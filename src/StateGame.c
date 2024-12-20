@@ -6,6 +6,7 @@
 #include "Print.h"
 #include "Sound.h"
 #include "Keys.h"
+#include "SGB.h"
 
 #include "StateGame.h"
 #include "SpritePlayer.h"
@@ -14,13 +15,14 @@
 UINT8 g_level_current = 1;
 UINT16 g_level_coins = 0;
 UINT16 g_level_spirits = 0;
-UINT16 g_level_bullets = 6;
+//UINT16 g_level_bullets = 6;
 UINT8 start_x, start_y;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
 extern UINT16 g_player_score;
 extern UINT16 levelMaxTime;
 
+IMPORT_MAP(gb_border);
 IMPORT_MAP(l1);
 //IMPORT_MAP(level01);
 //IMPORT_MAP(level02);
@@ -46,7 +48,7 @@ const struct MapInfoBanked levels[] = {
 UINT8 collision_tiles[] = {
 	109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 
 	121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
-	140, 141, 132, 143, 144, 145, 146, 147, 
+	140, 141, 132, 143, 144, 145, 146, 147, 148,
 	0
 };
 UINT8 fastest_times[] = { 120 };
@@ -75,6 +77,7 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* sta
 }
 
 void START() {
+	LOAD_SGB_BORDER(bg_border);
 	//static UINT8 start_x, start_y;
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
 	memset(collectables_taken, 0, sizeof(collectables_taken));
@@ -106,9 +109,9 @@ void UPDATE() {
 	if (!level_complete) {
 		Hud_Update();
 	} else {
-		if(KEY_TICKED(J_START | J_A | J_B)) {
+		if (KEY_TICKED(J_START | J_A | J_B)) {
 			g_level_current++;
-			if(levels[g_level_current-1].map == 0)
+			if (levels[g_level_current-1].map == 0)
 				SetState(StateWin);
 			else
 				SetState(StateGame);
@@ -130,9 +133,9 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 	collectables_taken[++ collectables_taken[0]] = collectable->unique_id;
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	switch (itype) {
-		case ITEM_BULLET:
-			g_level_bullets++;
-			break;
+		//case ITEM_BULLET:
+		//	g_level_bullets++;
+		//	break;
 		case ITEM_COIN:
 			g_level_coins++;
 			break;

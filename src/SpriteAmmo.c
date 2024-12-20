@@ -29,7 +29,7 @@ void UPDATE() {
 	if (CheckCollision(THIS, player_sprite)) {
 		TakeCollectable(THIS, ITEM_BULLET);
 		PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
-		player_data->bullets = player_data->bullets + 6;
+		//player_data->bullets = player_data->bullets + 6;
 		PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 		SpriteManagerRemove(THIS_IDX);
 		Hud_Update();

@@ -19,7 +19,7 @@
 #define HIT_ANIM_SPEED 254u
 #define DIE_ANIM_SPEED 254u
 #define VICTORY_ANIM_SPEED 8u
-#define MAX_BULLETS 255u
+//#define MAX_BULLETS 255u
 
 typedef enum {
 	PLAYER_STATE_IDLE,
@@ -57,8 +57,9 @@ typedef enum {
 
 typedef struct {
 	UINT8 anim_playing;
+	UINT8 start_x;
+	UINT8 start_y;
 	UINT8 lives;
-	UINT8 bullets;
 	UINT8 coins;
 	UINT8 spirits;
 	UINT8 timeup;

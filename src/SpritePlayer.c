@@ -42,7 +42,10 @@ UINT8 bg_hidden;
 UINT8 g_player_region;
 UINT8 pause_secs;
 UINT8 pause_ticks;
+UINT8 invincible_secs;
+UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
+UINT8 player_spawned;
 
 extern UINT16 timerCountdown;
 extern UINT16 levelMaxTime;
@@ -89,21 +92,20 @@ static AnimationState GetAnimationState(void) {
 	return currentAnimState;
 }
 
-void RestartLevel() {
+void StartLevel() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	//SHOW_BKG;
 	// move player to start/checkpoint
-	THIS->x = start_x;
-	THIS->y = start_y;
+	THIS->x = data->start_x;
+	THIS->y = data->start_y;
 	// reset time
 	timerCountdown = levelMaxTime;
-	// keep bullets
-	//data->bullets = 0;
-	data->anim_playing = false;
 	data->timeup = 0;
+	data->anim_playing = false;
+	data->invincible = true;
+	player_spawned = true;
 	ScrollRelocateMapTo(0, 0);
 	SetPlayerState(PLAYER_STATE_IDLE);
-	//SetAnimationState(WALK_IDLE);
 }
 
 void UpdateAttackPos() {
@@ -138,9 +140,9 @@ void Hit(Sprite* sprite, UINT8 idx) {
 void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	switch (itype) {
-		case ITEM_BULLET:
-			data->bullets++;
-			break;
+		//case ITEM_BULLET:
+		//	data->bullets++;
+		//	break;
 		case ITEM_COIN:
 			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			data->coins++;
@@ -159,36 +161,6 @@ void Attack() {
 	SetAnimationState(ATTACK);
 	attack1_sprite = SpriteManagerAdd(SpriteAttack1, THIS->x, THIS->y);
 	UpdateAttackPos();
-}
-
-void Shoot() {
-	PlayerData* data = (PlayerData*)THIS->custom_data;
-	// no bullets left
-	if (data->bullets == 0) return;
-	SetPlayerState(PLAYER_STATE_ATTACKING);
-	SetAnimationState(ATTACK);
-	//if (GetPlayerState() != PLAYER_STATE_ATTACKING) {
-		/*Sprite* attack_sprite = SpriteManagerAdd(SpriteAttack1, 0, 0);
-		attack_sprite->mirror = THIS->mirror;
-		if (THIS->mirror) {
-			attack_sprite->x = THIS->x - 2u;
-		} else {
-			attack_sprite->x = THIS->x + 7u; 
-		}*/
-	//}
-	//bullet_sprite->y = THIS->y + 12u;
-	//shoot_cooldown = 10;
-	//data->bullets--;
-	Sprite* bullet_sprite = SpriteManagerAdd(SpriteKunai, 0, 0);
-	bullet_sprite->mirror = THIS->mirror;
-	if (THIS->mirror) {
-		bullet_sprite->x = THIS->x - 2u;
-	} else {
-		bullet_sprite->x = THIS->x + 7u; 
-	}	
-	bullet_sprite->y = THIS->y + 5u;
-	shoot_cooldown = 10;
-	data->bullets--;
 }
 
 UINT8 tile_collision;
@@ -328,11 +300,13 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 //
 
 void START() {
-	PlayerData* data = (PlayerData*)THIS->custom_data;
 	player_sprite = THIS;
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	data->start_x = THIS->x;
+	data->start_y = THIS->y;
 	data->anim_playing = 0;
 	data->lives = MAX_LIVES;
-	data->bullets = 0;
+	//data->bullets = 0;
 	data->coins = 0;
 	data->spirits = 0;
 	data->timeup = 0;
@@ -351,6 +325,8 @@ void START() {
 	anim_hit_counter = 0;
 	pause_secs = 0;
 	pause_ticks = 0;
+	player_spawned = true;
+	StartLevel();
 }
 
 void UPDATE() {
@@ -365,6 +341,16 @@ void UPDATE() {
 			pause_secs--;
 		}
 		return;
+	}
+
+	if (invincible_secs) {
+		invincible_ticks++;
+		if (invincible_ticks == 25) {
+			invincible_ticks = 0;
+			invincible_secs--;
+		}
+	} else {
+		data->invincible = false;
 	}
 
 	if (data->timeup) {
@@ -405,7 +391,7 @@ void UPDATE() {
 			accel_y = 0;
 			if (THIS->anim_frame == 5) {
 				data->anim_playing = false;
-				RestartLevel();
+				StartLevel();
 			}
 			return;
 			break;
@@ -430,6 +416,7 @@ void UPDATE() {
 					SetAnimationState(WALK_IDLE);
 				}
 			}
+			player_spawned = false;
 
 	}
 
@@ -466,10 +453,21 @@ void UPDATE() {
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteEnemy1 || spr->type == SpriteEnemy2) {
-			if (CheckCollision(THIS, spr)) {
+			if (CheckCollision(THIS, spr) && !data->invincible) {
 				Hit(THIS, THIS_IDX);
 			}
 		} 
+		if (spr->type == SpritePortal) {
+			if (CheckCollision(THIS, spr) && !player_spawned) {
+				if (g_level_current == MAX_LEVEL) {
+					SetState(StateWin);
+					HIDE_WIN;
+				} else {
+					g_level_current++;
+					SetState(StateGame);
+				}
+			}
+		}
 	}
 
 }

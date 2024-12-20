@@ -20,7 +20,7 @@ UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
 				return 255u;
 			case TILE_INDEX_GOAL: 
 				*tile = TILE_INDEX_BG; 
-				return SpriteFlag;
+				return SpritePortal;
 			case TILE_INDEX_COIN: 
 				*tile = TILE_INDEX_BG; 
 				return SpriteCoin;
