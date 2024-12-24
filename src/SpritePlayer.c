@@ -13,7 +13,6 @@ const UINT8 anim_idle_shoot[] = {1, 18};
 const UINT8 anim_walk[] = {6, 4, 5, 6, 7, 8, 9};
 const UINT8 anim_walk_shoot[] = {1, 18};
 const UINT8 anim_jump[] = {3, 10, 11, 12};
-//const UINT8 anim_double_jump[] = {3, 15, 16, 17};
 const UINT8 anim_fall[] = {3, 14, 15, 16};
 const UINT8 anim_jump_shoot[] = {1, 13};
 const UINT8 anim_attack[] = {4, 17, 18, 19, 20};
@@ -22,6 +21,8 @@ const UINT8 anim_climb_idle[] = {1, 25};
 const UINT8 anim_push[] = {6, 26, 27, 28, 29, 30, 31};
 const UINT8 anim_hit[] = {6, 32, 33, 34, 32, 33, 34};
 const UINT8 anim_die[] = {15, 32, 33, 34, 32, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38};
+const UINT8 anim_appear[] = {3, 41, 40, 39};
+const UINT8 anim_disappear[] = {3, 39, 40, 41};
 const UINT8 anim_victory[] = {2, 39, 40}; // TBD
 
 
@@ -49,6 +50,7 @@ UINT8 player_spawned;
 
 extern UINT16 timerCountdown;
 extern UINT16 levelMaxTime;
+extern UINT8 level_complete;
 
 static void SetPlayerState(PlayerState state) {
 	prevPlayerState = curPlayerState;
@@ -84,6 +86,8 @@ static void SetAnimationState(AnimationState state) {
 		case CLIMB_IDLE:	SetSpriteAnim(THIS, anim_climb_idle, DEFAULT_ANIM_SPEED); break; 			
 		case HIT:			SetSpriteAnim(THIS, anim_hit, HIT_ANIM_SPEED); break;
 		case DIE:    		SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
+		case APPEAR:		SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
+		case DISAPPEAR:		SetSpriteAnim(THIS, anim_disappear, DISAPPEAR_ANIM_SPEED); break;
 		case VICTORY: 		SetSpriteAnim(THIS, anim_victory, VICTORY_ANIM_SPEED); break;
 	}
 }
@@ -104,8 +108,11 @@ void StartLevel() {
 	data->anim_playing = false;
 	data->invincible = true;
 	player_spawned = true;
+	level_complete = false;
 	ScrollRelocateMapTo(0, 0);
-	SetPlayerState(PLAYER_STATE_IDLE);
+	//SetPlayerState(PLAYER_STATE_IDLE);
+	SetPlayerState(PLAYER_STATE_APPEAR);
+	SetAnimationState(APPEAR);
 }
 
 void UpdateAttackPos() {
@@ -173,6 +180,7 @@ void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 		// go to next level or complete game
 		if (g_level_current == MAX_LEVEL) {
 			SetState(StateWin);
+			HIDE_WIN;
 		} else {
 			g_level_current++;
 			SetState(StateGame);
@@ -317,15 +325,15 @@ void START() {
 	shoot_cooldown = 0;
 	bg_hidden = 0;
 	scroll_target = THIS;
-	lastAnimState = currentAnimState = WALK_IDLE;
-	SetAnimationState(currentAnimState);
+	//lastAnimState = currentAnimState = WALK_IDLE;
+	//SetAnimationState(currentAnimState);
 	reset_x = 20;
 	reset_y = 80;
 	attack1_sprite = 0;
 	anim_hit_counter = 0;
 	pause_secs = 0;
 	pause_ticks = 0;
-	player_spawned = true;
+	//player_spawned = true;
 	StartLevel();
 }
 
@@ -363,6 +371,29 @@ void UPDATE() {
 		SetState(StateTimeUp);
 		HIDE_WIN;
 	}
+	
+	if (player_spawned) {
+		if (THIS->anim_frame == 2) {
+			SetPlayerState(PLAYER_STATE_IDLE);
+			SetAnimationState(NORMAL);
+			player_spawned = false;
+		}
+		return;
+	}
+
+	if (level_complete) {
+		if (THIS->anim_frame == 2) {
+			data->anim_playing = false;
+			if (g_level_current == MAX_LEVEL) {
+				SetState(StateWin);
+				HIDE_WIN;
+			} else {
+				g_level_current++;
+				SetState(StateGame);
+			}
+		}
+		return;
+	}
 
 	switch (GetPlayerState()) {
 		case PLAYER_STATE_BEFORE_JUMP:
@@ -398,7 +429,8 @@ void UPDATE() {
 		case PLAYER_STATE_DIE:
 			if (THIS->anim_frame == 14) {
 				data->anim_playing = false;
-				SetState(StateGameOver); 
+				SetState(StateGameOver);
+				HIDE_WIN;
 			}
 			return;
 			break;
@@ -406,6 +438,19 @@ void UPDATE() {
 			UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 22u) >> 3);
 			if (tile != 59u && tile != 60u) {
 				//SetPlayerState(PLAYER_STATE_IDLE);
+			}
+			break;
+		case PLAYER_STATE_DISAPPEAR:
+			if (THIS->anim_frame == 2) {
+				exit();
+				data->anim_playing = false;
+				if (g_level_current == MAX_LEVEL) {
+					SetState(StateWin);
+					HIDE_WIN;
+				} else {
+					g_level_current++;
+					SetState(StateGame);
+				}
 			}
 			break;
 		default:
@@ -449,7 +494,7 @@ void UPDATE() {
 		// TBD
 	}	
 
-	// check enemy sprite collision - item collission is in each item sprite
+	// check enemy sprite collision - item colission is in each item sprite
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteEnemy1 || spr->type == SpriteEnemy2) {
@@ -458,14 +503,14 @@ void UPDATE() {
 			}
 		} 
 		if (spr->type == SpritePortal) {
-			if (CheckCollision(THIS, spr) && !player_spawned) {
-				if (g_level_current == MAX_LEVEL) {
-					SetState(StateWin);
-					HIDE_WIN;
-				} else {
-					g_level_current++;
-					SetState(StateGame);
-				}
+			if (CheckCollision(THIS, spr) && !player_spawned && THIS->x > 16) {
+				THIS->x = spr->x-8;
+				spr->anim_speed = DISAPPEAR_ANIM_SPEED;
+				SetAnimationState(DISAPPEAR);
+				SetPlayerState(PLAYER_STATE_DISAPPEAR);
+				data->anim_playing = true;
+				level_complete = true;
+				//pause_secs = 5;
 			}
 		}
 	}

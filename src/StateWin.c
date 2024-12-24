@@ -14,8 +14,8 @@ IMPORT_MAP(win);
 //DECLARE_MUSIC(win);
 
 void START() {
+	HIDE_HUD;
 	InitScroll(BANK(win), &win, 0, 0);
-	HIDE_WIN;
 	//PlayMusic(gameover, 0);
 }
 

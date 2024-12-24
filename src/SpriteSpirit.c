@@ -1,49 +1,52 @@
 #include <stdbool.h>
-#include "Banks/SetAutoBank.h"
 #include "Sound.h"
 #include "main.h"
+
+#include "Banks/SetAutoBank.h"
+#include "Vector.h"
 #include "SpriteManager.h"
 
+// TODO: refactor ItemType from below
 #include "SpritePlayer.h"
-#include "GlobalVars.h"
 
-const UINT8 anim_spirit[] = {1, 0};
+#define DEFAULT_ANIM_SPEED		10u
+
+const UINT8 anim_spirit[] = VECTOR(4, 0, 1, 2, 3);
+struct SpiritInfo {
+	UINT16 start_y;
+    UINT8 frame;
+};
+
+UINT8 IsCollected(Sprite* collectable) BANKED;
+void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
 
 extern Sprite* player_sprite;
 extern UINT8 item_collected;
-UINT8 IsCollected(Sprite* collectable) BANKED;
-void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
-typedef struct {
-	UINT16 start_y;
-    UINT8 frame;
-} CustomData;
-
 
 void START() {
-	CustomData* data = (CustomData*)THIS->custom_data;
+	struct SpiritInfo* data = (struct SpiritInfo*)THIS->custom_data;
 	if (IsCollected(THIS) != 255) {
 		SpriteManagerRemove(THIS_IDX);
 	} else {
 		//data->start_y = THIS->y;
 		//data->frame = 0;
 	}
-	SetSpriteAnim(THIS, anim_spirit, 30u);
+	SetSpriteAnim(THIS, anim_spirit, DEFAULT_ANIM_SPEED);
 	//SetFrame(THIS, (((THIS->x >> 3) & 0x2) == 0) ? 0 : 1);
 }
 
 void UPDATE() {
-	CustomData* data = (CustomData*)THIS->custom_data;
-	//data->frame++;
+	struct SpiritInfo* data = (struct SpiritInfo*)THIS->custom_data;
 	//THIS->y = data->start_y + (SIN(data->frame + (UINT8)THIS->x) >> 5);
 	if (CheckCollision(THIS, player_sprite)) {
 		TakeCollectable(THIS, ITEM_SPIRIT);
-		PlayerData* data = (PlayerData*)player_sprite->custom_data;
-		data->spirits++;
+		PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
+		player_data->spirits++;
 		PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 		SpriteManagerRemove(THIS_IDX);
 		Hud_Update();
 	}
-
+	//data->frame++;
 }
 
 void DESTROY() {
