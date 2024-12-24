@@ -99,7 +99,6 @@ static AnimationState GetAnimationState(void) {
 
 void StartLevel() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	//SHOW_BKG;
 	// move player to start/checkpoint
 	THIS->x = data->start_x;
 	THIS->y = data->start_y;
@@ -111,7 +110,6 @@ void StartLevel() {
 	player_spawned = true;
 	level_complete = false;
 	ScrollRelocateMapTo(0, 0);
-	//SetPlayerState(PLAYER_STATE_IDLE);
 	SetPlayerState(PLAYER_STATE_APPEAR);
 	SetAnimationState(APPEAR);
 }
@@ -148,15 +146,13 @@ void Hit(Sprite* sprite, UINT8 idx) {
 void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	switch (itype) {
-		//case ITEM_BULLET:
-		//	data->bullets++;
-		//	break;
 		case ITEM_COIN:
 			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			data->coins++;
 			break;
 		case ITEM_SPIRIT:
 			data->spirits++;
+			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			break;
 		default:
 			break;
@@ -169,6 +165,7 @@ void Attack() {
 	SetAnimationState(ATTACK);
 	attack1_sprite = SpriteManagerAdd(SpriteAttack1, THIS->x, THIS->y);
 	UpdateAttackPos();
+	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
 }
 
 UINT8 tile_collision;
@@ -278,6 +275,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	if (KEY_TICKED(J_A) && (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_BEFORE_JUMP && GetPlayerState() != PLAYER_STATE_AFTER_JUMP)) {
 		//SetPlayerState(PLAYER_STATE_BEFORE_JUMP);
 		//SetAnimationState(BEFORE_JUMP);
+		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
 		SetPlayerState(PLAYER_STATE_JUMPING);
 		SetAnimationState(JUMP);
 		accel_y = -50;

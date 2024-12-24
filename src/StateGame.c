@@ -5,6 +5,7 @@
 #include "SpriteManager.h"
 #include "Print.h"
 #include "Sound.h"
+#include "Music.h"
 #include "Keys.h"
 #include "SGB.h"
 
@@ -15,7 +16,6 @@
 UINT8 g_level_current = 1;
 UINT16 g_level_coins = 0;
 UINT16 g_level_spirits = 0;
-//UINT16 g_level_bullets = 6;
 UINT8 start_x, start_y;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
@@ -24,11 +24,10 @@ extern UINT16 level_max_time;
 
 IMPORT_MAP(gb_border);
 IMPORT_MAP(l1);
-//IMPORT_MAP(level01);
-//IMPORT_MAP(level02);
-//...
-IMPORT_FONT(font);
-//DECLARE_MUSIC(level1);
+//..
+//IMPORT_FONT(font);
+
+DECLARE_MUSIC(cognition);
 
 #define BANKED_MAP(MAP, SECONDS) {BANK(MAP), &MAP, SECONDS}
 #define LEVELS_END {0, 0}
@@ -71,7 +70,7 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* sta
 		for(UINT8 x = 0; x < map->width; ++ x) {
 			UINT8 tile = *data++;
 			if (tile == TILE_INDEX_COIN) {          //coins
-				//num_clients++;
+
 			} else if (tile == TILE_INDEX_PLAYER) {  //player
 				*start_x = x;
 				*start_y = y;
@@ -83,7 +82,6 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* sta
 
 void START() {
 	LOAD_SGB_BORDER(bg_border);
-	//static UINT8 start_x, start_y;
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
 	memset(collectables_taken, 0, sizeof(collectables_taken));
 	scroll_top_movement_limit = 72;
@@ -97,17 +95,8 @@ void START() {
 
 	Hud_Init();
 
-	//INIT_SOUND();
-	//PlayMusic(level1, 1);
-	//HIDE_HUD;
-	//InitScroll(BANK(titlescreen), &titlescreen, 0, 0);
-	//gbt_stop();
-	//NR52_REG = 0x80; //Enables sound, you should always setup this first
-	//NR51_REG = 0xFF; //Enables all channels (left and right)
-	//NR50_REG = 0x77; //Max volume
-	//PlayMusic(titles, 0);
-	
-	//SetState(g_level_current+1);
+	PlayMusic(cognition, 1);
+
 }
 
 void UPDATE() {
@@ -138,9 +127,6 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 	collectables_taken[++ collectables_taken[0]] = collectable->unique_id;
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	switch (itype) {
-		//case ITEM_BULLET:
-		//	g_level_bullets++;
-		//	break;
 		case ITEM_COIN:
 			g_level_coins++;
 			break;

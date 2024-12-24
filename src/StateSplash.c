@@ -10,11 +10,11 @@
 #include "GlobalVars.h"
 
 IMPORT_MAP(titlescreen);
-//DECLARE_MUSIC(titles);
+DECLARE_MUSIC(organintro);
 
 void START() {
 	InitScroll(BANK(titlescreen), &titlescreen, 0, 0);
-	//PlayMusic(titlesreen, 0);
+	PlayMusic(organintro, 0);
 }
 
 void UPDATE() {

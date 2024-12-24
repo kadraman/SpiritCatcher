@@ -10,13 +10,12 @@
 #include "GlobalVars.h"
 
 IMPORT_MAP(gameover);
-
-//DECLARE_MUSIC(gameover);
+DECLARE_MUSIC(gameover);
 
 void START() {
 	HIDE_HUD;
 	InitScroll(BANK(gameover), &gameover, 0, 0);
-	//PlayMusic(gameover, 0);
+	PlayMusic(gameover, 0);
 }
 
 void UPDATE() {
