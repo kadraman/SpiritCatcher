@@ -20,7 +20,7 @@ UINT8 start_x, start_y;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
 extern UINT16 g_player_score;
-extern UINT16 levelMaxTime;
+extern UINT16 level_max_time;
 
 IMPORT_MAP(gb_border);
 IMPORT_MAP(l1);
@@ -55,6 +55,8 @@ UINT8 collision_tiles[] = {
 UINT8 fastest_times[] = { 120 };
 
 UINT8 level_complete;
+UINT16 level_width;
+UINT16 level_height;
 
 #define MAX_COLLECTABLES 10
 UINT16 collectables_taken[MAX_COLLECTABLES + 1];
@@ -62,6 +64,8 @@ UINT16 collectables_taken[MAX_COLLECTABLES + 1];
 void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* start_y) NONBANKED {
 	UINT8 * data, __save_bank = CURRENT_BANK;
 	SWITCH_ROM(map_bank);
+	level_width = map->width << 3;
+	level_height = map->height << 3;
 	data = map->data;
 	for(UINT8 y = 0; y < map->height; ++ y) {
 		for(UINT8 x = 0; x < map->width; ++ x) {
@@ -84,7 +88,7 @@ void START() {
 	memset(collectables_taken, 0, sizeof(collectables_taken));
 	scroll_top_movement_limit = 72;
 	scroll_bottom_movement_limit = 110;
-	levelMaxTime = level->seconds;
+	level_max_time = level->seconds;
 	level_complete = 0;
 
 	LocateStuff(level->bank, level->map, &start_x, &start_y);

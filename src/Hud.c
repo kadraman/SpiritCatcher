@@ -10,16 +10,15 @@
 #include "GlobalVars.h"
 
 // saved last drawn values, to work out what to update on hud
-//static UINT8 lastBullets = 0;
-static UINT8 lastCoins = 0;
-static UINT8 lastLives = 0;
-static UINT16 lastTimer = 0;
+static UINT8 last_spirits = 0;
+static UINT8 last_coins = 0;
+static UINT8 last_lives = 0;
+static UINT16 last_timer = 0;
 
 // level timer and countdown 
-UINT16 levelMaxTime;        // maximum time for level
-UINT16 timerCountdown;      // timer countdown to be decremented
-static UINT8 timerClock;    // frame counter for single timer tick
-UINT16 tileNum;
+UINT16 level_max_time;        // maximum time for level
+UINT16 timer_countdown;      // timer countdown to be decremented
+static UINT8 timer_clock;    // frame counter for single timer tick
 extern Sprite* player_sprite;
 
 void Hud_Init(void) BANKED {
@@ -27,13 +26,12 @@ void Hud_Init(void) BANKED {
     PlayerData* data = (PlayerData*)player_sprite->custom_data;
     INIT_HUD(hud);
     // prime the last values so they all get updated
-    //lastBullets = 0;
-    lastCoins = 0;
-    lastLives = 0;
-    timerCountdown = levelMaxTime;
-    timerClock = 0;
-    lastTimer = 0;
-    tileNum = 0;
+    last_spirits = 0;
+    last_coins = 0;
+    last_lives = 0;
+    timer_countdown = level_max_time;
+    timer_clock = 0;
+    last_timer = 0;
 }
 
 static UINT8 getHundreds(UINT8 full) {
@@ -73,16 +71,16 @@ static void PutU16 (UINT16 v, UINT8 at)
 }
 
 void Hud_Update(void) BANKED {
-    PlayerData* data = (PlayerData*)player_sprite->custom_data;
+    PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
     UINT8 tens;
     UINT8 ones;
 
-    timerClock++;  
-    if (timerClock == 25) {
-        timerClock = 0;
-        if (timerCountdown != 0) {
-            //lastTimer = 1;
-            timerCountdown--;
+    timer_clock++;  
+    if (timer_clock == 25) {
+        timer_clock = 0;
+        if (timer_countdown != 0) {
+            //last_timer = 1;
+            timer_countdown--;
         }
     }
 
@@ -97,35 +95,35 @@ void Hud_Update(void) BANKED {
     UINT8 af = player_sprite->anim_frame;
     PutU16(af, 8);
 #else
-    if (lastTimer != timerCountdown) {
-        PutU16(timerCountdown, 10);
+    if (last_timer != timer_countdown) {
+        PutU16(timer_countdown, 13);
     }
 
-    if (timerCountdown == 0) {
-        PutU16(timerCountdown, 10);
-        data->timeup = 1;
+    if (timer_countdown == 0) {
+        PutU16(timer_countdown, 13);
+        player_data->timeup = 1;
     }
 
-    /*if (lastBullets != data->bullets) {
-        lastBullets = data->bullets;
-        tens = getTens(data->bullets);
-        ones = data->bullets - (tens * 10);
-        //UPDATE_HUD_TILE(2, 0, 1 + tens);
-        //UPDATE_HUD_TILE(3, 0, lastBullets = 0 ? 1 : 1 + ones);
-    }*/
-
-    if (lastCoins != data->coins) {
-        lastCoins = data->coins;
-        tens = getTens(data->coins);
-        ones = data->coins - (tens * 10);
-        UPDATE_HUD_TILE(3, 0, 1 + tens);
-        UPDATE_HUD_TILE(4, 0, lastCoins = 0 ? 1 : 1 + ones);
+    if (last_spirits != player_data->spirits) {
+        last_spirits = player_data->spirits;
+        tens = getTens(player_data->spirits);
+        ones = player_data->spirits - (tens * 10);
+        UPDATE_HUD_TILE(2, 0, 1 + tens);
+        UPDATE_HUD_TILE(3, 0, last_spirits = 0 ? 1 : 1 + ones);
     }
 
-    if (lastLives != data->lives) {
-        lastLives = data->lives;
+    if (last_coins != player_data->coins) {
+        last_coins = player_data->coins;
+        tens = getTens(player_data->coins);
+        ones = player_data->coins - (tens * 10);
+        UPDATE_HUD_TILE(7, 0, 1 + tens);
+        UPDATE_HUD_TILE(8, 0, last_coins = 0 ? 1 : 1 + ones);
+    }
+
+    if (last_lives != player_data->lives) {
+        last_lives = player_data->lives;
         for (UINT8 i = 0; i < MAX_LIVES; ++i) {
-            UPDATE_HUD_TILE(18 - i, 0, i < data->lives ? 18 : 19);
+            UPDATE_HUD_TILE(19 - i, 0, i < player_data->lives ? 18 : 19);
         }
     }
 #endif

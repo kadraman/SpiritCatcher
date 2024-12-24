@@ -11,7 +11,7 @@
 
 #define DEFAULT_ANIM_SPEED		10u
 
-const UINT8 anim_spirit[] = VECTOR(4, 0, 1, 2, 3);
+const UINT8 anim_spirit[] = VECTOR(3, 0, 1, 2);
 struct SpiritInfo {
 	UINT16 start_y;
     UINT8 frame;

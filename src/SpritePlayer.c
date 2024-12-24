@@ -18,12 +18,11 @@ const UINT8 anim_jump_shoot[] = {1, 13};
 const UINT8 anim_attack[] = {4, 17, 18, 19, 20};
 const UINT8 anim_climb[] = {4, 21, 22, 23, 24};
 const UINT8 anim_climb_idle[] = {1, 25};
-const UINT8 anim_push[] = {6, 26, 27, 28, 29, 30, 31};
-const UINT8 anim_hit[] = {6, 32, 33, 34, 32, 33, 34};
-const UINT8 anim_die[] = {15, 32, 33, 34, 32, 33, 34, 35, 36, 37, 38, 38, 38, 38, 38, 38};
-const UINT8 anim_appear[] = {3, 41, 40, 39};
-const UINT8 anim_disappear[] = {3, 39, 40, 41};
-const UINT8 anim_victory[] = {2, 39, 40}; // TBD
+const UINT8 anim_hit[] = {6, 26, 27, 28, 26, 27, 28};
+const UINT8 anim_die[] = {15, 26, 27, 28, 26, 27, 28, 29, 30, 31, 32, 32, 32, 32};
+const UINT8 anim_appear[] = {3, 33, 34, 35};
+const UINT8 anim_disappear[] = {3, 36, 34, 33};
+const UINT8 anim_victory[] = {2, 34, 35}; // TBD
 
 
 Sprite* player_sprite;
@@ -48,9 +47,11 @@ UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
 UINT8 player_spawned;
 
-extern UINT16 timerCountdown;
-extern UINT16 levelMaxTime;
+extern UINT16 timer_countdown;
+extern UINT16 level_max_time;
 extern UINT8 level_complete;
+extern UINT16 level_width;
+extern UINT16 level_height;
 
 static void SetPlayerState(PlayerState state) {
 	prevPlayerState = curPlayerState;
@@ -103,7 +104,7 @@ void StartLevel() {
 	THIS->x = data->start_x;
 	THIS->y = data->start_y;
 	// reset time
-	timerCountdown = levelMaxTime;
+	timer_countdown = level_max_time;
 	data->timeup = 0;
 	data->anim_playing = false;
 	data->invincible = true;
@@ -220,10 +221,12 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 				SetAnimationState(WALK);
 				return;
 			}
-		} 
-		tile_collision = TranslateSprite(sprite, 1 << delta_time, 0);
+		}
+		if (THIS->x < level_width-16) {
+			tile_collision = TranslateSprite(sprite, 1 << delta_time, 0);
+			CheckCollisionTile(sprite, idx);
+		}
 		THIS->mirror = NO_MIRROR;
-		CheckCollisionTile(sprite, idx);
 		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
 			SetPlayerState(PLAYER_STATE_WALKING);
 			SetAnimationState(WALK);
@@ -240,10 +243,12 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 				SetAnimationState(WALK);
 				return;
 			}
-		} 
-		tile_collision = TranslateSprite(sprite, -1 << delta_time, 0);
+		}
+		if (THIS->x > 16) { 
+			tile_collision = TranslateSprite(sprite, -1 << delta_time, 0);
+			CheckCollisionTile(sprite, idx);
+		}
 		THIS->mirror = V_MIRROR;
-		CheckCollisionTile(sprite, idx);
 		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
 			SetPlayerState(PLAYER_STATE_WALKING);
 			SetAnimationState(WALK);
@@ -440,9 +445,8 @@ void UPDATE() {
 				//SetPlayerState(PLAYER_STATE_IDLE);
 			}
 			break;
-		case PLAYER_STATE_DISAPPEAR:
+		/*case PLAYER_STATE_DISAPPEAR:
 			if (THIS->anim_frame == 2) {
-				exit();
 				data->anim_playing = false;
 				if (g_level_current == MAX_LEVEL) {
 					SetState(StateWin);
@@ -452,7 +456,7 @@ void UPDATE() {
 					SetState(StateGame);
 				}
 			}
-			break;
+			break;*/
 		default:
 			if (keys == 0 && !data->anim_playing) {
 				if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
@@ -476,6 +480,7 @@ void UPDATE() {
 		if (accel_y < 40) {
 			accel_y += 2;
 		}
+		//if (THIS->y < 16) return;
 		tile_collision = TranslateSprite(THIS, 0, accel_y >> 4);
 		if (!tile_collision && delta_time != 0 && accel_y < 40) { 
 			//do another iteration if there is no collision
