@@ -257,6 +257,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	} else if (KEY_PRESSED(J_UP)) {
 		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 8u) >> 3);
 		if (tile == TILE_INDEX_LADDER) {
+			// move to center of ladder
+			THIS->x = (((THIS->x)>> 3) << 3) + 4;
 			accel_y = 0;
 			tile_collision = TranslateSprite(THIS, 0, -1 << delta_time);
 			CheckCollisionTile(sprite, idx);
@@ -266,6 +268,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	} else if (KEY_PRESSED(J_DOWN)) {
 		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y - 16u) >> 3);
 		if (tile == TILE_INDEX_LADDER) {
+			// move to center of ladder
+			THIS->x = (((THIS->x)>> 3) << 3) + 4;
 			accel_y = 0;
 			tile_collision = TranslateSprite(THIS, 0, 1 << delta_time);
 			CheckCollisionTile(sprite, idx);

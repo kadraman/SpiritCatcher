@@ -22,7 +22,11 @@ static UINT8 timer_clock;    // frame counter for single timer tick
 extern Sprite* player_sprite;
 
 void Hud_Init(void) BANKED {
+#ifdef DEBUG_HUD
+    IMPORT_MAP(debug_hud);
+#else
     IMPORT_MAP(hud);
+#endif
     PlayerData* data = (PlayerData*)player_sprite->custom_data;
     INIT_HUD(hud);
     // prime the last values so they all get updated
@@ -54,7 +58,7 @@ static UINT8 getTens (UINT8 full) {
     return t;
 }
 
-static void PutU16 (UINT16 v, UINT8 at)
+static void PutU16(UINT16 v, UINT8 at)
 {
     UINT8 hundreds;
     UINT8 tens;

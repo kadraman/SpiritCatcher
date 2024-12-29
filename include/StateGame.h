@@ -13,8 +13,9 @@
 #define TILE_INDEX_TOADSTALL    255
 
 #define TILE_INDEX_LADDER   27
+#define TILE_INDEX_LADDER_RIGHT 28
 #define TILE_INDEX_BG       28
-#define TILE_INDEX_BG2      59
+#define TILE_INDEX_BG2      60
 
 //#define TILE_ITEM_SPIKE	200
 //#define TILE_ITEM_COIN	201
