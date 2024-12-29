@@ -45,11 +45,14 @@ const struct MapInfoBanked levels[] = {
 };
 
 UINT8 collision_tiles[] = {
-	59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
-	70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-	81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91,
-	92, 93, 94,
+	60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+	70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+	80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
+	90, 91, 92, 93, 94, 95,
 	0
+};
+UINT8 collision_tiles_down[] = { 
+	27, 0
 };
 UINT8 fastest_times[] = { 120 };
 
@@ -91,7 +94,7 @@ void START() {
 
 	LocateStuff(level->bank, level->map, &start_x, &start_y);
 	scroll_target = SpriteManagerAdd(SpritePlayer, start_x << 3, (start_y - 1) << 3);
-	InitScroll(level->bank, level->map, collision_tiles, 0);
+	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
 	Hud_Init();
 

@@ -6,6 +6,7 @@
 #include "Sound.h"
 #include "Banks/SetAutoBank.h"
 #include "gb/gb.h"
+#include "StateGame.h"
 
 // player animations - the first number indicates the number of frames
 const UINT8 anim_idle[] = {4, 0, 1, 2, 3};		
@@ -211,9 +212,9 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	}*/
 	if (KEY_PRESSED(J_RIGHT)) {
 		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
-			UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 22u) >> 3);
+			UINT8 tile = GetScrollTile((player_sprite->x + 16u) >> 3, (player_sprite->y + 16u) >> 3);
 			SetAnimationState(WALK);
-			if (tile != 59u && tile != 60u) {
+			if (tile != TILE_INDEX_LADDER) {
 				SetPlayerState(PLAYER_STATE_WALKING);
 				SetAnimationState(WALK);
 				return;
@@ -233,9 +234,9 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}*/
 	} else if (KEY_PRESSED(J_LEFT)) {
 		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
-			UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 22u) >> 3);
+			UINT8 tile = GetScrollTile((player_sprite->x) >> 3, (player_sprite->y + 16u) >> 3);
 			SetAnimationState(WALK);
-			if (tile != 59u && tile != 60u) {
+			if (tile != TILE_INDEX_LADDER) {
 				SetPlayerState(PLAYER_STATE_WALKING);
 				SetAnimationState(WALK);
 				return;
@@ -254,8 +255,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 			decel_x--;
 		}*/
 	} else if (KEY_PRESSED(J_UP)) {
-		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 23u) >> 3);
-		if (tile == 59u || tile == 60u) {
+		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 8u) >> 3);
+		if (tile == TILE_INDEX_LADDER) {
 			accel_y = 0;
 			tile_collision = TranslateSprite(THIS, 0, -1 << delta_time);
 			CheckCollisionTile(sprite, idx);
@@ -263,8 +264,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 			SetAnimationState(CLIMB);
 		}
 	} else if (KEY_PRESSED(J_DOWN)) {
-		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 23u) >> 3);
-		if (tile == 59u || tile == 60u) {
+		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y - 16u) >> 3);
+		if (tile == TILE_INDEX_LADDER) {
 			accel_y = 0;
 			tile_collision = TranslateSprite(THIS, 0, 1 << delta_time);
 			CheckCollisionTile(sprite, idx);
@@ -439,7 +440,7 @@ void UPDATE() {
 			break;
 		case PLAYER_STATE_CLIMBING: 	
 			UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 22u) >> 3);
-			if (tile != 59u && tile != 60u) {
+			if (tile != TILE_INDEX_LADDER) {
 				//SetPlayerState(PLAYER_STATE_IDLE);
 			}
 			break;
