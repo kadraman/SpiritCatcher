@@ -73,8 +73,6 @@ static void SetAnimationState(AnimationState state) {
 	switch (state) {
 		case WALK:    		SetSpriteAnim(THIS, anim_walk, WALK_ANIM_SPEED); break;
 		case WALK_IDLE:    	SetSpriteAnim(THIS, anim_idle, DEFAULT_ANIM_SPEED);	break;
-		case BEFORE_JUMP:	
-		case AFTER_JUMP:	break; // TBD
 		case JUMP:    		SetSpriteAnim(THIS, anim_jump, DEFAULT_ANIM_SPEED); break;
 		case FALL:    		SetSpriteAnim(THIS, anim_fall, DEFAULT_ANIM_SPEED); break;
 		case ATTACK:		if (lastAnimState == JUMP) {
@@ -214,7 +212,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
 			UINT8 tile = GetScrollTile((player_sprite->x + 16u) >> 3, (player_sprite->y + 16u) >> 3);
 			SetAnimationState(WALK);
-			if (tile != TILE_INDEX_LADDER) {
+			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
 				SetPlayerState(PLAYER_STATE_WALKING);
 				SetAnimationState(WALK);
 				return;
@@ -236,7 +234,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
 			UINT8 tile = GetScrollTile((player_sprite->x) >> 3, (player_sprite->y + 16u) >> 3);
 			SetAnimationState(WALK);
-			if (tile != TILE_INDEX_LADDER) {
+			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
 				SetPlayerState(PLAYER_STATE_WALKING);
 				SetAnimationState(WALK);
 				return;
@@ -256,7 +254,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}*/
 	} else if (KEY_PRESSED(J_UP)) {
 		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 8u) >> 3);
-		if (tile == TILE_INDEX_LADDER) {
+		if (tile == TILE_INDEX_LADDER_LEFT || tile == TILE_INDEX_LADDER_RIGHT) {
 			// move to center of ladder
 			THIS->x = (((THIS->x)>> 3) << 3) + 4;
 			accel_y = 0;
@@ -267,7 +265,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}
 	} else if (KEY_PRESSED(J_DOWN)) {
 		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y - 16u) >> 3);
-		if (tile == TILE_INDEX_LADDER) {
+		if (tile == TILE_INDEX_LADDER_LEFT || tile == TILE_INDEX_LADDER_RIGHT) {
 			// move to center of ladder
 			THIS->x = (((THIS->x)>> 3) << 3) + 4;
 			accel_y = 0;
@@ -277,9 +275,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 			SetAnimationState(CLIMB);
 		}
 	}
-	if (KEY_TICKED(J_A) && (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_BEFORE_JUMP && GetPlayerState() != PLAYER_STATE_AFTER_JUMP)) {
-		//SetPlayerState(PLAYER_STATE_BEFORE_JUMP);
-		//SetAnimationState(BEFORE_JUMP);
+	if (KEY_TICKED(J_A) && (GetPlayerState() != PLAYER_STATE_JUMPING)) {
 		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
 		SetPlayerState(PLAYER_STATE_JUMPING);
 		SetAnimationState(JUMP);
@@ -333,15 +329,12 @@ void START() {
 	shoot_cooldown = 0;
 	bg_hidden = 0;
 	scroll_target = THIS;
-	//lastAnimState = currentAnimState = WALK_IDLE;
-	//SetAnimationState(currentAnimState);
 	reset_x = 20;
 	reset_y = 80;
 	attack1_sprite = 0;
 	anim_hit_counter = 0;
 	pause_secs = 0;
 	pause_ticks = 0;
-	//player_spawned = true;
 	StartLevel();
 }
 
@@ -404,13 +397,13 @@ void UPDATE() {
 	}
 
 	switch (GetPlayerState()) {
-		case PLAYER_STATE_BEFORE_JUMP:
-			if (THIS->anim_frame == 2) {
-				SetPlayerState(PLAYER_STATE_JUMPING);
-				SetAnimationState(JUMP);
-				accel_y = -50;
-			}
-			break;
+		//case PLAYER_STATE_BEFORE_JUMP:
+		//	if (THIS->anim_frame == 2) {
+		//		SetPlayerState(PLAYER_STATE_JUMPING);
+		//		SetAnimationState(JUMP);
+		//		accel_y = -50;
+		//	}
+		//	break;
 		case PLAYER_STATE_ATTACKING:
 			UpdateAttackPos();
 			if (THIS->anim_frame == 3) {
@@ -444,22 +437,10 @@ void UPDATE() {
 			break;
 		case PLAYER_STATE_CLIMBING: 	
 			UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 22u) >> 3);
-			if (tile != TILE_INDEX_LADDER) {
+			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
 				//SetPlayerState(PLAYER_STATE_IDLE);
 			}
 			break;
-		/*case PLAYER_STATE_DISAPPEAR:
-			if (THIS->anim_frame == 2) {
-				data->anim_playing = false;
-				if (g_level_current == MAX_LEVEL) {
-					SetState(StateWin);
-					HIDE_WIN;
-				} else {
-					g_level_current++;
-					SetState(StateGame);
-				}
-			}
-			break;*/
 		default:
 			if (keys == 0 && !data->anim_playing) {
 				if (GetPlayerState() == PLAYER_STATE_CLIMBING) {

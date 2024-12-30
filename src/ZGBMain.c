@@ -16,25 +16,25 @@ UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
 		*tile = 0;
 		switch (*tile_ptr) {
 			case TILE_INDEX_PLAYER: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return 255u;
 			case TILE_INDEX_GOAL: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return SpritePortal;
 			case TILE_INDEX_COIN: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return SpriteCoin;
 			case TILE_INDEX_SPIRIT1: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return SpriteEnemy1;
 			case TILE_INDEX_SPIRIT2: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return SpriteSpirit;
 			case TILE_INDEX_BAT: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return 255u;
 			case TILE_INDEX_TOADSTALL: 
-				*tile = TILE_INDEX_BG; 
+				*tile = TILE_INDEX_BG1; 
 				return 255u;
 			default: break;
 		}
