@@ -38,7 +38,7 @@ INT16 accel_y;
 UINT8 decel_x;
 UINT8 reset_x;
 UINT8 reset_y;
-UINT8 shoot_cooldown;
+UINT8 throw_cooldown;
 UINT8 bg_hidden;
 UINT8 g_player_region;
 UINT8 pause_secs;
@@ -167,6 +167,25 @@ void Attack() {
 	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
 }
 
+void Throw() {
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	// no knives left
+	if (data->knives == 0) return;
+	SetPlayerState(PLAYER_STATE_ATTACKING);
+	SetAnimationState(ATTACK);
+	Sprite* knife_sprite = SpriteManagerAdd(SpriteKnife, 0, 0);
+	knife_sprite->mirror = THIS->mirror;
+	if (THIS->mirror) {
+		knife_sprite->x = THIS->x - 2u;
+	} else {
+		knife_sprite->x = THIS->x + 7u; 
+	}	
+	knife_sprite->y = THIS->y + 5u;
+	data->knives--;
+	// reset cooldown
+	throw_cooldown = 10;
+}
+
 UINT8 tile_collision;
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 	if (tile_collision == TILE_ITEM_SPIKE) { // spikes
@@ -287,7 +306,13 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}
 	}
 	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DIE)) {
-		Attack();
+		if (KEY_PRESSED(J_UP)) {
+			if (!throw_cooldown) {
+				Throw();
+			}
+		} else {
+			Attack();
+		}
 	}
 	// nothing happening lets revert to idle state
 	if (keys == 0 && !(GetPlayerState() == PLAYER_STATE_JUMPING || GetPlayerState() == PLAYER_STATE_ATTACKING)) {
@@ -298,15 +323,12 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}
 	}
 	
-	/*if (GetPlayerState() != PLAYER_STATE_HIT) {
-		//if (shoot_cooldown) {
-		//	shoot_cooldown -= 1u;
-		//} else {
-			if (KEY_TICKED(J_B)) {
-				Shoot();
-			}
-		//}
-	}*/
+	// decrement throw cooldown so we can throw again
+	if (GetPlayerState() != PLAYER_STATE_HIT) {
+		if (throw_cooldown) {
+			throw_cooldown -= 1u;
+		}
+	}
 }
 
 //
@@ -318,7 +340,7 @@ void START() {
 	data->start_y = THIS->y;
 	data->anim_playing = 0;
 	data->lives = MAX_LIVES;
-	//data->bullets = 0;
+	data->knives = 10;
 	data->coins = 0;
 	data->spirits = 0;
 	data->timeup = 0;
@@ -326,7 +348,7 @@ void START() {
 	curPlayerState = PLAYER_STATE_IDLE;
 	accel_y = 0;
 	decel_x = 0;
-	shoot_cooldown = 0;
+	throw_cooldown = 0;
 	bg_hidden = 0;
 	scroll_target = THIS;
 	reset_x = 20;

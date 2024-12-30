@@ -66,6 +66,7 @@ typedef struct {
 	UINT8 start_y;
 	UINT8 lives;
 	UINT8 coins;
+	UINT8 knives;
 	UINT8 spirits;
 	UINT8 timeup;
 	UINT8 invincible;

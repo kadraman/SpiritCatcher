@@ -11,7 +11,7 @@
 
 // saved last drawn values, to work out what to update on hud
 static UINT8 last_spirits = 0;
-static UINT8 last_coins = 0;
+static UINT8 last_knives = 0;
 static UINT8 last_lives = 0;
 static UINT16 last_timer = 0;
 
@@ -31,7 +31,7 @@ void Hud_Init(void) BANKED {
     INIT_HUD(hud);
     // prime the last values so they all get updated
     last_spirits = 0;
-    last_coins = 0;
+    last_knives = 0;
     last_lives = 0;
     timer_countdown = level_max_time;
     timer_clock = 0;
@@ -116,12 +116,12 @@ void Hud_Update(void) BANKED {
         UPDATE_HUD_TILE(3, 0, last_spirits = 0 ? 1 : 1 + ones);
     }
 
-    if (last_coins != player_data->coins) {
-        last_coins = player_data->coins;
-        tens = getTens(player_data->coins);
-        ones = player_data->coins - (tens * 10);
+    if (last_knives != player_data->knives) {
+        last_knives = player_data->knives;
+        tens = getTens(player_data->knives);
+        ones = player_data->knives - (tens * 10);
         UPDATE_HUD_TILE(7, 0, 1 + tens);
-        UPDATE_HUD_TILE(8, 0, last_coins = 0 ? 1 : 1 + ones);
+        UPDATE_HUD_TILE(8, 0, last_knives = 0 ? 1 : 1 + ones);
     }
 
     if (last_lives != player_data->lives) {

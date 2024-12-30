@@ -12,6 +12,7 @@ STATE_DEF_END
 #define SPRITES \
 _SPRITE(SpritePlayer,   player,     FLIP_NONE)\
 _SPRITE(SpriteAttack1,  attack1,    FLIP_NONE)\
+_SPRITE(SpriteKnife,    knife,      FLIP_NONE)\
 _SPRITE(SpritePortal,   portal,     FLIP_NONE)\
 _SPRITE(SpriteFlag,     flag,       FLIP_NONE)\
 _SPRITE(SpriteCoin,     coin,       FLIP_NONE)\

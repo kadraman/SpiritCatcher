@@ -8,12 +8,12 @@
 
 #include "Sound.h"
 
-const UINT8 anim_kunai[] = {4, 0, 1, 2, 3};
+const UINT8 anim_knife[] = {4, 0, 1, 2, 3};
 
 
 void START() {
 	PlayFx(CHANNEL_1, 10, 0x2C, 0xD8, 0xF3, 0x62, 0xC7);
-	SetSpriteAnim(THIS, anim_kunai, 20u);
+	SetSpriteAnim(THIS, anim_knife, 20u);
 }
 
 void UPDATE() {

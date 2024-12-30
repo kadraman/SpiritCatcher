@@ -25,7 +25,7 @@ void START() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
 	data->appear = data->stable = data->disappear = false;
 	// TODO: define a better way to define if its the starting portal
-	if (THIS->x < 32) {
+	if (THIS->x < 32 && (player_sprite->x < 32 && player_sprite->y < 144)) {
 		data->appear = true;
 		SetSpriteAnim(THIS, anim_portal_appear, DISAPPEAR_ANIM_SPEED);
 	} else {
@@ -44,6 +44,7 @@ void UPDATE() {
 	if (level_complete && data->stable) {
 		data->stable = false;
 		data->disappear = true;
+		THIS->anim_frame = 0;
 		SetSpriteAnim(THIS, anim_portal_disappear, DISAPPEAR_ANIM_SPEED);
 	}
 	// if exit portal remove it after X frames
