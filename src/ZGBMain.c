@@ -32,7 +32,7 @@ UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
 				return SpriteSpirit;
 			case TILE_INDEX_BAT: 
 				*tile = TILE_INDEX_BG1; 
-				return 255u;
+				return SpriteBat;
 			case TILE_INDEX_TOADSTALL: 
 				*tile = TILE_INDEX_BG1; 
 				return 255u;

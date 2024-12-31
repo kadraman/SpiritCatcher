@@ -14,8 +14,8 @@
 #include "GlobalVars.h"
 
 UINT8 g_level_current = 1;
-UINT16 g_level_coins = 0;
-UINT16 g_level_spirits = 0;
+//UINT16 g_level_coins = 0;
+//UINT16 g_level_spirits = 0;
 UINT8 start_x, start_y;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
@@ -57,6 +57,8 @@ UINT8 collision_tiles_down[] = {
 UINT8 fastest_times[] = { 120 };
 
 UINT8 level_complete;
+UINT8 level_spirits;
+UINT8 level_coins;
 UINT16 level_width;
 UINT16 level_height;
 
@@ -72,9 +74,11 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* sta
 	for(UINT8 y = 0; y < map->height; ++ y) {
 		for(UINT8 x = 0; x < map->width; ++ x) {
 			UINT8 tile = *data++;
-			if (tile == TILE_INDEX_COIN) {          //coins
-
-			} else if (tile == TILE_INDEX_PLAYER) {  //player
+			if (tile == TILE_INDEX_SPIRIT1) {
+				level_spirits++;
+			} else if (tile == TILE_INDEX_COIN) {
+				level_coins++;
+			} else if (tile == TILE_INDEX_PLAYER) {
 				*start_x = x;
 				*start_y = y;
 			}
@@ -86,7 +90,6 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* sta
 void START() {
 	LOAD_SGB_BORDER(bg_border);
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
-	memset(collectables_taken, 0, sizeof(collectables_taken));
 	scroll_top_movement_limit = 72;
 	scroll_bottom_movement_limit = 110;
 	level_max_time = level->seconds;
@@ -95,6 +98,9 @@ void START() {
 	LocateStuff(level->bank, level->map, &start_x, &start_y);
 	scroll_target = SpriteManagerAdd(SpritePlayer, start_x << 3, (start_y - 1) << 3);
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
+
+	memset(collectables_taken, 0, sizeof(collectables_taken));
+
 
 	Hud_Init();
 
@@ -128,13 +134,18 @@ UINT8 IsCollected(Sprite* collectable) BANKED {
 
 void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 	collectables_taken[++ collectables_taken[0]] = collectable->unique_id;
-	PlayerData* data = (PlayerData*)player_sprite->custom_data;
+	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
 	switch (itype) {
-		case ITEM_COIN:
-			g_level_coins++;
-			break;
 		case ITEM_SPIRIT:
-			g_level_spirits++;
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			player_data->spirits++;
+			break;
+		case ITEM_COIN:
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			player_data->coins++;
+			break;
+		case ITEM_PORTAL:
+			break;
 		default:
 			break;
 	}

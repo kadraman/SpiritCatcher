@@ -5,12 +5,17 @@
 #include "Vector.h"
 #include "SpriteManager.h"
 
+#include "GlobalVars.h"
+
 #define DEFAULT_ANIM_SPEED		10u
 #define DISAPPEAR_ANIM_SPEED 	10u
 
 const UINT8 anim_portal_appear[] = VECTOR(10, 7, 6, 5, 4, 3, 2, 1, 5, 6, 7);
 const UINT8 anim_portal_stable[] = VECTOR(5, 0, 1, 2, 3, 4);
 const UINT8 anim_portal_disappear[] = VECTOR(3, 5, 6, 7);
+extern UINT8 item_collected;
+UINT8 IsCollected(Sprite* collectable) BANKED;
+void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
 struct PortalInfo
 {
     UINT8 frame;
@@ -24,13 +29,17 @@ extern UINT8 level_complete;
 void START() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
 	data->appear = data->stable = data->disappear = false;
-	// TODO: define a better way to define if its the starting portal
-	if (THIS->x < 32 && (player_sprite->x < 32 && player_sprite->y < 144)) {
-		data->appear = true;
-		SetSpriteAnim(THIS, anim_portal_appear, DISAPPEAR_ANIM_SPEED);
+	if (IsCollected(THIS) != 255) {
+		SpriteManagerRemove(THIS_IDX);
 	} else {
-		data->stable = true;
-		SetSpriteAnim(THIS, anim_portal_stable, DEFAULT_ANIM_SPEED);
+		// TODO: define a better way to define if its the starting portal
+		if (THIS->x < 32 && (player_sprite->x < 32 && player_sprite->y < 144)) {
+			data->appear = true;
+			SetSpriteAnim(THIS, anim_portal_appear, DISAPPEAR_ANIM_SPEED);
+		} else {
+			data->stable = true;
+			SetSpriteAnim(THIS, anim_portal_stable, DEFAULT_ANIM_SPEED);
+		}
 	}
 }
 
@@ -38,17 +47,19 @@ void UPDATE() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
 	// if entry portal remove it after X frames
 	if (data->appear && THIS->anim_frame == VECTOR_LEN(anim_portal_appear)-1) {
+		TakeCollectable(THIS, ITEM_PORTAL);
 		SpriteManagerRemove(THIS_IDX);
 	}
 	// if exit portal and not set to disappear change animation state
 	if (level_complete && data->stable) {
 		data->stable = false;
 		data->disappear = true;
-		THIS->anim_frame = 0;
 		SetSpriteAnim(THIS, anim_portal_disappear, DISAPPEAR_ANIM_SPEED);
+		return;
 	}
 	// if exit portal remove it after X frames
 	if (level_complete && data->disappear && THIS->anim_frame == VECTOR_LEN(anim_portal_disappear)-1) {
+		TakeCollectable(THIS, ITEM_PORTAL);
 		SpriteManagerRemove(THIS_IDX);
 	}
 	//data->frame++;

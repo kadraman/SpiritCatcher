@@ -22,7 +22,7 @@ const UINT8 anim_climb_idle[] = {1, 25};
 const UINT8 anim_hit[] = {6, 26, 27, 28, 26, 27, 28};
 const UINT8 anim_die[] = {15, 26, 27, 28, 26, 27, 28, 29, 30, 31, 32, 32, 32, 32};
 const UINT8 anim_appear[] = {3, 33, 34, 35};
-const UINT8 anim_disappear[] = {3, 36, 34, 33};
+const UINT8 anim_disappear[] = {5, 35, 34, 35, 34, 33};
 const UINT8 anim_victory[] = {2, 34, 35}; // TBD
 
 
@@ -40,7 +40,7 @@ UINT8 reset_x;
 UINT8 reset_y;
 UINT8 throw_cooldown;
 UINT8 bg_hidden;
-UINT8 g_player_region;
+//UINT8 g_player_region;
 UINT8 pause_secs;
 UINT8 pause_ticks;
 UINT8 invincible_secs;
@@ -508,7 +508,7 @@ void UPDATE() {
 	// check enemy sprite collision - item colission is in each item sprite
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-		if (spr->type == SpriteEnemy1 || spr->type == SpriteEnemy2) {
+		if (spr->type == SpriteEnemy1 || spr->type == SpriteBat) {
 			if (CheckCollision(THIS, spr) && !data->invincible) {
 				Hit(THIS, THIS_IDX);
 			}
@@ -516,7 +516,6 @@ void UPDATE() {
 		if (spr->type == SpritePortal) {
 			if (CheckCollision(THIS, spr) && !player_spawned && THIS->x > 16) {
 				THIS->x = spr->x-8;
-				spr->anim_speed = DISAPPEAR_ANIM_SPEED;
 				SetAnimationState(DISAPPEAR);
 				SetPlayerState(PLAYER_STATE_DISAPPEAR);
 				data->anim_playing = true;
