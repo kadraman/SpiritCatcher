@@ -132,7 +132,7 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
 		data->anim_playing = true;
-		pause_secs = 5;
+		pause_secs = 6;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
