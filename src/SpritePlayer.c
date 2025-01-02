@@ -188,19 +188,10 @@ void Throw() {
 
 UINT8 tile_collision;
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
-	if (tile_collision == TILE_ITEM_SPIKE) { // spikes
+	if (tile_collision == TILE_INDEX_SPIKE_UP || tile_collision == TILE_INDEX_SPIKE_DOWN) {
 		Hit(sprite, idx);
-	} else if (tile_collision == TILE_ITEM_COIN) { // coin
-		//Collected(sprite, ITEM_COIN, tile_collision);
-	} else if (tile_collision == TILE_ITEM_FLAG) {
-		// go to next level or complete game
-		if (g_level_current == MAX_LEVEL) {
-			SetState(StateWin);
-			HIDE_WIN;
-		} else {
-			g_level_current++;
-			SetState(StateGame);
-		}
+	} else if (tile_collision == TILE_INDEX_WATER_1 || tile_collision == TILE_INDEX_WATER_2) {
+		Hit(sprite, idx);
 	}
 }
 

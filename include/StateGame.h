@@ -14,8 +14,12 @@
 
 #define TILE_INDEX_LADDER_LEFT  27
 #define TILE_INDEX_LADDER_RIGHT 28
-#define TILE_INDEX_BG1          29
-#define TILE_INDEX_BG2          60
+#define TILE_INDEX_WATER_1      29
+#define TILE_INDEX_WATER_2      30
+#define TILE_INDEX_SPIKE_UP     31
+#define TILE_INDEX_SPIKE_DOWN   32
+#define TILE_INDEX_BG1          33
+#define TILE_INDEX_BG2          64
 
 //#define TILE_ITEM_SPIKE	200
 //#define TILE_ITEM_COIN	201

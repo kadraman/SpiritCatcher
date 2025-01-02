@@ -10,9 +10,9 @@
 #define DEFAULT_ANIM_SPEED		10u
 #define DISAPPEAR_ANIM_SPEED 	10u
 
-const UINT8 anim_portal_appear[] = VECTOR(10, 7, 6, 5, 4, 3, 2, 1, 5, 6, 7);
+const UINT8 anim_portal_appear[] = VECTOR(10, 6, 6, 5, 4, 3, 2, 1, 5, 6, 6);
 const UINT8 anim_portal_stable[] = VECTOR(5, 0, 1, 2, 3, 4);
-const UINT8 anim_portal_disappear[] = VECTOR(3, 5, 6, 7);
+const UINT8 anim_portal_disappear[] = VECTOR(3, 5, 6, 6);
 extern UINT8 item_collected;
 UINT8 IsCollected(Sprite* collectable) BANKED;
 void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
