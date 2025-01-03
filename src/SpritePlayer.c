@@ -1,12 +1,15 @@
 #include <stdbool.h>
-#include "SpritePlayer.h"
+#include <stdlib.h>
+
+#include "Banks/SetAutoBank.h"
+#include "gb/gb.h"
 #include "Keys.h"
 #include "Scroll.h"
 #include "Print.h"
 #include "Sound.h"
-#include "Banks/SetAutoBank.h"
-#include "gb/gb.h"
+
 #include "StateGame.h"
+#include "SpritePlayer.h"
 
 // player animations - the first number indicates the number of frames
 const UINT8 anim_idle[] = {4, 0, 1, 2, 3};		
@@ -35,12 +38,13 @@ static PlayerState curPlayerState, prevPlayerState;
 static AnimationState lastAnimState, currentAnimState;
 
 INT16 accel_y;
-UINT8 decel_x;
+INT16 accel_x;
+UINT16 x_inc;
+UINT16 y_inc;
 UINT8 reset_x;
 UINT8 reset_y;
 UINT8 throw_cooldown;
 UINT8 bg_hidden;
-//UINT8 g_player_region;
 UINT8 pause_secs;
 UINT8 pause_ticks;
 UINT8 invincible_secs;
@@ -98,6 +102,7 @@ static AnimationState GetAnimationState(void) {
 
 void StartLevel() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
+	accel_x = accel_y = 0;
 	// move player to start/checkpoint
 	THIS->x = data->start_x;
 	THIS->y = data->start_y;
@@ -186,6 +191,8 @@ void Throw() {
 	throw_cooldown = 10;
 }
 
+
+
 UINT8 tile_collision;
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 	if (tile_collision == TILE_INDEX_SPIKE_UP || tile_collision == TILE_INDEX_SPIKE_DOWN) {
@@ -195,31 +202,23 @@ void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 	}
 }
 
+void AddDamping(Sprite* sprite, UINT8 idx) {
+	if (accel_x > 0) {
+		accel_x -= X_DAMPENING;
+		x_inc = accel_x >> 6;
+		tile_collision = TranslateSprite(sprite, x_inc, 0);
+	} else if (accel_x < 0) {
+		accel_x += X_DAMPENING;
+		x_inc = abs(accel_x) >> 6;
+		tile_collision = TranslateSprite(sprite, -x_inc, 0);
+	}
+	CheckCollisionTile(sprite, idx);
+
+}
 void HandleInput(Sprite* sprite, UINT8 idx) {
 	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DIE) return;
-	/*
-	if (decel_x > 0) {
-		tile_collision = TranslateSprite(sprite, 1 << delta_time, 0);
-		THIS->mirror = NO_MIRROR;
-		CheckCollisionTile(sprite, idx);
-		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
-			SetPlayerState(PLAYER_STATE_WALKING);
-			SetAnimationState(WALK);
-		}
-		decel_x--;
-	}
-	if (decel_x < 0) {
-		tile_collision = TranslateSprite(sprite, -1 << delta_time, 0);
-		THIS->mirror = V_MIRROR;
-		CheckCollisionTile(sprite, idx);
-		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
-			SetPlayerState(PLAYER_STATE_WALKING);
-			SetAnimationState(WALK);
-		}	
-		decel_x++;
-	}*/
 	if (KEY_PRESSED(J_RIGHT)) {
-		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
+		/*if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
 			UINT8 tile = GetScrollTile((player_sprite->x + 16u) >> 3, (player_sprite->y + 16u) >> 3);
 			SetAnimationState(WALK);
 			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
@@ -227,21 +226,18 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 				SetAnimationState(WALK);
 				return;
 			}
-		}
-		if (THIS->x < level_width-16) {
-			tile_collision = TranslateSprite(sprite, 1 << delta_time, 0);
-			CheckCollisionTile(sprite, idx);
-		}
+		}*/
+		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
+		x_inc = accel_x >> 6;	
+		tile_collision = TranslateSprite(sprite, x_inc, 0);
+		CheckCollisionTile(sprite, idx);
 		THIS->mirror = NO_MIRROR;
 		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
 			SetPlayerState(PLAYER_STATE_WALKING);
 			SetAnimationState(WALK);
 		}
-		/*if (decel_x < MAX_DECEL_X) {
-			decel_x++;
-		}*/
 	} else if (KEY_PRESSED(J_LEFT)) {
-		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
+		/*if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
 			UINT8 tile = GetScrollTile((player_sprite->x) >> 3, (player_sprite->y + 16u) >> 3);
 			SetAnimationState(WALK);
 			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
@@ -249,20 +245,19 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 				SetAnimationState(WALK);
 				return;
 			}
-		}
-		if (THIS->x > 16) { 
-			tile_collision = TranslateSprite(sprite, -1 << delta_time, 0);
-			CheckCollisionTile(sprite, idx);
-		}
+		}*/
+		if (accel_x > -(X_SPEED_MAX-X_SPEED_INC)) accel_x -= X_SPEED_INC;
+		x_inc = abs(accel_x) >> 6;
+		tile_collision = TranslateSprite(sprite, -x_inc, 0);
+		CheckCollisionTile(sprite, idx);
 		THIS->mirror = V_MIRROR;
 		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
 			SetPlayerState(PLAYER_STATE_WALKING);
 			SetAnimationState(WALK);
 		}
-		/*if (decel_x > -(MAX_DECEL_X)) {
-			decel_x--;
-		}*/
-	} else if (KEY_PRESSED(J_UP)) {
+	} else 
+
+	if (KEY_PRESSED(J_UP)) {
 		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 8u) >> 3);
 		if (tile == TILE_INDEX_LADDER_LEFT || tile == TILE_INDEX_LADDER_RIGHT) {
 			// move to center of ladder
@@ -284,15 +279,18 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 			SetPlayerState(PLAYER_STATE_CLIMBING);
 			SetAnimationState(CLIMB);
 		}
+	} else {
+		AddDamping(THIS, THIS_IDX);
 	}
+
 	if (KEY_TICKED(J_A) && (GetPlayerState() != PLAYER_STATE_JUMPING)) {
 		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
 		SetPlayerState(PLAYER_STATE_JUMPING);
 		SetAnimationState(JUMP);
-		accel_y = -50;
+		accel_y = -Y_JUMP_HEIGHT;
 	} else {
 		// check if now FALLING?
-		if ((accel_y >> 4) > 1) {
+		if ((accel_y >> 6) > 1) {
 			SetAnimationState(FALL);
 		}
 	}
@@ -305,6 +303,9 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 			Attack();
 		}
 	}
+	//
+	//if (keys == 0) AddDamping(THIS, THIS_IDX);
+
 	// nothing happening lets revert to idle state
 	if (keys == 0 && !(GetPlayerState() == PLAYER_STATE_JUMPING || GetPlayerState() == PLAYER_STATE_ATTACKING)) {
 		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
@@ -338,7 +339,7 @@ void START() {
 	data->invincible = 0;
 	curPlayerState = PLAYER_STATE_IDLE;
 	accel_y = 0;
-	decel_x = 0;
+	accel_x = 0;
 	throw_cooldown = 0;
 	bg_hidden = 0;
 	scroll_target = THIS;
@@ -427,7 +428,7 @@ void UPDATE() {
 			break;
 		case PLAYER_STATE_JUMPING:
 			// check if now FALLING?
-			if ((accel_y >> 4) > 1) {
+			if ((accel_y >> 6) > 1) {
 				SetPlayerState(PLAYER_STATE_FALLING);
 				SetAnimationState(FALL);
 			}
@@ -472,18 +473,17 @@ void UPDATE() {
 
 	HandleInput(THIS, THIS_IDX);
 
-	// simple gravity physics until we "collide" with something and not on a ladder
+	// simple gravity physics
 	if (curPlayerState != PLAYER_STATE_CLIMBING) {
-		if (accel_y < 40) {
-			accel_y += 2;
+		if (accel_y < Y_SPEED_MAX) {
+			accel_y += Y_GRAVITY;
 		}
-		//if (THIS->y < 16) return;
-		tile_collision = TranslateSprite(THIS, 0, accel_y >> 4);
-		if (!tile_collision && delta_time != 0 && accel_y < 40) { 
+		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
+		//if (!tile_collision && delta_time != 0 && accel_y < Y_SPEED_MAX) { 
 			//do another iteration if there is no collision
-			accel_y += 2;
-			tile_collision = TranslateSprite(THIS, 0, accel_y >> 4);
-		}
+		//	accel_y += Y_GRAVITY;
+		//	tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
+		//}
 		if (tile_collision) {
 			accel_y = 0;
 			if (currentAnimState == JUMP || currentAnimState == FALL) {

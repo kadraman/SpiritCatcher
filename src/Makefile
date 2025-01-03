@@ -5,6 +5,8 @@ PROJECT_NAME = rom
 # Possible are: gb gbc pocket megaduck sms gg
 TARGETS=gbc
 
+CUSTOM_DATA_SIZE = 16
+
 # Builds all targets sequentially
 all: $(TARGETS)
 

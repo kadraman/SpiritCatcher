@@ -9,8 +9,6 @@
 // TODO: refactor ItemType from below
 #include "SpritePlayer.h"
 
-#define DEFAULT_ANIM_SPEED		10u
-
 const UINT8 anim_spirit[] = VECTOR(3, 0, 1, 2);
 struct SpiritInfo {
 	UINT16 start_y;

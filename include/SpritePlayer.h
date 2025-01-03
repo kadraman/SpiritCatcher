@@ -5,22 +5,25 @@
 #include "SpriteManager.h"
 #include "Sprite.h"
 #include "ZGBMain.h"
-#include "GlobalVars.h"
 #include "ZGBUtils.h"
+
+#include "GlobalVars.h"
 #include "Hud.h"
 
-#define DEBUG_CONTROLS 0
 
-#define MAX_DECEL_X 10u
-#define GROUNDED_BIT 7u
-#define DOUBLE_JUMP_BIT 6u
-#define DEFAULT_ANIM_SPEED 10u
-#define WALK_ANIM_SPEED 10u
-#define HIT_ANIM_SPEED 254u
-#define DIE_ANIM_SPEED 254u
-#define DISAPPEAR_ANIM_SPEED 10u
-#define VICTORY_ANIM_SPEED 8u
-//#define MAX_BULLETS 255u
+#define DEFAULT_ANIM_SPEED 		10
+#define WALK_ANIM_SPEED 		10
+#define HIT_ANIM_SPEED 			254
+#define DIE_ANIM_SPEED 			254
+#define DISAPPEAR_ANIM_SPEED 	10
+#define VICTORY_ANIM_SPEED 		8
+
+#define X_SPEED_MAX         	100
+#define X_SPEED_INC         	10
+#define X_DAMPENING         	5
+#define Y_SPEED_MAX				150
+#define Y_GRAVITY				10
+#define Y_JUMP_HEIGHT			160
 
 typedef enum {
 	PLAYER_STATE_IDLE,
