@@ -20,12 +20,10 @@ const UINT8 anim_jump[] = {3, 10, 11, 12};
 const UINT8 anim_fall[] = {3, 14, 15, 16};
 const UINT8 anim_jump_shoot[] = {1, 13};
 const UINT8 anim_attack[] = {4, 17, 18, 19, 20};
-const UINT8 anim_climb[] = {4, 21, 22, 23, 24};
-const UINT8 anim_climb_idle[] = {1, 25};
-const UINT8 anim_hit[] = {6, 26, 27, 28, 26, 27, 28};
-const UINT8 anim_die[] = {15, 26, 27, 28, 26, 27, 28, 29, 30, 31, 32, 32, 32, 32};
-const UINT8 anim_appear[] = {3, 33, 34, 35};
-const UINT8 anim_disappear[] = {5, 35, 34, 35, 34, 33};
+const UINT8 anim_hit[] = {6, 21, 22, 23, 21, 22, 23};
+const UINT8 anim_die[] = {15, 21, 22, 23, 21, 22, 23, 24, 25, 26, 27, 28, 28, 28};
+const UINT8 anim_appear[] = {3, 30, 29, 28};
+const UINT8 anim_disappear[] = {5, 28, 29, 28, 29, 30};
 const UINT8 anim_victory[] = {2, 34, 35}; // TBD
 
 
@@ -85,9 +83,7 @@ static void SetAnimationState(AnimationState state) {
 								SetSpriteAnim(THIS, anim_walk_shoot, DEFAULT_ANIM_SPEED);
 							}
 							//SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED);
-							break;
-		case CLIMB:			SetSpriteAnim(THIS, anim_climb, DEFAULT_ANIM_SPEED); break;
-		case CLIMB_IDLE:	SetSpriteAnim(THIS, anim_climb_idle, DEFAULT_ANIM_SPEED); break; 			
+							break;		
 		case HIT:			SetSpriteAnim(THIS, anim_hit, HIT_ANIM_SPEED); break;
 		case DIE:    		SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
 		case APPEAR:		SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
@@ -218,69 +214,34 @@ void AddDamping(Sprite* sprite, UINT8 idx) {
 void HandleInput(Sprite* sprite, UINT8 idx) {
 	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DIE) return;
 	if (KEY_PRESSED(J_RIGHT)) {
-		/*if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
-			UINT8 tile = GetScrollTile((player_sprite->x + 16u) >> 3, (player_sprite->y + 16u) >> 3);
-			SetAnimationState(WALK);
-			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
-				SetPlayerState(PLAYER_STATE_WALKING);
-				SetAnimationState(WALK);
-				return;
-			}
-		}*/
 		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
 		x_inc = accel_x >> 6;	
 		tile_collision = TranslateSprite(sprite, x_inc, 0);
 		CheckCollisionTile(sprite, idx);
 		THIS->mirror = NO_MIRROR;
-		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
+		if (GetPlayerState() != PLAYER_STATE_JUMPING) {
 			SetPlayerState(PLAYER_STATE_WALKING);
 			SetAnimationState(WALK);
 		}
 	} else if (KEY_PRESSED(J_LEFT)) {
-		/*if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
-			UINT8 tile = GetScrollTile((player_sprite->x) >> 3, (player_sprite->y + 16u) >> 3);
-			SetAnimationState(WALK);
-			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
-				SetPlayerState(PLAYER_STATE_WALKING);
-				SetAnimationState(WALK);
-				return;
-			}
-		}*/
 		if (accel_x > -(X_SPEED_MAX-X_SPEED_INC)) accel_x -= X_SPEED_INC;
 		x_inc = abs(accel_x) >> 6;
 		tile_collision = TranslateSprite(sprite, -x_inc, 0);
 		CheckCollisionTile(sprite, idx);
 		THIS->mirror = V_MIRROR;
-		if (GetPlayerState() != PLAYER_STATE_JUMPING && GetPlayerState() != PLAYER_STATE_CLIMBING) {
+		if (GetPlayerState() != PLAYER_STATE_JUMPING) {
 			SetPlayerState(PLAYER_STATE_WALKING);
 			SetAnimationState(WALK);
 		}
-	} else 
-
-	if (KEY_PRESSED(J_UP)) {
-		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 8u) >> 3);
-		if (tile == TILE_INDEX_LADDER_LEFT || tile == TILE_INDEX_LADDER_RIGHT) {
-			// move to center of ladder
-			THIS->x = (((THIS->x)>> 3) << 3) + 4;
-			accel_y = 0;
-			tile_collision = TranslateSprite(THIS, 0, -1 << delta_time);
-			CheckCollisionTile(sprite, idx);
-			SetPlayerState(PLAYER_STATE_CLIMBING);
-			SetAnimationState(CLIMB);
-		}
-	} else if (KEY_PRESSED(J_DOWN)) {
-		UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y - 16u) >> 3);
-		if (tile == TILE_INDEX_LADDER_LEFT || tile == TILE_INDEX_LADDER_RIGHT) {
-			// move to center of ladder
-			THIS->x = (((THIS->x)>> 3) << 3) + 4;
-			accel_y = 0;
-			tile_collision = TranslateSprite(THIS, 0, 1 << delta_time);
-			CheckCollisionTile(sprite, idx);
-			SetPlayerState(PLAYER_STATE_CLIMBING);
-			SetAnimationState(CLIMB);
-		}
 	} else {
 		AddDamping(THIS, THIS_IDX);
+	}
+	if (KEY_PRESSED(J_UP)) {
+		//
+	} else if (KEY_PRESSED(J_DOWN)) {
+		//
+	} else {
+		// AddDamping(THIS, THIS_IDX);
 	}
 
 	if (KEY_TICKED(J_A) && (GetPlayerState() != PLAYER_STATE_JUMPING)) {
@@ -308,11 +269,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 
 	// nothing happening lets revert to idle state
 	if (keys == 0 && !(GetPlayerState() == PLAYER_STATE_JUMPING || GetPlayerState() == PLAYER_STATE_ATTACKING)) {
-		if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
-			SetAnimationState(CLIMB_IDLE);
-		} else {
-			SetAnimationState(WALK_IDLE);
-		}
+		SetAnimationState(WALK_IDLE);
 	}
 	
 	// decrement throw cooldown so we can throw again
@@ -449,19 +406,9 @@ void UPDATE() {
 			}
 			return;
 			break;
-		case PLAYER_STATE_CLIMBING: 	
-			UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 22u) >> 3);
-			if (tile != TILE_INDEX_LADDER_LEFT && tile != TILE_INDEX_LADDER_RIGHT) {
-				//SetPlayerState(PLAYER_STATE_IDLE);
-			}
-			break;
 		default:
 			if (keys == 0 && !data->anim_playing) {
-				if (GetPlayerState() == PLAYER_STATE_CLIMBING) {
-					SetAnimationState(CLIMB_IDLE);
-				} else {
-					SetAnimationState(WALK_IDLE);
-				}
+				SetAnimationState(WALK_IDLE);
 			}
 			player_spawned = false;
 
@@ -474,27 +421,23 @@ void UPDATE() {
 	HandleInput(THIS, THIS_IDX);
 
 	// simple gravity physics
-	if (curPlayerState != PLAYER_STATE_CLIMBING) {
-		if (accel_y < Y_SPEED_MAX) {
-			accel_y += Y_GRAVITY;
+	if (accel_y < Y_SPEED_MAX) {
+		accel_y += Y_GRAVITY;
+	}
+	tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
+	//if (!tile_collision && delta_time != 0 && accel_y < Y_SPEED_MAX) { 
+		//do another iteration if there is no collision
+	//	accel_y += Y_GRAVITY;
+	//	tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
+	//}
+	if (tile_collision) {
+		accel_y = 0;
+		if (currentAnimState == JUMP || currentAnimState == FALL) {
+			currentAnimState = WALK_IDLE;
 		}
-		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
-		//if (!tile_collision && delta_time != 0 && accel_y < Y_SPEED_MAX) { 
-			//do another iteration if there is no collision
-		//	accel_y += Y_GRAVITY;
-		//	tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
-		//}
-		if (tile_collision) {
-			accel_y = 0;
-			if (currentAnimState == JUMP || currentAnimState == FALL) {
-				currentAnimState = WALK_IDLE;
-			}
-			curPlayerState = PLAYER_STATE_IDLE;
-			CheckCollisionTile(THIS, THIS_IDX);
-		}
-	} else {
-		// TBD
-	}	
+		curPlayerState = PLAYER_STATE_IDLE;
+		CheckCollisionTile(THIS, THIS_IDX);
+	}
 
 	// check enemy sprite collision - item colission is in each item sprite
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
