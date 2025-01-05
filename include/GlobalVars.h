@@ -1,7 +1,7 @@
 #ifndef GLOBALVARS_H_
 #define GLOBALVARS_H_
 
-#define MAX_LIVES 3
+#define MAX_LIVES 5
 #define MAX_LEVEL 1
 
 #define TILE_ITEM_SPIKE	200

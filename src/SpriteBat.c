@@ -36,13 +36,12 @@ void START() {
     CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
     startx = THIS->x; starty = THIS->y;
 	SetSpriteAnim(THIS, anim_bat_move, 5u);
-	//THIS->lim_x = 160u;
-	//THIS->lim_y = 160u;
+	THIS->lim_x = 160u;
+	THIS->lim_y = 160u;
 }
 
 void UPDATE() {
 
-    // initialize the Bresenham algo state
 	CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
 	data->dx  =  abs(TARGET_X_COORD - THIS->x);
 	data->dy  = -abs(TARGET_Y_COORD - THIS->y);
@@ -54,7 +53,6 @@ void UPDATE() {
     if (data->dx < ATTACK_DISTANCE && data->dy < ATTACK_DISTANCE) {
         SetSpriteAnim(THIS, anim_bat_attack, 5u);
         if (frame_skip == ATTACK_DELAY) {
-            // iterate one step of the Bresenham algo
             INT16 e2 = data->err << 1;
             if (e2 > data->dy) { data->err += data->dy; THIS->x += data->sx; }
             if (e2 < data->dx) { data->err += data->dx; THIS->y += data->sy; }
@@ -69,6 +67,9 @@ void UPDATE() {
 
     if (CheckCollision(THIS, player_sprite)) {
         // TODO: move away after successful attack
+        
+        //THIS->x = startx;
+        //THIS->y = starty;
         //Sprite *spr2 = SpriteManagerAdd(SpriteParticle, THIS->x, THIS->y);
 		//SpriteManagerRemove(THIS_IDX);
 	}

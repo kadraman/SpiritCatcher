@@ -19,6 +19,7 @@ _SPRITE(SpriteCoin,     coin,       FLIP_NONE)\
 _SPRITE(SpriteEnemy1,   enemy1,     FLIP_NONE)\
 _SPRITE(SpriteSpirit,   spirit,     FLIP_NONE)\
 _SPRITE(SpriteBullet,   bullet,     FLIP_NONE)\
+_SPRITE(SpriteMushroom, mushroom,   FLIP_NONE)\
 _SPRITE(SpriteBat,      bat,        FLIP_NONE)\
 _SPRITE(SpriteParticle, particles,  FLIP_NONE)\
 _SPRITE(SpriteJewell1,  jewell1,    FLIP_NONE)\

@@ -112,11 +112,11 @@ void Hud_Update(void) BANKED {
     //PutU16(af, 17);
 #else
     if (last_timer != timer_countdown) {
-        PutU16(timer_countdown, 13);
+        PutU16(timer_countdown, 11);
     }
 
     if (timer_countdown == 0) {
-        PutU16(timer_countdown, 13);
+        PutU16(timer_countdown, 11);
         player_data->timeup = 1;
     }
 
@@ -124,16 +124,16 @@ void Hud_Update(void) BANKED {
         last_spirits = player_data->spirits;
         tens = getTens(player_data->spirits);
         ones = player_data->spirits - (tens * 10);
-        UPDATE_HUD_TILE(2, 0, 1 + tens);
-        UPDATE_HUD_TILE(3, 0, last_spirits = 0 ? 1 : 1 + ones);
+        UPDATE_HUD_TILE(1, 0, 1 + tens);
+        UPDATE_HUD_TILE(2, 0, last_spirits = 0 ? 1 : 1 + ones);
     }
 
     if (last_knives != player_data->knives) {
         last_knives = player_data->knives;
         tens = getTens(player_data->knives);
         ones = player_data->knives - (tens * 10);
-        UPDATE_HUD_TILE(7, 0, 1 + tens);
-        UPDATE_HUD_TILE(8, 0, last_knives = 0 ? 1 : 1 + ones);
+        UPDATE_HUD_TILE(5, 0, 1 + tens);
+        UPDATE_HUD_TILE(6, 0, last_knives = 0 ? 1 : 1 + ones);
     }
 
     if (last_lives != player_data->lives) {

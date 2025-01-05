@@ -21,7 +21,7 @@ const UINT8 anim_fall[] = {3, 14, 15, 16};
 const UINT8 anim_jump_shoot[] = {1, 13};
 const UINT8 anim_attack[] = {4, 17, 18, 19, 20};
 const UINT8 anim_hit[] = {6, 21, 22, 23, 21, 22, 23};
-const UINT8 anim_die[] = {15, 21, 22, 23, 21, 22, 23, 24, 25, 26, 27, 28, 28, 28};
+const UINT8 anim_die[] = {20, 21, 22, 23, 21, 22, 23, 24, 25, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27};
 const UINT8 anim_appear[] = {3, 30, 29, 28};
 const UINT8 anim_disappear[] = {5, 28, 29, 28, 29, 30};
 const UINT8 anim_victory[] = {2, 34, 35}; // TBD
@@ -126,19 +126,21 @@ void UpdateAttackPos() {
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT) return;
-	if (data->anim_playing) return;
+	//if (data->anim_playing) return;
 	if (data->invincible) return;
 	if (--data->lives <= 0) {
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
-		data->anim_playing = true;
+		//data->anim_playing = true;
 		pause_secs = 6;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(HIT);
-		data->anim_playing = true;
+		//data->anim_playing = true;
+		data->invincible = true;
+		invincible_secs = 3;
 	}
 	Hud_Update();	
 }
@@ -282,6 +284,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 
 //
 
+UINT8 visible_skip = 0;
+
 void START() {
 	player_sprite = THIS;
 	PlayerData* data = (PlayerData*)THIS->custom_data;
@@ -323,6 +327,11 @@ void UPDATE() {
 		return;
 	}
 
+	if (data->invincible) {
+		SetVisible(THIS, visible_skip++);
+		if (visible_skip > 3) visible_skip = 0;
+	}
+
 	if (invincible_secs) {
 		invincible_ticks++;
 		if (invincible_ticks == 25) {
@@ -331,6 +340,7 @@ void UPDATE() {
 		}
 	} else {
 		data->invincible = false;
+		SetVisible(THIS, true);
 	}
 
 	if (data->timeup) {
@@ -368,13 +378,6 @@ void UPDATE() {
 	}
 
 	switch (GetPlayerState()) {
-		//case PLAYER_STATE_BEFORE_JUMP:
-		//	if (THIS->anim_frame == 2) {
-		//		SetPlayerState(PLAYER_STATE_JUMPING);
-		//		SetAnimationState(JUMP);
-		//		accel_y = -50;
-		//	}
-		//	break;
 		case PLAYER_STATE_ATTACKING:
 			UpdateAttackPos();
 			if (THIS->anim_frame == 3) {
@@ -391,12 +394,11 @@ void UPDATE() {
 			}
 			break;
 		case PLAYER_STATE_HIT:
-			accel_y = 0;
+			accel_x = accel_y = 0;
 			if (THIS->anim_frame == 5) {
 				data->anim_playing = false;
-				StartLevel();
+				SetPlayerState(prevPlayerState);
 			}
-			return;
 			break;
 		case PLAYER_STATE_DIE:
 			if (THIS->anim_frame == 14) {

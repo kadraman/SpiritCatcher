@@ -67,6 +67,10 @@ UINT16 level_height;
 #define MAX_COLLECTABLES 10
 UINT16 collectables_taken[MAX_COLLECTABLES + 1];
 
+void pause(UINT16 time) BANKED {
+	if (time) while (time--) vsync();	
+}
+
 void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* start_y) NONBANKED {
 	UINT8 * data, __save_bank = CURRENT_BANK;
 	SWITCH_ROM(map_bank);
