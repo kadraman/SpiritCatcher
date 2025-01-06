@@ -102,7 +102,9 @@ void START() {
 	level_complete = 0;
 
 	LocateStuff(level->bank, level->map, &start_x, &start_y);
-	scroll_target = SpriteManagerAdd(SpritePlayer, start_x << 3, (start_y - 1) << 3);
+	//scroll_target = SpriteManagerAdd(SpritePlayer, start_x << 3, (start_y - 1) << 3);
+	scroll_target = SpriteManagerAdd(SpritePlayer, 0, 40);
+
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));
