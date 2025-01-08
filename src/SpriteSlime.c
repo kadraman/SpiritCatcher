@@ -6,7 +6,7 @@
 #include "Scroll.h"
 #include "SpriteManager.h"
 
-const UINT8 anim_enemy1_move[] = {2, 0, 1};
+const UINT8 anim_slime_move[] = {9, 0, 1, 1, 1, 1, 1, 2, 1, 3};
 struct EnemyInfo
 {
     BYTE wait;
@@ -15,15 +15,15 @@ struct EnemyInfo
 void START() {
 	struct EnemyInfo* data = (struct EnemyInfo*)THIS->custom_data;
 	data->wait = 0;
-	SetSpriteAnim(THIS, anim_enemy1_move, 5u);
-	THIS->lim_x = 160u;
-	THIS->lim_y = 160u;
+	SetSpriteAnim(THIS, anim_slime_move, 5u);
+	//THIS->lim_x = 160u;
+	//THIS->lim_y = 160u;
 }
 
 void UPDATE() {
 	struct EnemyInfo* data = (struct EnemyInfo*)THIS->custom_data;
-	if (!data->wait)
-    {
+	if (THIS->anim_frame > 1 && THIS->anim_frame < 7) return;
+	if (!data->wait) {
 		if (THIS->mirror == V_MIRROR) {
 			//moving left
 			if (TranslateSprite(THIS, -1, 0)) {
@@ -41,7 +41,7 @@ void UPDATE() {
 		}
 		data->wait = 1;
     } else {
-        data->wait = 0;
+		if (data->wait++ == 2) data->wait = 0;
     }
 }
 

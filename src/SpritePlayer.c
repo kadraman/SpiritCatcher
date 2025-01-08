@@ -444,7 +444,7 @@ void UPDATE() {
 	// check enemy sprite collision - item colission is in each item sprite
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-		if (spr->type == SpriteEnemy1 || spr->type == SpriteBat) {
+		if (spr->type == SpriteSlime || spr->type == SpriteBat || SpriteMushroom) {
 			if (CheckCollision(THIS, spr) && !data->invincible) {
 				Hit(THIS, THIS_IDX);
 			}
