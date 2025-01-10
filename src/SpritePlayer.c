@@ -12,19 +12,19 @@
 #include "SpritePlayer.h"
 
 // player animations - the first number indicates the number of frames
-const UINT8 anim_idle[] = {4, 0, 1, 2, 3};		
-const UINT8 anim_idle_shoot[] = {1, 18};		
-const UINT8 anim_walk[] = {6, 4, 5, 6, 7, 8, 9};
-const UINT8 anim_walk_shoot[] = {1, 18};
-const UINT8 anim_jump[] = {3, 10, 11, 12};
-const UINT8 anim_fall[] = {3, 14, 15, 16};
-const UINT8 anim_jump_shoot[] = {1, 13};
-const UINT8 anim_attack[] = {4, 17, 18, 19, 20};
-const UINT8 anim_hit[] = {6, 21, 22, 23, 21, 22, 23};
-const UINT8 anim_die[] = {20, 21, 22, 23, 21, 22, 23, 24, 25, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27};
-const UINT8 anim_appear[] = {3, 30, 29, 28};
-const UINT8 anim_disappear[] = {5, 28, 29, 28, 29, 30};
-const UINT8 anim_victory[] = {2, 34, 35}; // TBD
+const UINT8 anim_idle[] = {4, 0, 1, 2, 1};		
+const UINT8 anim_idle_shoot[] = {1, 0};		
+const UINT8 anim_walk[] = {4, 3, 4, 5, 6};
+const UINT8 anim_walk_shoot[] = {1, 3};
+const UINT8 anim_jump[] = {2, 7, 8};
+const UINT8 anim_fall[] = {1, 9};
+const UINT8 anim_jump_shoot[] = {8};
+const UINT8 anim_attack[] = {1, 12};
+const UINT8 anim_hit[] = {4, 10, 11, 10, 11};
+const UINT8 anim_die[] = {20, 10, 11, 10, 11, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14};
+const UINT8 anim_appear[] = {3, 17, 16, 15};
+const UINT8 anim_disappear[] = {5, 15, 16, 15, 16, 17};
+const UINT8 anim_victory[] = {2, 18, 19}; // TBD
 
 
 Sprite* player_sprite;
@@ -380,7 +380,7 @@ void UPDATE() {
 	switch (GetPlayerState()) {
 		case PLAYER_STATE_ATTACKING:
 			UpdateAttackPos();
-			if (THIS->anim_frame == 3) {
+			if (THIS->anim_frame == 1) {
 				//animation_playing = 0;
 				data->anim_playing = 0;
 				SetAnimationState(lastAnimState);
@@ -394,8 +394,8 @@ void UPDATE() {
 			}
 			break;
 		case PLAYER_STATE_HIT:
-			accel_x = accel_y = 0;
-			if (THIS->anim_frame == 5) {
+			accel_x = 0;
+			if (THIS->anim_frame == 3) {
 				data->anim_playing = false;
 				SetPlayerState(prevPlayerState);
 			}
