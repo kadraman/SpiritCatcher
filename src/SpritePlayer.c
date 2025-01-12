@@ -41,7 +41,7 @@ UINT16 x_inc;
 UINT16 y_inc;
 UINT8 reset_x;
 UINT8 reset_y;
-UINT8 throw_cooldown;
+UINT8 magix_cooldown;
 UINT8 bg_hidden;
 UINT8 pause_secs;
 UINT8 pause_ticks;
@@ -153,7 +153,7 @@ void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
 			data->coins++;
 			break;
 		case ITEM_SPIRIT:
-			data->spirits++;
+			data->has_spirit = true;
 			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			break;
 		default:
@@ -170,23 +170,23 @@ void Attack() {
 	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
 }
 
-void Throw() {
+void Magix() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	// no knives left
-	if (data->knives == 0) return;
+	// no magix left
+	if (data->magix == 0) return;
 	SetPlayerState(PLAYER_STATE_ATTACKING);
 	SetAnimationState(ATTACK);
-	Sprite* knife_sprite = SpriteManagerAdd(SpriteKnife, 0, 0);
-	knife_sprite->mirror = THIS->mirror;
+	Sprite* magix_sprite = SpriteManagerAdd(SpriteMagix, 0, 0);
+	magix_sprite->mirror = THIS->mirror;
 	if (THIS->mirror) {
-		knife_sprite->x = THIS->x - 2u;
+		magix_sprite->x = THIS->x - 2u;
 	} else {
-		knife_sprite->x = THIS->x + 7u; 
+		magix_sprite->x = THIS->x + 7u; 
 	}	
-	knife_sprite->y = THIS->y + 5u;
-	data->knives--;
+	magix_sprite->y = THIS->y + 5u;
+	data->magix--;
 	// reset cooldown
-	throw_cooldown = 10;
+	magix_cooldown = 10;
 }
 
 
@@ -259,8 +259,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	}
 	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DIE)) {
 		if (KEY_PRESSED(J_UP)) {
-			if (!throw_cooldown) {
-				Throw();
+			if (!magix_cooldown) {
+				Magix();
 			}
 		} else {
 			Attack();
@@ -274,10 +274,10 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		SetAnimationState(WALK_IDLE);
 	}
 	
-	// decrement throw cooldown so we can throw again
+	// decrement magix cooldown so we can magix again
 	if (GetPlayerState() != PLAYER_STATE_HIT) {
-		if (throw_cooldown) {
-			throw_cooldown -= 1u;
+		if (magix_cooldown) {
+			magix_cooldown -= 1u;
 		}
 	}
 }
@@ -293,15 +293,15 @@ void START() {
 	data->start_y = THIS->y;
 	data->anim_playing = 0;
 	data->lives = MAX_LIVES;
-	data->knives = 10;
+	data->magix = 12;
 	data->coins = 0;
-	data->spirits = 0;
+	data->has_spirit = 0;
 	data->timeup = 0;
 	data->invincible = 0;
 	curPlayerState = PLAYER_STATE_IDLE;
 	accel_y = 0;
 	accel_x = 0;
-	throw_cooldown = 0;
+	magix_cooldown = 0;
 	bg_hidden = 0;
 	scroll_target = THIS;
 	reset_x = 20;

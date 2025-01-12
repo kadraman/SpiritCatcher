@@ -14,8 +14,6 @@
 #include "GlobalVars.h"
 
 UINT8 g_level_current = 1;
-//UINT16 g_level_coins = 0;
-//UINT16 g_level_spirits = 0;
 UINT8 start_x, start_y;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
@@ -59,12 +57,7 @@ UINT8 collision_tiles_down[] = {
 	27, 0
 };
 UINT8 fastest_times[] = { 120 };
-
 UINT8 level_complete;
-//UINT8 level_spirits;
-//UINT8 level_coins;
-//UINT16 level_width;
-//UINT16 level_height;
 
 #define MAX_COLLECTABLES 10
 UINT16 collectables_taken[MAX_COLLECTABLES + 1];
@@ -72,28 +65,6 @@ UINT16 collectables_taken[MAX_COLLECTABLES + 1];
 void pause(UINT16 time) BANKED {
 	if (time) while (time--) vsync();	
 }
-
-/*void LocateStuff(UINT8 map_bank, struct MapInfo* map, UINT8* start_x, UINT8* start_y) NONBANKED {
-	UINT8 * data, __save_bank = CURRENT_BANK;
-	SWITCH_ROM(map_bank);
-	level_width = map->width << 3;
-	level_height = map->height << 3;
-	data = map->data;
-	for(UINT8 y = 0; y < map->height; ++ y) {
-		for(UINT8 x = 0; x < map->width; ++ x) {
-			UINT8 tile = *data++;
-			if (tile == TILE_INDEX_SPIRIT1) {
-				level_spirits++;
-			} else if (tile == TILE_INDEX_COIN) {
-				level_coins++;
-			} else if (tile == TILE_INDEX_PLAYER) {
-				*start_x = x;
-				*start_y = y;
-			}
-		}
-	}
-	SWITCH_ROM(__save_bank);
-}*/
 
 void START() {
 	LOAD_SGB_BORDER(bg_border);
@@ -103,13 +74,10 @@ void START() {
 	level_max_time = level->seconds;
 	level_complete = 0;
 
-	//LocateStuff(level->bank, level->map, &start_x, &start_y);
-	//scroll_target = SpriteManagerAdd(SpritePlayer, start_x << 3, (start_y - 1) << 3);
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));
-
 
 	Hud_Init();
 
@@ -147,7 +115,7 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 	switch (itype) {
 		case ITEM_SPIRIT:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			player_data->spirits++;
+			player_data->has_spirit = 1;
 			break;
 		case ITEM_COIN:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);

@@ -13,8 +13,8 @@
 //#define DEBUG_HUD   1
 
 // saved last drawn values, to work out what to update on hud
-static UINT8 last_spirits = 0;
-static UINT8 last_knives = 0;
+static UINT8 last_has_spirit = 0;
+static UINT8 last_magix = 0;
 static UINT8 last_lives = 0;
 static UINT16 last_timer = 0;
 
@@ -37,8 +37,8 @@ void Hud_Init(void) BANKED {
 #endif
     PlayerData* data = (PlayerData*)player_sprite->custom_data;
     // prime the last values so they all get updated
-    last_spirits = 0;
-    last_knives = 0;
+    last_has_spirit = 0;
+    last_magix = 0;
     last_lives = 0;
     timer_countdown = level_max_time;
     timer_clock = 0;
@@ -112,28 +112,25 @@ void Hud_Update(void) BANKED {
     //PutU16(af, 17);
 #else
     if (last_timer != timer_countdown) {
-        PutU16(timer_countdown, 11);
+        PutU16(timer_countdown, 9);
     }
 
     if (timer_countdown == 0) {
-        PutU16(timer_countdown, 11);
+        PutU16(timer_countdown, 9);
         player_data->timeup = 1;
     }
 
-    if (last_spirits != player_data->spirits) {
-        last_spirits = player_data->spirits;
-        tens = getTens(player_data->spirits);
-        ones = player_data->spirits - (tens * 10);
-        UPDATE_HUD_TILE(1, 0, 1 + tens);
-        UPDATE_HUD_TILE(2, 0, last_spirits = 0 ? 1 : 1 + ones);
+    if (last_has_spirit != player_data->has_spirit) {
+        last_has_spirit = player_data->has_spirit;
+        UPDATE_HUD_TILE(5, 0, last_has_spirit = 0 ? 11 : 17);
     }
 
-    if (last_knives != player_data->knives) {
-        last_knives = player_data->knives;
-        tens = getTens(player_data->knives);
-        ones = player_data->knives - (tens * 10);
-        UPDATE_HUD_TILE(5, 0, 1 + tens);
-        UPDATE_HUD_TILE(6, 0, last_knives = 0 ? 1 : 1 + ones);
+    if (last_magix != player_data->magix) {
+        last_magix = player_data->magix;
+        tens = getTens(player_data->magix);
+        ones = player_data->magix - (tens * 10);
+        UPDATE_HUD_TILE(1, 0, 1 + tens);
+        UPDATE_HUD_TILE(2, 0, last_magix = 0 ? 1 : 1 + ones);
     }
 
     if (last_lives != player_data->lives) {

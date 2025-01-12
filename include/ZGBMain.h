@@ -17,7 +17,7 @@ _SPRITE(SpriteSpirit,   spirit,     FLIP_NONE)\
 _SPRITE(SpriteCoin,     coin,       FLIP_NONE)\
 _SPRITE(SpritePortal,   portal,     FLIP_NONE)\
 _SPRITE(SpritePlayer,   player,     FLIP_NONE)\
-_SPRITE(SpriteKnife,    knife,      FLIP_NONE)\
+_SPRITE(SpriteMagix,    magix,      FLIP_NONE)\
 _SPRITE(SpriteParticle, particles,  FLIP_NONE)\
 _SPRITE(SpriteAttack1,  attack1,    FLIP_NONE)\
 SPRITE_DEF_END

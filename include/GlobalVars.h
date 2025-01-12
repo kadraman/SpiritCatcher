@@ -1,7 +1,7 @@
 #ifndef GLOBALVARS_H_
 #define GLOBALVARS_H_
 
-#define MAX_LIVES 5
+#define MAX_LIVES 6
 #define MAX_LEVEL 1
 
 #define TILE_ITEM_SPIKE	200
@@ -11,10 +11,6 @@
 
 extern UINT16 g_player_score;
 extern UINT8 g_level_current;
-//extern UINT16 g_level_coins;
-//extern UINT16 g_level_spirits;
-//extern UINT16 g_level_bullets;
-//extern UINT8 g_player_region;
 
 typedef struct {
 	UINT8 x;

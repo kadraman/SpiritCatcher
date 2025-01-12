@@ -26,13 +26,6 @@
 //#define TILE_ITEM_BOX	202
 //#define TILE_ITEM_FLAG	203
 
-//extern UINT16 g_player_score;
-//extern UINT8 g_level_current;
-//extern UINT16 g_level_coins;
-//extern UINT16 g_level_spirits;
-//extern UINT16 g_level_bullets;
-//extern UINT8 g_player_region;
-
 //typedef struct {
 //	UINT8 x;
 //	UINT8 y;
