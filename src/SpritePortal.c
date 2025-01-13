@@ -4,6 +4,7 @@
 #include "Banks/SetAutoBank.h"
 #include "Vector.h"
 #include "SpriteManager.h"
+#include "SpritePlayer.h"
 
 #include "GlobalVars.h"
 
@@ -28,8 +29,9 @@ extern UINT8 level_complete;
  
 void START() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
+	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
 	data->appear = data->stable = data->disappear = false;
-	if (IsCollected(THIS) != 255) {
+	if (!player_data->has_spirit) {
 		SpriteManagerRemove(THIS_IDX);
 	} else {
 		// TODO: define a better way to define if its the starting portal

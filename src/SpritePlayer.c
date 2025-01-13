@@ -13,12 +13,12 @@
 
 // player animations - the first number indicates the number of frames
 const UINT8 anim_idle[] = {4, 0, 1, 2, 1};		
-const UINT8 anim_idle_shoot[] = {1, 0};		
+const UINT8 anim_idle_attack[] = {1, 0};		
 const UINT8 anim_walk[] = {4, 3, 4, 5, 6};
-const UINT8 anim_walk_shoot[] = {1, 3};
+const UINT8 anim_walk_attack[] = {1, 3};
 const UINT8 anim_jump[] = {2, 7, 8};
 const UINT8 anim_fall[] = {1, 9};
-const UINT8 anim_jump_shoot[] = {8};
+const UINT8 anim_jump_attack[] = {8};
 const UINT8 anim_attack[] = {1, 12};
 const UINT8 anim_hit[] = {4, 10, 11, 10, 11};
 const UINT8 anim_die[] = {20, 10, 11, 10, 11, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14};
@@ -78,9 +78,9 @@ static void SetAnimationState(AnimationState state) {
 		case JUMP:    		SetSpriteAnim(THIS, anim_jump, DEFAULT_ANIM_SPEED); break;
 		case FALL:    		SetSpriteAnim(THIS, anim_fall, DEFAULT_ANIM_SPEED); break;
 		case ATTACK:		if (lastAnimState == JUMP) {
-								SetSpriteAnim(THIS, anim_jump_shoot, DEFAULT_ANIM_SPEED);
+								SetSpriteAnim(THIS, anim_jump_attack, DEFAULT_ANIM_SPEED);
 							} else {
-								SetSpriteAnim(THIS, anim_walk_shoot, DEFAULT_ANIM_SPEED);
+								SetSpriteAnim(THIS, anim_walk_attack, DEFAULT_ANIM_SPEED);
 							}
 							//SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED);
 							break;		
@@ -258,13 +258,13 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}
 	}
 	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DIE)) {
-		if (KEY_PRESSED(J_UP)) {
+		//if (KEY_PRESSED(J_UP)) {
 			if (!magix_cooldown) {
 				Magix();
 			}
-		} else {
-			Attack();
-		}
+		//} else {
+		//	Attack();
+		//}
 	}
 	//
 	//if (keys == 0) AddDamping(THIS, THIS_IDX);
@@ -379,7 +379,7 @@ void UPDATE() {
 
 	switch (GetPlayerState()) {
 		case PLAYER_STATE_ATTACKING:
-			UpdateAttackPos();
+			//UpdateAttackPos();
 			if (THIS->anim_frame == 1) {
 				//animation_playing = 0;
 				data->anim_playing = 0;
@@ -416,7 +416,7 @@ void UPDATE() {
 
 	}
 
-	//if (currentAnimState == ATTACK && shoot_cooldown == 0) {
+	//if (currentAnimState == ATTACK && attack_cooldown == 0) {
 	//	SetAnimationState(lastAnimState);
 	//}
 
@@ -450,7 +450,7 @@ void UPDATE() {
 			}
 		} 
 		if (spr->type == SpritePortal) {
-			if (CheckCollision(THIS, spr) && !player_spawned && THIS->x > 16) {
+			if (CheckCollision(THIS, spr) && !player_spawned && data->has_spirit && THIS->x > 16) {
 				THIS->x = spr->x-8;
 				SetAnimationState(DISAPPEAR);
 				SetPlayerState(PLAYER_STATE_DISAPPEAR);
