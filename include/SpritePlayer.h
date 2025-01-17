@@ -25,6 +25,17 @@
 #define Y_GRAVITY				10
 #define Y_JUMP_HEIGHT			160
 
+enum {
+  pGroundedFlag			= (1 << 0), /* 0b00000001 */
+  pAnimPlayingFlag      = (1 << 1), /* 0b00000010 */
+  pHasSpiritFlag	    = (1 << 2), /* 0b00000100 */
+  pTimeUpFlag		    = (1 << 3), /* 0b00001000 */
+  pInvincibleFlag	 	= (1 << 4), /* 0b00010000 */
+  pAnother1Flag			= (1 << 5), /* 0b00100000 */
+  kAnother2Flag         = (1 << 6), /* 0b01000000 */
+  kAnother3Flag         = (1 << 7), /* 0b10000000 */
+};
+
 typedef enum {
 	PLAYER_STATE_IDLE,
 	PLAYER_STATE_WALKING,
@@ -55,6 +66,7 @@ typedef enum {
 } AnimationState;
 
 typedef struct {
+	UINT8 flags;
 	UINT8 anim_playing;
 	UINT8 start_x;
 	UINT8 start_y;

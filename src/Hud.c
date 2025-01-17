@@ -118,6 +118,7 @@ void Hud_Update(void) BANKED {
     if (timer_countdown == 0) {
         PutU16(timer_countdown, 9);
         player_data->timeup = 1;
+        player_data->flags |= pTimeUpFlag;
     }
 
     if (last_has_spirit != player_data->has_spirit) {

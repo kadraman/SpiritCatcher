@@ -42,7 +42,6 @@ UINT16 y_inc;
 UINT8 reset_x;
 UINT8 reset_y;
 UINT8 magix_cooldown;
-UINT8 bg_hidden;
 UINT8 pause_secs;
 UINT8 pause_ticks;
 UINT8 invincible_secs;
@@ -82,7 +81,6 @@ static void SetAnimationState(AnimationState state) {
 							} else {
 								SetSpriteAnim(THIS, anim_walk_attack, DEFAULT_ANIM_SPEED);
 							}
-							//SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED);
 							break;		
 		case HIT:			SetSpriteAnim(THIS, anim_hit, HIT_ANIM_SPEED); break;
 		case DIE:    		SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
@@ -104,7 +102,9 @@ void StartLevel() {
 	THIS->y = data->start_y;
 	// reset time
 	timer_countdown = level_max_time;
-	data->timeup = 0;
+	//data->flags = 0;
+	data->flags = pGroundedFlag;
+	//data->timeup = 0;
 	data->anim_playing = false;
 	data->invincible = true;
 	player_spawned = true;
@@ -126,19 +126,16 @@ void UpdateAttackPos() {
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT) return;
-	//if (data->anim_playing) return;
 	if (data->invincible) return;
 	if (--data->lives <= 0) {
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
-		//data->anim_playing = true;
 		pause_secs = 6;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(HIT);
-		//data->anim_playing = true;
 		data->invincible = true;
 		invincible_secs = 3;
 	}
@@ -211,9 +208,10 @@ void AddDamping(Sprite* sprite, UINT8 idx) {
 		tile_collision = TranslateSprite(sprite, -x_inc, 0);
 	}
 	CheckCollisionTile(sprite, idx);
-
 }
+
 void HandleInput(Sprite* sprite, UINT8 idx) {
+	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DIE) return;
 	if (KEY_PRESSED(J_RIGHT)) {
 		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
@@ -246,7 +244,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		// AddDamping(THIS, THIS_IDX);
 	}
 
-	if (KEY_TICKED(J_A) && (GetPlayerState() != PLAYER_STATE_JUMPING)) {
+	if (KEY_TICKED(J_A) && (data->flags & pGroundedFlag)) {
+		data->flags &= pGroundedFlag;
 		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
 		SetPlayerState(PLAYER_STATE_JUMPING);
 		SetAnimationState(JUMP);
@@ -258,13 +257,13 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		}
 	}
 	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DIE)) {
-		//if (KEY_PRESSED(J_UP)) {
+		if (KEY_PRESSED(J_UP)) {
 			if (!magix_cooldown) {
 				Magix();
 			}
-		//} else {
-		//	Attack();
-		//}
+		} else {
+			Attack();
+		}
 	}
 	//
 	//if (keys == 0) AddDamping(THIS, THIS_IDX);
@@ -289,20 +288,21 @@ UINT8 visible_skip = 0;
 void START() {
 	player_sprite = THIS;
 	PlayerData* data = (PlayerData*)THIS->custom_data;
+	//data->flags = 0;
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	data->anim_playing = 0;
+	data->flags = pGroundedFlag;
 	data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
 	data->has_spirit = 0;
-	data->timeup = 0;
+	//data->timeup = 0;
 	data->invincible = 0;
 	curPlayerState = PLAYER_STATE_IDLE;
 	accel_y = 0;
 	accel_x = 0;
 	magix_cooldown = 0;
-	bg_hidden = 0;
 	scroll_target = THIS;
 	reset_x = 20;
 	reset_y = 80;
@@ -343,7 +343,8 @@ void UPDATE() {
 		SetVisible(THIS, true);
 	}
 
-	if (data->timeup) {
+	//if (data->timeup) {
+	if (data->flags & pTimeUpFlag) {
 		data->lives--;
 		Hud_Update();
 		if (data->lives <= 0) { 
@@ -379,7 +380,7 @@ void UPDATE() {
 
 	switch (GetPlayerState()) {
 		case PLAYER_STATE_ATTACKING:
-			//UpdateAttackPos();
+			UpdateAttackPos();
 			if (THIS->anim_frame == 1) {
 				//animation_playing = 0;
 				data->anim_playing = 0;
@@ -416,10 +417,6 @@ void UPDATE() {
 
 	}
 
-	//if (currentAnimState == ATTACK && attack_cooldown == 0) {
-	//	SetAnimationState(lastAnimState);
-	//}
-
 	HandleInput(THIS, THIS_IDX);
 
 	// simple gravity physics
@@ -438,13 +435,14 @@ void UPDATE() {
 			currentAnimState = WALK_IDLE;
 		}
 		curPlayerState = PLAYER_STATE_IDLE;
+		data->flags |= pGroundedFlag;
 		CheckCollisionTile(THIS, THIS_IDX);
 	}
 
 	// check enemy sprite collision - item colission is in each item sprite
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-		if (spr->type == SpriteSlime || spr->type == SpriteBat || SpriteMushroom) {
+		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom) {
 			if (CheckCollision(THIS, spr) && !data->invincible) {
 				Hit(THIS, THIS_IDX);
 			}
