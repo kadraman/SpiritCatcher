@@ -103,10 +103,13 @@ void StartLevel() {
 	// reset time
 	timer_countdown = level_max_time;
 	//data->flags = 0;
-	data->flags = pGroundedFlag;
+	FLAG_SET(data->flags, pGroundedFlag);
+	FLAG_CLEAR(data->flags, pTimeUpFlag);
+	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	//data->timeup = 0;
-	data->anim_playing = false;
-	data->invincible = true;
+	//data->anim_playing = false;
+	//data->invincible = true;
 	player_spawned = true;
 	level_complete = false;
 	ScrollRelocateMapTo(0, 0);
@@ -126,7 +129,8 @@ void UpdateAttackPos() {
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT) return;
-	if (data->invincible) return;
+	//if (data->invincible) return;
+	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
 	if (--data->lives <= 0) {
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
@@ -136,7 +140,8 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(HIT);
-		data->invincible = true;
+		//data->invincible = true;
+		FLAG_SET(data->flags, pInvincibleFlag);
 		invincible_secs = 3;
 	}
 	Hud_Update();	
@@ -150,7 +155,8 @@ void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
 			data->coins++;
 			break;
 		case ITEM_SPIRIT:
-			data->has_spirit = true;
+			//data->has_spirit = true;
+			FLAG_SET(data->flags, pHasSpiritFlag);
 			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			break;
 		default:
@@ -244,12 +250,12 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		// AddDamping(THIS, THIS_IDX);
 	}
 
-	if (KEY_TICKED(J_A) && (data->flags & pGroundedFlag)) {
-		data->flags &= pGroundedFlag;
-		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
-		SetPlayerState(PLAYER_STATE_JUMPING);
-		SetAnimationState(JUMP);
-		accel_y = -Y_JUMP_HEIGHT;
+	if (KEY_TICKED(J_A) && FLAG_CHECK(data->flags, pGroundedFlag)) {
+			FLAG_CLEAR(data->flags, pGroundedFlag);
+			PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
+			SetPlayerState(PLAYER_STATE_JUMPING);
+			SetAnimationState(JUMP);
+			accel_y = -Y_JUMP_HEIGHT;
 	} else {
 		// check if now FALLING?
 		if ((accel_y >> 6) > 1) {
@@ -288,17 +294,16 @@ UINT8 visible_skip = 0;
 void START() {
 	player_sprite = THIS;
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	//data->flags = 0;
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	data->anim_playing = 0;
-	data->flags = pGroundedFlag;
+	FLAG_SET(data->flags, pGroundedFlag);
+	FLAG_CLEAR(data->flags, pTimeUpFlag);
+	FLAG_CLEAR(data->flags, pHasSpiritFlag);
+	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
-	data->has_spirit = 0;
-	//data->timeup = 0;
-	data->invincible = 0;
 	curPlayerState = PLAYER_STATE_IDLE;
 	accel_y = 0;
 	accel_x = 0;
@@ -327,7 +332,7 @@ void UPDATE() {
 		return;
 	}
 
-	if (data->invincible) {
+	if (FLAG_CHECK(data->flags, pInvincibleFlag)) {
 		SetVisible(THIS, visible_skip++);
 		if (visible_skip > 3) visible_skip = 0;
 	}
@@ -339,12 +344,11 @@ void UPDATE() {
 			invincible_secs--;
 		}
 	} else {
-		data->invincible = false;
+		FLAG_CLEAR(data->flags, pInvincibleFlag);
 		SetVisible(THIS, true);
 	}
 
-	//if (data->timeup) {
-	if (data->flags & pTimeUpFlag) {
+	if (FLAG_CHECK(data->flags, pTimeUpFlag)) {
 		data->lives--;
 		Hud_Update();
 		if (data->lives <= 0) { 
@@ -435,7 +439,7 @@ void UPDATE() {
 			currentAnimState = WALK_IDLE;
 		}
 		curPlayerState = PLAYER_STATE_IDLE;
-		data->flags |= pGroundedFlag;
+		FLAG_SET(data->flags, pGroundedFlag);
 		CheckCollisionTile(THIS, THIS_IDX);
 	}
 
@@ -443,12 +447,12 @@ void UPDATE() {
 	for (i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom) {
-			if (CheckCollision(THIS, spr) && !data->invincible) {
+			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pInvincibleFlag))) {
 				Hit(THIS, THIS_IDX);
 			}
 		} 
 		if (spr->type == SpritePortal) {
-			if (CheckCollision(THIS, spr) && !player_spawned && data->has_spirit && THIS->x > 16) {
+			if (CheckCollision(THIS, spr) && !player_spawned && FLAG_CHECK(data->flags, pHasSpiritFlag) && THIS->x > 16) {
 				THIS->x = spr->x-8;
 				SetAnimationState(DISAPPEAR);
 				SetPlayerState(PLAYER_STATE_DISAPPEAR);

@@ -35,7 +35,6 @@ void Hud_Init(void) BANKED {
     IMPORT_MAP(hud);
     INIT_HUD(hud);
 #endif
-    PlayerData* data = (PlayerData*)player_sprite->custom_data;
     // prime the last values so they all get updated
     last_has_spirit = 0;
     last_magix = 0;
@@ -118,12 +117,14 @@ void Hud_Update(void) BANKED {
     if (timer_countdown == 0) {
         PutU16(timer_countdown, 9);
         player_data->timeup = 1;
-        player_data->flags |= pTimeUpFlag;
+        FLAG_SET(player_data->flags, pTimeUpFlag);
     }
 
-    if (last_has_spirit != player_data->has_spirit) {
-        last_has_spirit = player_data->has_spirit;
-        UPDATE_HUD_TILE(5, 0, last_has_spirit = 0 ? 11 : 17);
+    if (last_has_spirit != FLAG_CHECK(player_data->flags, pHasSpiritFlag)) {
+        last_has_spirit = FLAG_CHECK(player_data->flags, pHasSpiritFlag);
+    //if (FLAG_CHECK(player_data->flags, pHasSpiritFlag)) {
+        //last_has_spirit = FLAG_CHECK(player_data->flags, pHasSpiritFlag);
+        UPDATE_HUD_TILE(5, 0, 17);
     }
 
     if (last_magix != player_data->magix) {

@@ -10,6 +10,16 @@
 #include "GlobalVars.h"
 #include "Hud.h"
 
+#define pGroundedFlag		0	/* player is on the ground, i.e. not jumping */
+#define pTimeUpFlag			1	/* player has run out of time */
+#define	pInvincibleFlag		2	/* player is invincible, i.e. cannot lose a life */
+#define pAnimPlayingFlag	3	/* player animation is playing frames and needs to complete all of them */
+#define pHasSpiritFlag		4	/* player has caught the sprit */
+
+#define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
+#define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 
+#define FLAG_CHECK(var, flag) 	((var) &   (1 << (flag))) 
+#define FLAG_TOGGLE(var, flag) 	((var) ^=  (1 << (flag)))
 
 #define DEFAULT_ANIM_SPEED 		10
 #define WALK_ANIM_SPEED 		10
@@ -24,17 +34,6 @@
 #define Y_SPEED_MAX				150
 #define Y_GRAVITY				10
 #define Y_JUMP_HEIGHT			160
-
-enum {
-  pGroundedFlag			= (1 << 0), /* 0b00000001 */
-  pAnimPlayingFlag      = (1 << 1), /* 0b00000010 */
-  pHasSpiritFlag	    = (1 << 2), /* 0b00000100 */
-  pTimeUpFlag		    = (1 << 3), /* 0b00001000 */
-  pInvincibleFlag	 	= (1 << 4), /* 0b00010000 */
-  pAnother1Flag			= (1 << 5), /* 0b00100000 */
-  kAnother2Flag         = (1 << 6), /* 0b01000000 */
-  kAnother3Flag         = (1 << 7), /* 0b10000000 */
-};
 
 typedef enum {
 	PLAYER_STATE_IDLE,

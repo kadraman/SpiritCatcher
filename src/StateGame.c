@@ -113,13 +113,13 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 	collectables_taken[++ collectables_taken[0]] = collectable->unique_id;
 	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
 	switch (itype) {
-		case ITEM_SPIRIT:
-			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			player_data->has_spirit = 1;
-			break;
 		case ITEM_COIN:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 			player_data->coins++;
+			break;
+		case ITEM_SPIRIT:
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			FLAG_SET(player_data->flags, pHasSpiritFlag);
 			break;
 		case ITEM_PORTAL:
 			break;

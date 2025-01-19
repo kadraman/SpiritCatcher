@@ -31,9 +31,7 @@ void START() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
 	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
 	data->appear = data->stable = data->disappear = false;
-	if (!player_data->has_spirit) {
-		SpriteManagerRemove(THIS_IDX);
-	} else {
+	if (FLAG_CHECK(player_data->flags, pHasSpiritFlag)) {
 		// TODO: define a better way to define if its the starting portal
 		if (THIS->x < 32 && (player_sprite->x < 32 && player_sprite->y < 144)) {
 			data->appear = true;
@@ -42,6 +40,8 @@ void START() {
 			data->stable = true;
 			SetSpriteAnim(THIS, anim_portal_stable, DEFAULT_ANIM_SPEED);
 		}
+	} else {
+		SpriteManagerRemove(THIS_IDX);
 	}
 }
 
