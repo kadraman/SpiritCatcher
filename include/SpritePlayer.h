@@ -33,7 +33,7 @@
 #define X_DAMPENING         	5
 #define Y_SPEED_MAX				150
 #define Y_GRAVITY				10
-#define Y_JUMP_HEIGHT			160
+#define Y_JUMP_HEIGHT			200
 
 typedef enum {
 	PLAYER_STATE_IDLE,

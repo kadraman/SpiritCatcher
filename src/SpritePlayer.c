@@ -32,6 +32,7 @@ Sprite* attack1_sprite;
 extern Sprite* attack_particle;
 extern UINT8 start_x, start_y;
 extern INT16 scroll_x, scroll_y;
+extern INT16 min_x, max_x, min_y, max_y;
 static PlayerState curPlayerState, prevPlayerState;
 static AnimationState lastAnimState, currentAnimState;
 
@@ -102,14 +103,11 @@ void StartLevel() {
 	THIS->y = data->start_y;
 	// reset time
 	timer_countdown = level_max_time;
-	//data->flags = 0;
+	// reset flags
 	FLAG_SET(data->flags, pGroundedFlag);
 	FLAG_CLEAR(data->flags, pTimeUpFlag);
 	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
-	//data->timeup = 0;
-	//data->anim_playing = false;
-	//data->invincible = true;
 	player_spawned = true;
 	level_complete = false;
 	ScrollRelocateMapTo(0, 0);
@@ -232,6 +230,9 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	} else if (KEY_PRESSED(J_LEFT)) {
 		if (accel_x > -(X_SPEED_MAX-X_SPEED_INC)) accel_x -= X_SPEED_INC;
 		x_inc = abs(accel_x) >> 6;
+		if (sprite->x - x_inc < min_x) {
+			x_inc = accel_x = 0;
+		}
 		tile_collision = TranslateSprite(sprite, -x_inc, 0);
 		CheckCollisionTile(sprite, idx);
 		THIS->mirror = V_MIRROR;

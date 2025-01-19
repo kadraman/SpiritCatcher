@@ -15,6 +15,7 @@
 
 UINT8 g_level_current = 1;
 UINT8 start_x, start_y;
+INT16 min_x, max_x, min_y, max_y;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
 extern UINT16 g_player_score;
@@ -33,9 +34,9 @@ DECLARE_MUSIC(cognition);
 struct MapInfoBanked {
 	UINT8 bank;
 	struct MapInfo* map;
-	UINT16 start_x;
-	UINT16 start_y;
-	UINT8  seconds;
+	UINT16 start_x;			// player starting location
+	UINT16 start_y;			// player starting location
+	UINT8  seconds;			// ax time to complete level
 };
 
 const struct MapInfoBanked levels[] = {
@@ -73,7 +74,8 @@ void START() {
 	scroll_bottom_movement_limit = 110;
 	level_max_time = level->seconds;
 	level_complete = 0;
-
+	min_x = min_y = 1;
+	// TODO: calculat max_x, max_y based on map loaded
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
