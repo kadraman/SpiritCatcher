@@ -7,7 +7,7 @@
 #include "ZGBMain.h"
 #include "ZGBUtils.h"
 
-#include "GlobalVars.h"
+#include "GameTypes.h"
 #include "Hud.h"
 
 #define pGroundedFlag		0	/* player is on the ground, i.e. not jumping */
@@ -66,15 +66,11 @@ typedef enum {
 
 typedef struct {
 	UINT8 flags;
-	UINT8 anim_playing;
 	UINT8 start_x;
 	UINT8 start_y;
 	UINT8 lives;
 	UINT8 coins;
 	UINT8 magix;
-	UINT8 has_spirit;
-	UINT8 timeup;
-	UINT8 invincible;
 } PlayerData;
 
 #endif // SPRITEPLAYER_H

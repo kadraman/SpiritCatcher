@@ -8,7 +8,7 @@
 #include "SpriteManager.h"
 
 #include "SpritePlayer.h"
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 //#define DEBUG_HUD   1
 
@@ -64,8 +64,7 @@ static UINT8 getTens (UINT8 full) {
     return t;
 }
 
-static void PutU16(UINT16 v, UINT8 at)
-{
+static void PutU16(UINT16 v, UINT8 at) {
     UINT8 hundreds;
     UINT8 tens;
     UINT8 ones;
@@ -89,7 +88,6 @@ void Hud_Update(void) BANKED {
     if (timer_clock == 25) {
         timer_clock = 0;
         if (timer_countdown != 0) {
-            //last_timer = 1;
             timer_countdown--;
         }
     }
@@ -116,14 +114,11 @@ void Hud_Update(void) BANKED {
 
     if (timer_countdown == 0) {
         PutU16(timer_countdown, 9);
-        player_data->timeup = 1;
         FLAG_SET(player_data->flags, pTimeUpFlag);
     }
 
     if (last_has_spirit != FLAG_CHECK(player_data->flags, pHasSpiritFlag)) {
         last_has_spirit = FLAG_CHECK(player_data->flags, pHasSpiritFlag);
-    //if (FLAG_CHECK(player_data->flags, pHasSpiritFlag)) {
-        //last_has_spirit = FLAG_CHECK(player_data->flags, pHasSpiritFlag);
         UPDATE_HUD_TILE(5, 0, 17);
     }
 

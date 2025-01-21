@@ -6,7 +6,7 @@
 #include "SpriteManager.h"
 #include "SpritePlayer.h"
 
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 #define DEFAULT_ANIM_SPEED		10u
 #define DISAPPEAR_ANIM_SPEED 	10u

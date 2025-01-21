@@ -1,5 +1,5 @@
-#ifndef GLOBALVARS_H_
-#define GLOBALVARS_H_
+#ifndef GAMETYPES_H_
+#define GAMETYPES_H_
 
 #define MAX_LIVES 6
 #define MAX_LEVEL 1
@@ -19,4 +19,4 @@ typedef enum {
 	ITEM_SPIRIT
 } ItemType;
 
-#endif
+#endif // GAMETYPES_H

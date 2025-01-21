@@ -7,7 +7,7 @@
 #include "Keys.h"
 #include "Music.h"
 
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 IMPORT_MAP(titlescreen);
 DECLARE_MUSIC(organintro);

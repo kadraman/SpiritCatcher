@@ -4,7 +4,7 @@
 #include "SpriteManager.h"
 
 #include "SpritePlayer.h"
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 const UINT8 anim_ammo[] = {4, 0, 1, 2, 3};
 

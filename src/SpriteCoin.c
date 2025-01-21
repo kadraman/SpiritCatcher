@@ -5,7 +5,7 @@
 #include "SpriteManager.h"
 
 #include "SpritePlayer.h"
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 const UINT8 anim_coin[] = {8, 0, 1, 2, 3, 4, 1, 3, 2};
 

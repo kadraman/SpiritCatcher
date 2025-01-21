@@ -4,7 +4,7 @@
 #include "main.h"
 #include "SpriteManager.h"
 
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 const UINT8 anim_jewell[] = {1, 0};
 

@@ -2,7 +2,7 @@
 #define HUD_H_
 
 #include "Banks/SetAutoBank.h"
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 //#define DEBUG_HUD 1
 

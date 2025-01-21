@@ -1,7 +1,7 @@
 #include "ZGBMain.h"
 #include "Math.h"
 #include "StateGame.h"
-#include "GlobalVars.h"
+#include "GameTypes.h"
 
 UINT16 g_player_score = 0;
 

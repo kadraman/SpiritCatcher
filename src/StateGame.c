@@ -11,7 +11,8 @@
 
 #include "StateGame.h"
 #include "SpritePlayer.h"
-#include "GlobalVars.h"
+#include "Water.h"
+#include "GameTypes.h"
 
 UINT8 g_level_current = 1;
 UINT8 start_x, start_y;
@@ -48,10 +49,11 @@ const struct MapInfoBanked levels[] = {
 UINT8 collision_tiles[] = {
 	TILE_INDEX_WATER_1, TILE_INDEX_WATER_2,
 	TILE_INDEX_SPIKE_UP, TILE_INDEX_SPIKE_DOWN,
-	65, 66, 67, 68, 69, 70,
+	66, 67, 68, 69, 70,
 	71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
 	81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
 	91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+	101,
 	0
 };
 UINT8 collision_tiles_down[] = { 
@@ -90,6 +92,7 @@ void START() {
 void UPDATE() {
 	if (!level_complete) {
 		Hud_Update();
+		Water_Animate();
 	} else {
 		if (KEY_TICKED(J_START | J_A | J_B)) {
 			g_level_current++;

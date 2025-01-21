@@ -127,7 +127,6 @@ void UpdateAttackPos() {
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT) return;
-	//if (data->invincible) return;
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
 	if (--data->lives <= 0) {
 		SetPlayerState(PLAYER_STATE_DIE);
@@ -138,7 +137,6 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(HIT);
-		//data->invincible = true;
 		FLAG_SET(data->flags, pInvincibleFlag);
 		invincible_secs = 3;
 	}
@@ -153,7 +151,6 @@ void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
 			data->coins++;
 			break;
 		case ITEM_SPIRIT:
-			//data->has_spirit = true;
 			FLAG_SET(data->flags, pHasSpiritFlag);
 			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			break;
@@ -297,11 +294,11 @@ void START() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
-	data->anim_playing = 0;
 	FLAG_SET(data->flags, pGroundedFlag);
 	FLAG_CLEAR(data->flags, pTimeUpFlag);
 	FLAG_CLEAR(data->flags, pHasSpiritFlag);
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
+	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 	data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
@@ -371,7 +368,7 @@ void UPDATE() {
 
 	if (level_complete) {
 		if (THIS->anim_frame == 2) {
-			data->anim_playing = false;
+			FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 			if (g_level_current == MAX_LEVEL) {
 				SetState(StateWin);
 				HIDE_WIN;
@@ -387,8 +384,7 @@ void UPDATE() {
 		case PLAYER_STATE_ATTACKING:
 			UpdateAttackPos();
 			if (THIS->anim_frame == 1) {
-				//animation_playing = 0;
-				data->anim_playing = 0;
+				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 				SetAnimationState(lastAnimState);
 			}
 			break;
@@ -402,20 +398,20 @@ void UPDATE() {
 		case PLAYER_STATE_HIT:
 			accel_x = 0;
 			if (THIS->anim_frame == 3) {
-				data->anim_playing = false;
+				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 				SetPlayerState(prevPlayerState);
 			}
 			break;
 		case PLAYER_STATE_DIE:
 			if (THIS->anim_frame == 14) {
-				data->anim_playing = false;
+				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 				SetState(StateGameOver);
 				HIDE_WIN;
 			}
 			return;
 			break;
 		default:
-			if (keys == 0 && !data->anim_playing) {
+			if (keys == 0 && !FLAG_CHECK(data->flags, pAnimPlayingFlag)) {
 				SetAnimationState(WALK_IDLE);
 			}
 			player_spawned = false;
@@ -457,7 +453,7 @@ void UPDATE() {
 				THIS->x = spr->x-8;
 				SetAnimationState(DISAPPEAR);
 				SetPlayerState(PLAYER_STATE_DISAPPEAR);
-				data->anim_playing = true;
+				FLAG_SET(data->flags, pAnimPlayingFlag);
 				level_complete = true;
 				//pause_secs = 5;
 			}
