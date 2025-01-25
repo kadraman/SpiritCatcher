@@ -46,7 +46,8 @@ typedef enum {
 	PLAYER_STATE_DIE,
 	PLAYER_STATE_TIMEOVER,
 	PLAYER_STATE_APPEAR,
-	PLAYER_STATE_DISAPPEAR
+	PLAYER_STATE_DISAPPEAR,
+	PLAYER_STATE_DROWNING
 } PlayerState;
 
 typedef enum {
@@ -61,6 +62,7 @@ typedef enum {
 	DIE,
 	APPEAR,
 	DISAPPEAR,
+	DROWN,
 	VICTORY
 } AnimationState;
 

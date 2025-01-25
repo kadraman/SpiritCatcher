@@ -12,19 +12,20 @@
 #include "SpritePlayer.h"
 
 // player animations - the first number indicates the number of frames
-const UINT8 anim_idle[] = {4, 0, 1, 2, 1};		
-const UINT8 anim_idle_attack[] = {1, 0};		
-const UINT8 anim_walk[] = {4, 3, 4, 5, 6};
-const UINT8 anim_walk_attack[] = {1, 3};
-const UINT8 anim_jump[] = {2, 7, 8};
-const UINT8 anim_fall[] = {1, 9};
-const UINT8 anim_jump_attack[] = {8};
-const UINT8 anim_attack[] = {1, 12};
-const UINT8 anim_hit[] = {4, 10, 11, 10, 11};
-const UINT8 anim_die[] = {20, 10, 11, 10, 11, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14};
-const UINT8 anim_appear[] = {3, 17, 16, 15};
-const UINT8 anim_disappear[] = {5, 15, 16, 15, 16, 17};
-const UINT8 anim_victory[] = {2, 18, 19}; // TBD
+const UINT8 anim_idle[] = {3, 0, 1, 2};		
+const UINT8 anim_idle_attack[] = {1, 20};		
+const UINT8 anim_walk[] = {4, 1, 3, 4, 5};
+const UINT8 anim_walk_attack[] = {1, 20};
+const UINT8 anim_jump[] = {2, 6, 7};
+const UINT8 anim_fall[] = {1, 8};
+const UINT8 anim_jump_attack[] = {1, 20};
+const UINT8 anim_attack[] = {2, 19, 20};
+const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
+const UINT8 anim_die[] = {20, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12};
+const UINT8 anim_appear[] = {3, 15, 14, 13};
+const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
+const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 19};
+const UINT8 anim_victory[] = {2, 21, 22}; // TBD
 
 
 Sprite* player_sprite;
@@ -77,13 +78,14 @@ static void SetAnimationState(AnimationState state) {
 		case WALK_IDLE:    	SetSpriteAnim(THIS, anim_idle, DEFAULT_ANIM_SPEED);	break;
 		case JUMP:    		SetSpriteAnim(THIS, anim_jump, DEFAULT_ANIM_SPEED); break;
 		case FALL:    		SetSpriteAnim(THIS, anim_fall, DEFAULT_ANIM_SPEED); break;
-		case ATTACK:		if (lastAnimState == JUMP) {
-								SetSpriteAnim(THIS, anim_jump_attack, DEFAULT_ANIM_SPEED);
-							} else {
-								SetSpriteAnim(THIS, anim_walk_attack, DEFAULT_ANIM_SPEED);
-							}
-							break;		
+		case ATTACK:		//if (lastAnimState == JUMP) {
+							//	SetSpriteAnim(THIS, anim_jump_attack, DEFAULT_ANIM_SPEED);
+							//} else {
+							//	SetSpriteAnim(THIS, anim_walk_attack, DEFAULT_ANIM_SPEED);
+							//}
+							SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED); break;		
 		case HIT:			SetSpriteAnim(THIS, anim_hit, HIT_ANIM_SPEED); break;
+		case DROWN:			SetSpriteAnim(THIS, anim_drown, DIE_ANIM_SPEED); break;
 		case DIE:    		SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
 		case APPEAR:		SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
 		case DISAPPEAR:		SetSpriteAnim(THIS, anim_disappear, DISAPPEAR_ANIM_SPEED); break;
@@ -94,6 +96,8 @@ static void SetAnimationState(AnimationState state) {
 static AnimationState GetAnimationState(void) {
 	return currentAnimState;
 }
+
+extern void ScrollScreenRedraw(void);
 
 void StartLevel() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
@@ -110,6 +114,9 @@ void StartLevel() {
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	player_spawned = true;
 	level_complete = false;
+	//scroll_target = 0;
+	MoveScroll(0, 0);
+	//ScrollScreenRedraw();
 	ScrollRelocateMapTo(0, 0);
 	SetPlayerState(PLAYER_STATE_APPEAR);
 	SetAnimationState(APPEAR);
@@ -137,6 +144,26 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(HIT);
+		FLAG_SET(data->flags, pInvincibleFlag);
+		invincible_secs = 3;
+	}
+	Hud_Update();	
+}
+
+void Drown(Sprite* sprite, UINT8 idx) {
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	if (GetPlayerState() == PLAYER_STATE_DROWNING) return;
+	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
+	if (--data->lives <= 0) {
+		SetPlayerState(PLAYER_STATE_DIE);
+		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
+		SetAnimationState(DIE);
+		pause_secs = 6;
+	} else {
+		SetPlayerState(PLAYER_STATE_DROWNING);
+		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
+		SetAnimationState(DROWN);
+		FLAG_SET(data->flags, pAnimPlayingFlag);
 		FLAG_SET(data->flags, pInvincibleFlag);
 		invincible_secs = 3;
 	}
@@ -193,8 +220,8 @@ UINT8 tile_collision;
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 	if (tile_collision == TILE_INDEX_SPIKE_UP || tile_collision == TILE_INDEX_SPIKE_DOWN) {
 		Hit(sprite, idx);
-	} else if (tile_collision == TILE_INDEX_WATER_1 || tile_collision == TILE_INDEX_WATER_2) {
-		Hit(sprite, idx);
+	} else if (tile_collision == TILE_INDEX_WATER_1 || tile_collision == TILE_INDEX_WATER_2 || tile_collision == TILE_INDEX_WATER_3) {
+		Drown(sprite, idx);
 	}
 }
 
@@ -213,7 +240,7 @@ void AddDamping(Sprite* sprite, UINT8 idx) {
 
 void HandleInput(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DIE) return;
+	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) return;
 	if (KEY_PRESSED(J_RIGHT)) {
 		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
 		x_inc = accel_x >> 6;	
@@ -249,18 +276,18 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	}
 
 	if (KEY_TICKED(J_A) && FLAG_CHECK(data->flags, pGroundedFlag)) {
-			FLAG_CLEAR(data->flags, pGroundedFlag);
-			PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
-			SetPlayerState(PLAYER_STATE_JUMPING);
-			SetAnimationState(JUMP);
-			accel_y = -Y_JUMP_HEIGHT;
+		FLAG_CLEAR(data->flags, pGroundedFlag);
+		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
+		SetPlayerState(PLAYER_STATE_JUMPING);
+		SetAnimationState(JUMP);
+		accel_y = -Y_JUMP_HEIGHT;
 	} else {
 		// check if now FALLING?
 		if ((accel_y >> 6) > 1) {
 			SetAnimationState(FALL);
 		}
 	}
-	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DIE)) {
+	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DROWNING && GetPlayerState() != PLAYER_STATE_DIE)) {
 		if (KEY_PRESSED(J_UP)) {
 			if (!magix_cooldown) {
 				Magix();
@@ -408,7 +435,16 @@ void UPDATE() {
 				SetState(StateGameOver);
 				HIDE_WIN;
 			}
-			return;
+			break;
+		case PLAYER_STATE_DROWNING:
+			accel_x = 0;
+			
+			StartLevel();
+
+			if (THIS->anim_frame == 3) {
+				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+				StartLevel();
+			}
 			break;
 		default:
 			if (keys == 0 && !FLAG_CHECK(data->flags, pAnimPlayingFlag)) {
