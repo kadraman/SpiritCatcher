@@ -15,6 +15,7 @@
 #define	pInvincibleFlag		2	/* player is invincible, i.e. cannot lose a life */
 #define pAnimPlayingFlag	3	/* player animation is playing frames and needs to complete all of them */
 #define pHasSpiritFlag		4	/* player has caught the sprit */
+#define pIsDeadFlag			5	/* player has died, drowned etc. */
 
 #define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
 #define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 

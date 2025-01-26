@@ -114,12 +114,15 @@ void StartLevel() {
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	player_spawned = true;
 	level_complete = false;
-	//scroll_target = 0;
-	MoveScroll(0, 0);
+	//scroll_target = NULL;
+	//MoveScroll(0, 0);
+	//RefreshScroll();
+	//MoveScroll(0, 0);
 	//ScrollScreenRedraw();
 	ScrollRelocateMapTo(0, 0);
 	SetPlayerState(PLAYER_STATE_APPEAR);
 	SetAnimationState(APPEAR);
+	scroll_target = THIS;
 }
 
 void UpdateAttackPos() {
@@ -159,13 +162,16 @@ void Drown(Sprite* sprite, UINT8 idx) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
 		pause_secs = 6;
+				scroll_target = 0;
 	} else {
+		scroll_target = 0;
 		SetPlayerState(PLAYER_STATE_DROWNING);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DROWN);
 		FLAG_SET(data->flags, pAnimPlayingFlag);
 		FLAG_SET(data->flags, pInvincibleFlag);
 		invincible_secs = 3;
+		pause_secs = 3;
 	}
 	Hud_Update();	
 }
@@ -326,6 +332,7 @@ void START() {
 	FLAG_CLEAR(data->flags, pHasSpiritFlag);
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+	FLAG_CLEAR(data->flags, pIsDeadFlag);
 	data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
@@ -438,13 +445,11 @@ void UPDATE() {
 			break;
 		case PLAYER_STATE_DROWNING:
 			accel_x = 0;
-			
-			StartLevel();
-
-			if (THIS->anim_frame == 3) {
+			if (THIS->anim_frame == 9) {
 				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 				StartLevel();
 			}
+			return;
 			break;
 		default:
 			if (keys == 0 && !FLAG_CHECK(data->flags, pAnimPlayingFlag)) {
