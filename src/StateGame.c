@@ -124,7 +124,7 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 			break;
 		case ITEM_SPIRIT:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			FLAG_SET(player_data->flags, pHasSpiritFlag);
+			FLAG_SET(player_data->flags, pCaughtSpiritFlag);
 			break;
 		case ITEM_PORTAL:
 			break;

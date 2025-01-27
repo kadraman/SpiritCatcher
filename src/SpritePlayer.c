@@ -24,7 +24,7 @@ const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
 const UINT8 anim_die[] = {20, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12};
 const UINT8 anim_appear[] = {3, 15, 14, 13};
 const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
-const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 19};
+const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18};
 const UINT8 anim_victory[] = {2, 21, 22}; // TBD
 
 
@@ -78,14 +78,9 @@ static void SetAnimationState(AnimationState state) {
 		case WALK_IDLE:    	SetSpriteAnim(THIS, anim_idle, DEFAULT_ANIM_SPEED);	break;
 		case JUMP:    		SetSpriteAnim(THIS, anim_jump, DEFAULT_ANIM_SPEED); break;
 		case FALL:    		SetSpriteAnim(THIS, anim_fall, DEFAULT_ANIM_SPEED); break;
-		case ATTACK:		//if (lastAnimState == JUMP) {
-							//	SetSpriteAnim(THIS, anim_jump_attack, DEFAULT_ANIM_SPEED);
-							//} else {
-							//	SetSpriteAnim(THIS, anim_walk_attack, DEFAULT_ANIM_SPEED);
-							//}
-							SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED); break;		
+		case ATTACK:		SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED); break;		
 		case HIT:			SetSpriteAnim(THIS, anim_hit, HIT_ANIM_SPEED); break;
-		case DROWN:			SetSpriteAnim(THIS, anim_drown, DIE_ANIM_SPEED); break;
+		case DROWN:			SetSpriteAnim(THIS, anim_drown, DROWN_ANIM_SPEED); break;
 		case DIE:    		SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
 		case APPEAR:		SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
 		case DISAPPEAR:		SetSpriteAnim(THIS, anim_disappear, DISAPPEAR_ANIM_SPEED); break;
@@ -97,7 +92,10 @@ static AnimationState GetAnimationState(void) {
 	return currentAnimState;
 }
 
-extern void ScrollScreenRedraw(void);
+void RestartLevel() {
+	SpriteManagerRemoveSprite(THIS);
+	SetState(StateGame);
+}
 
 void StartLevel() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
@@ -114,15 +112,9 @@ void StartLevel() {
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	player_spawned = true;
 	level_complete = false;
-	//scroll_target = NULL;
-	//MoveScroll(0, 0);
-	//RefreshScroll();
-	//MoveScroll(0, 0);
-	//ScrollScreenRedraw();
-	ScrollRelocateMapTo(0, 0);
+	scroll_target = THIS;
 	SetPlayerState(PLAYER_STATE_APPEAR);
 	SetAnimationState(APPEAR);
-	scroll_target = THIS;
 }
 
 void UpdateAttackPos() {
@@ -156,24 +148,13 @@ void Hit(Sprite* sprite, UINT8 idx) {
 void Drown(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_DROWNING) return;
-	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
-	if (--data->lives <= 0) {
-		SetPlayerState(PLAYER_STATE_DIE);
-		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-		SetAnimationState(DIE);
-		pause_secs = 6;
-				scroll_target = 0;
-	} else {
-		scroll_target = 0;
-		SetPlayerState(PLAYER_STATE_DROWNING);
-		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-		SetAnimationState(DROWN);
-		FLAG_SET(data->flags, pAnimPlayingFlag);
-		FLAG_SET(data->flags, pInvincibleFlag);
-		invincible_secs = 3;
-		pause_secs = 3;
-	}
-	Hud_Update();	
+	SetPlayerState(PLAYER_STATE_DROWNING);
+	PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
+	SetAnimationState(DROWN);
+	FLAG_SET(data->flags, pAnimPlayingFlag);
+	FLAG_SET(data->flags, pInvincibleFlag);
+	//THIS->y = THIS->y + 1;
+	invincible_secs = 254;
 }
 
 void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
@@ -184,7 +165,7 @@ void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
 			data->coins++;
 			break;
 		case ITEM_SPIRIT:
-			FLAG_SET(data->flags, pHasSpiritFlag);
+			FLAG_SET(data->flags, pCaughtSpiritFlag);
 			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 			break;
 		default:
@@ -328,11 +309,11 @@ void START() {
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
+	FLAG_CLEAR(data->flags, pDamagedFlag);
 	FLAG_CLEAR(data->flags, pTimeUpFlag);
-	FLAG_CLEAR(data->flags, pHasSpiritFlag);
+	FLAG_CLEAR(data->flags, pCaughtSpiritFlag);
 	FLAG_CLEAR(data->flags, pInvincibleFlag);
 	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-	FLAG_CLEAR(data->flags, pIsDeadFlag);
 	data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
@@ -447,9 +428,8 @@ void UPDATE() {
 			accel_x = 0;
 			if (THIS->anim_frame == 9) {
 				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-				StartLevel();
+				RestartLevel();
 			}
-			return;
 			break;
 		default:
 			if (keys == 0 && !FLAG_CHECK(data->flags, pAnimPlayingFlag)) {
@@ -490,7 +470,7 @@ void UPDATE() {
 			}
 		} 
 		if (spr->type == SpritePortal) {
-			if (CheckCollision(THIS, spr) && !player_spawned && FLAG_CHECK(data->flags, pHasSpiritFlag) && THIS->x > 16) {
+			if (CheckCollision(THIS, spr) && !player_spawned && FLAG_CHECK(data->flags, pCaughtSpiritFlag) && THIS->x > 16) {
 				THIS->x = spr->x-8;
 				SetAnimationState(DISAPPEAR);
 				SetPlayerState(PLAYER_STATE_DISAPPEAR);

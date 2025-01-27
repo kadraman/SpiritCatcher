@@ -10,12 +10,12 @@
 #include "GameTypes.h"
 #include "Hud.h"
 
-#define pGroundedFlag		0	/* player is on the ground, i.e. not jumping */
-#define pTimeUpFlag			1	/* player has run out of time */
-#define	pInvincibleFlag		2	/* player is invincible, i.e. cannot lose a life */
-#define pAnimPlayingFlag	3	/* player animation is playing frames and needs to complete all of them */
-#define pHasSpiritFlag		4	/* player has caught the sprit */
-#define pIsDeadFlag			5	/* player has died, drowned etc. */
+#define pGroundedFlag			0	/* player is on the ground, i.e. not jumping */
+#define pDamagedFlag			1	/* player has taken damanage, died, drowned etc. */
+#define pTimeUpFlag				2	/* player has run out of time */
+#define	pInvincibleFlag			3	/* player is invincible, i.e. cannot lose a life */
+#define pAnimPlayingFlag		4	/* player animation is playing frames and needs to complete all of them */
+#define pCaughtSpiritFlag		5	/* player has caught the sprit */
 
 #define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
 #define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 
@@ -27,6 +27,7 @@
 #define HIT_ANIM_SPEED 			254
 #define DIE_ANIM_SPEED 			254
 #define DISAPPEAR_ANIM_SPEED 	10
+#define DROWN_ANIM_SPEED		10
 #define VICTORY_ANIM_SPEED 		8
 
 #define X_SPEED_MAX         	100

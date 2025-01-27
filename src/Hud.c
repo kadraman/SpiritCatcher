@@ -26,6 +26,7 @@ static UINT8 timer_clock;    // frame counter for single timer tick
 extern Sprite* player_sprite;
 extern INT16 accel_x, accel_y;
 extern UINT16 x_inc, y_inc;
+extern PlayerState curPlayerState;
 
 void Hud_Init(void) BANKED {
 #ifdef DEBUG_HUD
@@ -97,16 +98,20 @@ void Hud_Update(void) BANKED {
     PutU16 (player_sprite->x, 0);
     PutU16 (player_sprite->y, 3);
     // player acceleration
-    PutU16 (abs(accel_x), 7);
-    PutU16 (abs(x_inc), 10);
-    PutU16 (abs(accel_y), 14);
-    PutU16 (abs(y_inc), 17);
+    //PutU16 (abs(accel_x), 7);
+    //PutU16 (abs(x_inc), 10);
+    //PutU16 (abs(accel_y), 14);
+    //PutU16 (abs(y_inc), 17);
     // current tile
     //UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 16u) >> 3);
     //PutU16(tile, 14);
+    // player state
+    PutU16(curPlayerState, 16);
     // animation frame
-    //UINT8 af = player_sprite->anim_frame;
-    //PutU16(af, 17);
+    tens = getTens(player_sprite->anim_frame);
+    ones = player_sprite->anim_frame - (tens * 10);
+    UPDATE_HUD_TILE(1, 0, 1 + tens);
+    UPDATE_HUD_TILE(2, 0, 1 + ones);
 #else
     if (last_timer != timer_countdown) {
         PutU16(timer_countdown, 9);
@@ -117,8 +122,8 @@ void Hud_Update(void) BANKED {
         FLAG_SET(player_data->flags, pTimeUpFlag);
     }
 
-    if (last_has_spirit != FLAG_CHECK(player_data->flags, pHasSpiritFlag)) {
-        last_has_spirit = FLAG_CHECK(player_data->flags, pHasSpiritFlag);
+    if (last_has_spirit != FLAG_CHECK(player_data->flags, pCaughtSpiritFlag)) {
+        last_has_spirit = FLAG_CHECK(player_data->flags, pCaughtSpiritFlag);
         UPDATE_HUD_TILE(5, 0, 17);
     }
 

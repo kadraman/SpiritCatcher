@@ -16,7 +16,6 @@
 #define SCREEN_TILE_REFRES_H (SCREEN_TILES_H + SCREEN_PAD_TOP  + SCREEN_PAD_BOTTOM)
 
 void ScrollRelocateMapTo(UINT16 new_x, UINT16 new_y) {
-	//DISPLAY_OFF;
 	UINT8 __save = CURRENT_BANK;
     scroll_x = new_x;
     scroll_y = new_y;
@@ -26,5 +25,4 @@ void ScrollRelocateMapTo(UINT16 new_x, UINT16 new_y) {
 			ScrollUpdateRow((scroll_x >> 3) - SCREEN_PAD_LEFT,  y - SCREEN_PAD_TOP);
 		}
 	SWITCH_ROM(__save);
-	//DISPLAY_ON;
 }
