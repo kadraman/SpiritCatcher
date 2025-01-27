@@ -21,7 +21,7 @@ const UINT8 anim_fall[] = {1, 8};
 const UINT8 anim_jump_attack[] = {1, 20};
 const UINT8 anim_attack[] = {2, 19, 20};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
-const UINT8 anim_die[] = {20, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12};
+const UINT8 anim_die[] = {14, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12};
 const UINT8 anim_appear[] = {3, 15, 14, 13};
 const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
 const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18};
@@ -50,6 +50,7 @@ UINT8 invincible_secs;
 UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
 UINT8 player_spawned;
+UINT8 visible_skip;
 
 extern UINT16 timer_countdown;
 extern UINT16 level_max_time;
@@ -92,31 +93,6 @@ static AnimationState GetAnimationState(void) {
 	return currentAnimState;
 }
 
-void RestartLevel() {
-	SpriteManagerRemoveSprite(THIS);
-	SetState(StateGame);
-}
-
-void StartLevel() {
-	PlayerData* data = (PlayerData*)THIS->custom_data;
-	accel_x = accel_y = 0;
-	// move player to start/checkpoint
-	THIS->x = data->start_x;
-	THIS->y = data->start_y;
-	// reset time
-	timer_countdown = level_max_time;
-	// reset flags
-	FLAG_SET(data->flags, pGroundedFlag);
-	FLAG_CLEAR(data->flags, pTimeUpFlag);
-	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-	FLAG_CLEAR(data->flags, pInvincibleFlag);
-	player_spawned = true;
-	level_complete = false;
-	scroll_target = THIS;
-	SetPlayerState(PLAYER_STATE_APPEAR);
-	SetAnimationState(APPEAR);
-}
-
 void UpdateAttackPos() {
 	attack1_sprite->mirror = THIS->mirror;
 	if(THIS->mirror == V_MIRROR) 
@@ -128,17 +104,19 @@ void UpdateAttackPos() {
 
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	if (GetPlayerState() == PLAYER_STATE_HIT) return;
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
 	if (--data->lives <= 0) {
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
-		pause_secs = 6;
+		FLAG_SET(data->flags, pAnimPlayingFlag);
+		FLAG_SET(data->flags, pInvincibleFlag);
+		invincible_secs = 254;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(HIT);
+		FLAG_SET(data->flags, pAnimPlayingFlag);
 		FLAG_SET(data->flags, pInvincibleFlag);
 		invincible_secs = 3;
 	}
@@ -201,8 +179,6 @@ void Magix() {
 	magix_cooldown = 10;
 }
 
-
-
 UINT8 tile_collision;
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 	if (tile_collision == TILE_INDEX_SPIKE_UP || tile_collision == TILE_INDEX_SPIKE_DOWN) {
@@ -228,6 +204,8 @@ void AddDamping(Sprite* sprite, UINT8 idx) {
 void HandleInput(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) return;
+	
+	// player movement
 	if (KEY_PRESSED(J_RIGHT)) {
 		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
 		x_inc = accel_x >> 6;	
@@ -254,6 +232,8 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	} else {
 		AddDamping(THIS, THIS_IDX);
 	}
+
+	// ladders
 	if (KEY_PRESSED(J_UP)) {
 		//
 	} else if (KEY_PRESSED(J_DOWN)) {
@@ -262,6 +242,7 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		// AddDamping(THIS, THIS_IDX);
 	}
 
+	// jumping
 	if (KEY_TICKED(J_A) && FLAG_CHECK(data->flags, pGroundedFlag)) {
 		FLAG_CLEAR(data->flags, pGroundedFlag);
 		PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
@@ -274,11 +255,14 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 			SetAnimationState(FALL);
 		}
 	}
+
+	// attack or capture spirit
 	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DROWNING && GetPlayerState() != PLAYER_STATE_DIE)) {
 		if (KEY_PRESSED(J_UP)) {
-			if (!magix_cooldown) {
-				Magix();
-			}
+			//if (!magix_cooldown) {
+			//	Magix();
+			//}
+			// TODO: capture spirit
 		} else {
 			Attack();
 		}
@@ -301,8 +285,6 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 
 //
 
-UINT8 visible_skip = 0;
-
 void START() {
 	player_sprite = THIS;
 	PlayerData* data = (PlayerData*)THIS->custom_data;
@@ -317,10 +299,12 @@ void START() {
 	data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
-	curPlayerState = PLAYER_STATE_IDLE;
+	//curPlayerState = PLAYER_STATE_IDLE;
 	accel_y = 0;
 	accel_x = 0;
 	magix_cooldown = 0;
+	player_spawned = true;
+	level_complete = false;
 	scroll_target = THIS;
 	reset_x = 20;
 	reset_y = 80;
@@ -328,7 +312,9 @@ void START() {
 	anim_hit_counter = 0;
 	pause_secs = 0;
 	pause_ticks = 0;
-	StartLevel();
+	visible_skip = 0;
+	SetPlayerState(PLAYER_STATE_APPEAR);
+	SetAnimationState(APPEAR);
 }
 
 void UPDATE() {
@@ -336,6 +322,7 @@ void UPDATE() {
 	UINT8 i;
 	Sprite* spr;
 
+	// pause
 	if (pause_secs) {
 		pause_ticks++;
 		if (pause_ticks == 25) {
@@ -345,11 +332,11 @@ void UPDATE() {
 		return;
 	}
 
+	// invincible
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) {
 		SetVisible(THIS, visible_skip++);
 		if (visible_skip > 3) visible_skip = 0;
 	}
-
 	if (invincible_secs) {
 		invincible_ticks++;
 		if (invincible_ticks == 25) {
@@ -361,6 +348,7 @@ void UPDATE() {
 		SetVisible(THIS, true);
 	}
 
+	// timeup
 	if (FLAG_CHECK(data->flags, pTimeUpFlag)) {
 		data->lives--;
 		Hud_Update();
@@ -372,6 +360,7 @@ void UPDATE() {
 		HIDE_WIN;
 	}
 	
+	// player spawned
 	if (player_spawned) {
 		if (THIS->anim_frame == 2) {
 			SetPlayerState(PLAYER_STATE_IDLE);
@@ -381,6 +370,7 @@ void UPDATE() {
 		return;
 	}
 
+	// level complete
 	if (level_complete) {
 		if (THIS->anim_frame == 2) {
 			FLAG_CLEAR(data->flags, pAnimPlayingFlag);
@@ -395,6 +385,7 @@ void UPDATE() {
 		return;
 	}
 
+	// all states
 	switch (GetPlayerState()) {
 		case PLAYER_STATE_ATTACKING:
 			UpdateAttackPos();
@@ -410,25 +401,30 @@ void UPDATE() {
 				SetAnimationState(FALL);
 			}
 			break;
+		case PLAYER_STATE_DROWNING:
+			accel_x = 0;
+			if (THIS->anim_frame == 9) {
+				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+				SpriteManagerRemoveSprite(THIS);
+				SetState(StateGame);
+			}
+			return;
+			break;
+		case PLAYER_STATE_DIE:
+			accel_x = 0;
+			if (THIS->anim_frame == 13) {
+				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+				SpriteManagerRemoveSprite(THIS);
+				SetState(StateGameOver);
+				HIDE_WIN;
+			}
+			return;
+			break;
 		case PLAYER_STATE_HIT:
 			accel_x = 0;
 			if (THIS->anim_frame == 3) {
 				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 				SetPlayerState(prevPlayerState);
-			}
-			break;
-		case PLAYER_STATE_DIE:
-			if (THIS->anim_frame == 14) {
-				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-				SetState(StateGameOver);
-				HIDE_WIN;
-			}
-			break;
-		case PLAYER_STATE_DROWNING:
-			accel_x = 0;
-			if (THIS->anim_frame == 9) {
-				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-				RestartLevel();
 			}
 			break;
 		default:

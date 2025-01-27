@@ -26,7 +26,6 @@ static UINT8 timer_clock;    // frame counter for single timer tick
 extern Sprite* player_sprite;
 extern INT16 accel_x, accel_y;
 extern UINT16 x_inc, y_inc;
-extern PlayerState curPlayerState;
 
 void Hud_Init(void) BANKED {
 #ifdef DEBUG_HUD
@@ -105,8 +104,6 @@ void Hud_Update(void) BANKED {
     // current tile
     //UINT8 tile = GetScrollTile((player_sprite->x + 8u) >> 3, (player_sprite->y + 16u) >> 3);
     //PutU16(tile, 14);
-    // player state
-    PutU16(curPlayerState, 16);
     // animation frame
     tens = getTens(player_sprite->anim_frame);
     ones = player_sprite->anim_frame - (tens * 10);

@@ -22,20 +22,4 @@
 #define TILE_INDEX_BG1          34
 #define TILE_INDEX_BG2          65
 
-//#define TILE_ITEM_SPIKE	200
-//#define TILE_ITEM_COIN	201
-//#define TILE_ITEM_BOX	202
-//#define TILE_ITEM_FLAG	203
-
-//typedef struct {
-//	UINT8 x;
-//	UINT8 y;
-//} ItemPos;
-
-//typedef enum {
-//	ITEM_COIN,
-//	ITEM_BULLET,
-//	ITEM_SPIRIT
-//} ItemType;
-
 #endif

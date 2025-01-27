@@ -48,7 +48,7 @@ void START() {
 void UPDATE() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
 	// if entry portal remove it after X frames
-	if (data->appear && THIS->anim_frame == VECTOR_LEN(anim_portal_appear)-1) {
+	if (data->appear && (THIS->anim_frame+1) == VECTOR_LEN(anim_portal_appear)) {
 		TakeCollectable(THIS, ITEM_PORTAL);
 		SpriteManagerRemove(THIS_IDX);
 	}
