@@ -109,6 +109,12 @@ void Hud_Update(void) BANKED {
     ones = player_sprite->anim_frame - (tens * 10);
     UPDATE_HUD_TILE(1, 0, 1 + tens);
     UPDATE_HUD_TILE(2, 0, 1 + ones);
+    // player state
+    PlayerState state = GetPlayerState();
+    tens = getTens(state);
+    ones = state - (tens * 10);
+    UPDATE_HUD_TILE(18, 0, 1 + tens);
+    UPDATE_HUD_TILE(19, 0, 1 + ones);
 #else
     if (last_timer != timer_countdown) {
         PutU16(timer_countdown, 9);
@@ -132,10 +138,10 @@ void Hud_Update(void) BANKED {
         UPDATE_HUD_TILE(2, 0, last_magix = 0 ? 1 : 1 + ones);
     }
 
-    if (last_lives != player_data->lives) {
-        last_lives = player_data->lives;
+    if (last_lives != g_player_lives) {
+        last_lives = g_player_lives;
         for (UINT8 i = 0; i < MAX_LIVES; ++i) {
-            UPDATE_HUD_TILE(19 - i, 0, i < player_data->lives ? 18 : 19);
+            UPDATE_HUD_TILE(19 - i, 0, i < g_player_lives ? 18 : 19);
         }
     }
 #endif

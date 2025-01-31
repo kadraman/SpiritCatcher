@@ -1,6 +1,7 @@
 #ifndef SPRITEPLAYER_H
 #define SPRITEPLAYER_H
 
+#include <stdbool.h>
 #include "main.h"
 #include "SpriteManager.h"
 #include "Sprite.h"
@@ -76,5 +77,11 @@ typedef struct {
 	UINT8 coins;
 	UINT8 magix;
 } PlayerData;
+
+void SetPlayerState(PlayerState state) BANKED;
+PlayerState GetPlayerState(void) BANKED;
+bool GetPlayerStateEquals(PlayerState ps) BANKED;
+AnimationState GetAnimationState(void) BANKED;
+void SetAnimationState(AnimationState state) BANKED;
 
 #endif // SPRITEPLAYER_H

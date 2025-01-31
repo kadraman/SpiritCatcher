@@ -7,6 +7,7 @@
 #include "Scroll.h"
 #include "Print.h"
 #include "Sound.h"
+#include "Vector.h"
 
 #include "StateGame.h"
 #include "SpritePlayer.h"
@@ -28,14 +29,14 @@ const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18};
 const UINT8 anim_victory[] = {2, 21, 22}; // TBD
 
 
-Sprite* player_sprite;
-Sprite* attack1_sprite;
+Sprite* player_sprite = 0;
+Sprite* attack1_sprite = 0;
 extern Sprite* attack_particle;
 extern UINT8 start_x, start_y;
 extern INT16 scroll_x, scroll_y;
 extern INT16 min_x, max_x, min_y, max_y;
-static PlayerState curPlayerState, prevPlayerState;
-static AnimationState lastAnimState, currentAnimState;
+PlayerState curPlayerState, prevPlayerState;
+AnimationState lastAnimState, currentAnimState;
 
 INT16 accel_y;
 INT16 accel_x;
@@ -58,20 +59,20 @@ extern UINT8 level_complete;
 extern UINT16 level_width;
 extern UINT16 level_height;
 
-static void SetPlayerState(PlayerState state) {
+void SetPlayerState(PlayerState state) BANKED {
 	prevPlayerState = curPlayerState;
 	curPlayerState = state;
 }
 
-static PlayerState GetPlayerState(void) {
+PlayerState GetPlayerState(void) BANKED {
 	return curPlayerState;
 }
 
-static bool GetPlayerStateEquals(PlayerState ps) {
+bool GetPlayerStateEquals(PlayerState ps) BANKED {
 	return curPlayerState == ps;
 }
 
-static void SetAnimationState(AnimationState state) {
+void SetAnimationState(AnimationState state) BANKED {
 	lastAnimState = currentAnimState;
 	currentAnimState = state;
 	switch (state) {
@@ -89,8 +90,12 @@ static void SetAnimationState(AnimationState state) {
 	}
 }
 
-static AnimationState GetAnimationState(void) {
+AnimationState GetAnimationState(void) BANKED {
 	return currentAnimState;
+}
+
+UINT8 GetLastAnimFrame() BANKED {
+	return VECTOR_LEN(THIS->anim_data)-1;
 }
 
 void UpdateAttackPos() {
@@ -105,13 +110,13 @@ void UpdateAttackPos() {
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
-	if (--data->lives <= 0) {
+	if (--g_player_lives <= 0) {
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
 		FLAG_SET(data->flags, pAnimPlayingFlag);
 		FLAG_SET(data->flags, pInvincibleFlag);
-		invincible_secs = 254;
+		invincible_secs = 10;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
@@ -132,7 +137,7 @@ void Drown(Sprite* sprite, UINT8 idx) {
 	FLAG_SET(data->flags, pAnimPlayingFlag);
 	FLAG_SET(data->flags, pInvincibleFlag);
 	//THIS->y = THIS->y + 1;
-	invincible_secs = 254;
+	invincible_secs = 10;
 }
 
 void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
@@ -203,7 +208,7 @@ void AddDamping(Sprite* sprite, UINT8 idx) {
 
 void HandleInput(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) return;
+	//if (GetPlayerState() == PLAYER_STATE_HIT || GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) return;
 	
 	// player movement
 	if (KEY_PRESSED(J_RIGHT)) {
@@ -286,17 +291,19 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 //
 
 void START() {
-	player_sprite = THIS;
+	memset((PlayerData*)(THIS->custom_data), 0, CUSTOM_DATA_SIZE);
 	PlayerData* data = (PlayerData*)THIS->custom_data;
+	g_player_dead = false;
+	player_sprite = THIS;
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
-	FLAG_CLEAR(data->flags, pDamagedFlag);
-	FLAG_CLEAR(data->flags, pTimeUpFlag);
-	FLAG_CLEAR(data->flags, pCaughtSpiritFlag);
-	FLAG_CLEAR(data->flags, pInvincibleFlag);
-	FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-	data->lives = MAX_LIVES;
+	//FLAG_CLEAR(data->flags, pDamagedFlag);
+	//FLAG_CLEAR(data->flags, pTimeUpFlag);
+	//FLAG_CLEAR(data->flags, pCaughtSpiritFlag);
+	//FLAG_CLEAR(data->flags, pInvincibleFlag);
+	//FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+	//data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
 	//curPlayerState = PLAYER_STATE_IDLE;
@@ -321,6 +328,16 @@ void UPDATE() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	UINT8 i;
 	Sprite* spr;
+
+	// player spawned
+	/*if (player_spawned) {
+		if (THIS->anim_frame == 2) {
+			SetPlayerState(PLAYER_STATE_IDLE);
+			SetAnimationState(NORMAL);
+			player_spawned = false;
+		}
+		return;
+	}*/
 
 	// pause
 	if (pause_secs) {
@@ -350,24 +367,15 @@ void UPDATE() {
 
 	// timeup
 	if (FLAG_CHECK(data->flags, pTimeUpFlag)) {
-		data->lives--;
+		g_player_lives--;
 		Hud_Update();
-		if (data->lives <= 0) { 
-			SetState(StateGameOver);
-			HIDE_WIN;
+		if (g_player_lives <= 0) { 
+			//SetState(StateGameOver);
+			//HIDE_WIN;
+			g_player_dead = true;
 		}
 		SetState(StateTimeUp);
 		HIDE_WIN;
-	}
-	
-	// player spawned
-	if (player_spawned) {
-		if (THIS->anim_frame == 2) {
-			SetPlayerState(PLAYER_STATE_IDLE);
-			SetAnimationState(NORMAL);
-			player_spawned = false;
-		}
-		return;
 	}
 
 	// level complete
@@ -381,6 +389,16 @@ void UPDATE() {
 				g_level_current++;
 				SetState(StateGame);
 			}
+		}
+		return;
+	}
+
+	// dead, drowned etc
+	if (GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) {
+		accel_x = 0;
+		if (THIS->anim_frame == GetLastAnimFrame()) {
+			SetPlayerState(PLAYER_STATE_IDLE);
+			g_player_dead = true;
 		}
 		return;
 	}
@@ -404,21 +422,20 @@ void UPDATE() {
 		case PLAYER_STATE_DROWNING:
 			accel_x = 0;
 			if (THIS->anim_frame == 9) {
-				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-				SpriteManagerRemoveSprite(THIS);
-				SetState(StateGame);
+				SetPlayerState(PLAYER_STATE_IDLE);
+				g_player_dead = true;
 			}
-			return;
 			break;
 		case PLAYER_STATE_DIE:
 			accel_x = 0;
 			if (THIS->anim_frame == 13) {
-				FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-				SpriteManagerRemoveSprite(THIS);
-				SetState(StateGameOver);
-				HIDE_WIN;
+				//FLAG_CLEAR(data->flags, pAnimPlayingFlag);
+				//SpriteManagerRemoveSprite(THIS);
+				//SetState(StateGameOver);
+				//HIDE_WIN;
+				SetPlayerState(PLAYER_STATE_IDLE);
+				g_player_dead = true;
 			}
-			return;
 			break;
 		case PLAYER_STATE_HIT:
 			accel_x = 0;
@@ -480,6 +497,12 @@ void UPDATE() {
 }
 
 void DESTROY() {
+	//PlayerData* data = (PlayerData*)THIS->custom_data;
+	//if (data->lives > 0) {
+	//	SetState(StateGame);
+	//} else {
+	//	SetState(StateGameOver);
+	//}
 }
 
 

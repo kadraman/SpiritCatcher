@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "Banks/SetAutoBank.h"
 
 #include "ZGBMain.h"
@@ -15,11 +17,14 @@
 #include "GameTypes.h"
 
 UINT8 g_level_current = 1;
+UINT8 g_player_lives = MAX_LIVES; 
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
+bool level_complete = false;
+bool g_player_dead = false;
+
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
-extern UINT16 g_player_score;
 extern UINT16 level_max_time;
 
 IMPORT_MAP(gb_border);
@@ -60,7 +65,6 @@ UINT8 collision_tiles_down[] = {
 	27, 0
 };
 UINT8 fastest_times[] = { 120 };
-UINT8 level_complete;
 
 #define MAX_COLLECTABLES 10
 UINT16 collectables_taken[MAX_COLLECTABLES + 1];
@@ -70,12 +74,12 @@ void pause(UINT16 time) BANKED {
 }
 
 void START() {
-	LOAD_SGB_BORDER(bg_border);
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
 	scroll_top_movement_limit = 72;
 	scroll_bottom_movement_limit = 110;
 	level_max_time = level->seconds;
-	level_complete = 0;
+	level_complete = false;
+	g_player_dead = false;
 	min_x = min_y = 1;
 	// TODO: calculat max_x, max_y based on map loaded
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
@@ -90,18 +94,22 @@ void START() {
 }
 
 void UPDATE() {
-	if (!level_complete) {
+	if (g_player_dead) {
+		SpriteManagerRemoveSprite(player_sprite);
+		SpriteManagerFlushRemove();
+		SetState(StateOverworld);
+	}
+	if (level_complete) {
+		g_level_current++;
+		if (levels[g_level_current-1].map == 0) {
+			SetState(StateWin);
+			HIDE_HUD;
+		} else {
+			SetState(StateOverworld);
+		}
+	} else {
 		Hud_Update();
 		Water_Animate();
-	} else {
-		if (KEY_TICKED(J_START | J_A | J_B)) {
-			g_level_current++;
-			if (levels[g_level_current-1].map == 0)
-				SetState(StateWin);
-			else
-				SetState(StateGame);
-			HIDE_HUD;
-		}
 	}
 }
 

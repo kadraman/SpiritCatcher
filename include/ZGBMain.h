@@ -3,6 +3,7 @@
 
 #define STATES \
 _STATE(StateSplash)\
+_STATE(StateOverworld)\
 _STATE(StateGame)\
 _STATE(StateTimeUp)\
 _STATE(StateGameOver)\
