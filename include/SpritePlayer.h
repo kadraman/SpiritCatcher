@@ -12,7 +12,7 @@
 #include "Hud.h"
 
 #define pGroundedFlag			0	/* player is on the ground, i.e. not jumping */
-#define pDamagedFlag			1	/* player has taken damanage, died, drowned etc. */
+#define pDeadFlag				1	/* player has died, drowned etc. */
 #define pTimeUpFlag				2	/* player has run out of time */
 #define	pInvincibleFlag			3	/* player is invincible, i.e. cannot lose a life */
 #define pAnimPlayingFlag		4	/* player animation is playing frames and needs to complete all of them */

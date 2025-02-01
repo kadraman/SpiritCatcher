@@ -115,8 +115,7 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		SetAnimationState(DIE);
 		FLAG_SET(data->flags, pAnimPlayingFlag);
-		FLAG_SET(data->flags, pInvincibleFlag);
-		invincible_secs = 10;
+		//invincible_secs = 10;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
@@ -135,9 +134,8 @@ void Drown(Sprite* sprite, UINT8 idx) {
 	PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 	SetAnimationState(DROWN);
 	FLAG_SET(data->flags, pAnimPlayingFlag);
-	FLAG_SET(data->flags, pInvincibleFlag);
 	//THIS->y = THIS->y + 1;
-	invincible_secs = 10;
+	//invincible_secs = 10;
 }
 
 void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
@@ -298,7 +296,7 @@ void START() {
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
-	//FLAG_CLEAR(data->flags, pDamagedFlag);
+	//FLAG_CLEAR(data->flags, pDeadFlag);
 	//FLAG_CLEAR(data->flags, pTimeUpFlag);
 	//FLAG_CLEAR(data->flags, pCaughtSpiritFlag);
 	//FLAG_CLEAR(data->flags, pInvincibleFlag);
@@ -397,8 +395,8 @@ void UPDATE() {
 	if (GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) {
 		accel_x = 0;
 		if (THIS->anim_frame == GetLastAnimFrame()) {
-			SetPlayerState(PLAYER_STATE_IDLE);
-			g_player_dead = true;
+			//SetPlayerState(PLAYER_STATE_IDLE);
+			FLAG_SET(data->flags, pDeadFlag);
 		}
 		return;
 	}
@@ -417,24 +415,6 @@ void UPDATE() {
 			if ((accel_y >> 6) > 1) {
 				SetPlayerState(PLAYER_STATE_FALLING);
 				SetAnimationState(FALL);
-			}
-			break;
-		case PLAYER_STATE_DROWNING:
-			accel_x = 0;
-			if (THIS->anim_frame == 9) {
-				SetPlayerState(PLAYER_STATE_IDLE);
-				g_player_dead = true;
-			}
-			break;
-		case PLAYER_STATE_DIE:
-			accel_x = 0;
-			if (THIS->anim_frame == 13) {
-				//FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-				//SpriteManagerRemoveSprite(THIS);
-				//SetState(StateGameOver);
-				//HIDE_WIN;
-				SetPlayerState(PLAYER_STATE_IDLE);
-				g_player_dead = true;
 			}
 			break;
 		case PLAYER_STATE_HIT:
@@ -503,6 +483,8 @@ void DESTROY() {
 	//} else {
 	//	SetState(StateGameOver);
 	//}
+	SetPlayerState(PLAYER_STATE_IDLE);
+	g_player_dead = false;
 }
 
 

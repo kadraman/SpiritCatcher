@@ -20,8 +20,8 @@ UINT8 g_level_current = 1;
 UINT8 g_player_lives = MAX_LIVES; 
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
-bool level_complete = false;
-bool g_player_dead = false;
+bool level_complete;
+bool g_player_dead;
 
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
@@ -94,10 +94,12 @@ void START() {
 }
 
 void UPDATE() {
-	if (g_player_dead) {
+	PlayerData* data = (PlayerData*)player_sprite->custom_data;
+	if (FLAG_CHECK(data->flags, pDeadFlag)) {
 		SpriteManagerRemoveSprite(player_sprite);
 		SpriteManagerFlushRemove();
-		SetState(StateOverworld);
+		player_sprite = NULL;
+		SetState(StateGame);
 	}
 	if (level_complete) {
 		g_level_current++;
