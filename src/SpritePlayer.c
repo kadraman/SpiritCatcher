@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <gbdk/emu_debug.h>
 
 #include "Banks/SetAutoBank.h"
 #include "gb/gb.h"
@@ -45,6 +46,7 @@ UINT16 y_inc;
 UINT8 reset_x;
 UINT8 reset_y;
 UINT8 magix_cooldown;
+UINT8 magix_coolup;
 UINT8 pause_secs;
 UINT8 pause_ticks;
 UINT8 invincible_secs;
@@ -52,6 +54,7 @@ UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
 UINT8 player_spawned;
 UINT8 visible_skip;
+UINT8 tile_collision;
 
 extern UINT16 timer_countdown;
 extern UINT16 level_max_time;
@@ -179,10 +182,10 @@ void Magix() {
 	magix_sprite->y = THIS->y + 5u;
 	data->magix--;
 	// reset cooldown
-	magix_cooldown = 10;
+	magix_cooldown = 30;
+	magix_coolup = 240;
 }
 
-UINT8 tile_collision;
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
 	if (tile_collision == TILE_INDEX_SPIKE_UP || tile_collision == TILE_INDEX_SPIKE_DOWN) {
 		Hit(sprite, idx);
@@ -262,12 +265,12 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	// attack or capture spirit
 	if (KEY_TICKED(J_B) && (GetPlayerState() != PLAYER_STATE_ATTACKING && GetPlayerState() != PLAYER_STATE_HIT && GetPlayerState() != PLAYER_STATE_DROWNING && GetPlayerState() != PLAYER_STATE_DIE)) {
 		if (KEY_PRESSED(J_UP)) {
-			//if (!magix_cooldown) {
-			//	Magix();
-			//}
 			// TODO: capture spirit
 		} else {
-			Attack();
+			//Attack();
+			if (!magix_cooldown) {
+				Magix();
+			}
 		}
 	}
 	//
@@ -282,6 +285,10 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 	if (GetPlayerState() != PLAYER_STATE_HIT) {
 		if (magix_cooldown) {
 			magix_cooldown -= 1u;
+		} else if (magix_coolup) {
+			magix_coolup -= 1u;
+		} else {
+			if (data->magix < 12) data->magix++;
 		}
 	}
 }
@@ -318,8 +325,10 @@ void START() {
 	pause_secs = 0;
 	pause_ticks = 0;
 	visible_skip = 0;
+	tile_collision = 0;
 	SetPlayerState(PLAYER_STATE_APPEAR);
 	SetAnimationState(APPEAR);
+	EMU_printf("SpritePlayer::START: flags: %d\n", data->flags);
 }
 
 void UPDATE() {
@@ -394,9 +403,11 @@ void UPDATE() {
 	// dead, drowned etc
 	if (GetPlayerState() == PLAYER_STATE_DROWNING || GetPlayerState() == PLAYER_STATE_DIE) {
 		accel_x = 0;
+		// update global dead variable once animation has compelted
 		if (THIS->anim_frame == GetLastAnimFrame()) {
-			//SetPlayerState(PLAYER_STATE_IDLE);
+			EMU_printf("SpritePlayer::UPDATE: player has died in state: %d\n", GetPlayerState());
 			FLAG_SET(data->flags, pDeadFlag);
+			g_player_dead = true;
 		}
 		return;
 	}
@@ -477,14 +488,7 @@ void UPDATE() {
 }
 
 void DESTROY() {
-	//PlayerData* data = (PlayerData*)THIS->custom_data;
-	//if (data->lives > 0) {
-	//	SetState(StateGame);
-	//} else {
-	//	SetState(StateGameOver);
-	//}
-	SetPlayerState(PLAYER_STATE_IDLE);
-	g_player_dead = false;
+
 }
 
 

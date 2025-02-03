@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <gbdk/emu_debug.h>
 
 #include "Banks/SetAutoBank.h"
 
@@ -95,11 +96,12 @@ void START() {
 
 void UPDATE() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
-	if (FLAG_CHECK(data->flags, pDeadFlag)) {
+	if (g_player_dead) {
+		EMU_printf("StateGame::UPDATE: player is dead\n");
 		SpriteManagerRemoveSprite(player_sprite);
 		SpriteManagerFlushRemove();
 		player_sprite = NULL;
-		SetState(StateGame);
+		SetState(StateGameOver);
 	}
 	if (level_complete) {
 		g_level_current++;
