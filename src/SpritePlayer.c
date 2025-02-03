@@ -46,7 +46,7 @@ UINT16 y_inc;
 UINT8 reset_x;
 UINT8 reset_y;
 UINT8 magix_cooldown;
-UINT8 magix_coolup;
+UINT8 magix_recharge;
 UINT8 pause_secs;
 UINT8 pause_ticks;
 UINT8 invincible_secs;
@@ -181,9 +181,9 @@ void Magix() {
 	}	
 	magix_sprite->y = THIS->y + 5u;
 	data->magix--;
-	// reset cooldown
-	magix_cooldown = 30;
-	magix_coolup = 240;
+	// reset cooldown/coolup
+	magix_cooldown = MAGIX_COOLDOWN_TIME;
+	magix_recharge = MAGIX_RECHARGE_TIME;
 }
 
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
@@ -281,14 +281,16 @@ void HandleInput(Sprite* sprite, UINT8 idx) {
 		SetAnimationState(WALK_IDLE);
 	}
 	
-	// decrement magix cooldown so we can magix again
+	// magix cooldown/recharge
 	if (GetPlayerState() != PLAYER_STATE_HIT) {
 		if (magix_cooldown) {
-			magix_cooldown -= 1u;
-		} else if (magix_coolup) {
-			magix_coolup -= 1u;
-		} else {
-			if (data->magix < 12) data->magix++;
+			magix_cooldown--;
+		} else if (magix_recharge) {
+			magix_recharge--;
+		}
+		if (!magix_recharge && data->magix < MAGIX_FULL) {
+			data->magix++;
+			magix_recharge = MAGIX_RECHARGE_TIME;
 		}
 	}
 }

@@ -37,6 +37,9 @@
 #define Y_SPEED_MAX				150
 #define Y_GRAVITY				10
 #define Y_JUMP_HEIGHT			200
+#define MAGIX_RECHARGE_TIME		60
+#define MAGIX_COOLDOWN_TIME		60
+#define MAGIX_FULL				12
 
 typedef enum {
 	PLAYER_STATE_IDLE,
