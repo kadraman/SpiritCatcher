@@ -18,5 +18,13 @@
 #define TILE_INDEX_SPIKE_DOWN   33
 #define TILE_INDEX_BG1          34
 #define TILE_INDEX_BG2          65
+#define TILE_INDEX_BRIDGE_1     77
+#define TILE_INDEX_BRIDGE_2     78
+#define TILE_INDEX_BRIDGE_3     79
+#define TILE_INDEX_BRIDGE_4     80
+#define TILE_INDEX_BRIDGE_5     81
+#define TILE_INDEX_BRIDGE_6     82
+#define TILE_INDEX_BRIDGE_GO_1  83
+#define TILE_INDEX_BRIDGE_GO_2  84
 
 #endif
