@@ -9,22 +9,22 @@
 #define TILE_INDEX_BAT          254
 #define TILE_INDEX_TOADSTALL    255
 
-#define TILE_INDEX_LADDER_LEFT  27
-#define TILE_INDEX_LADDER_RIGHT 28
-#define TILE_INDEX_WATER_1      29
-#define TILE_INDEX_WATER_2      30
-#define TILE_INDEX_WATER_3      31
-#define TILE_INDEX_SPIKE_UP     32
-#define TILE_INDEX_SPIKE_DOWN   33
-#define TILE_INDEX_BG1          34
-#define TILE_INDEX_BG2          65
-#define TILE_INDEX_BRIDGE_1     77
-#define TILE_INDEX_BRIDGE_2     78
-#define TILE_INDEX_BRIDGE_3     79
-#define TILE_INDEX_BRIDGE_4     80
-#define TILE_INDEX_BRIDGE_5     81
-#define TILE_INDEX_BRIDGE_6     82
-#define TILE_INDEX_BRIDGE_GO_1  83
-#define TILE_INDEX_BRIDGE_GO_2  84
+#define TILE_INDEX_LADDER_LEFT  28
+#define TILE_INDEX_LADDER_RIGHT 29
+#define TILE_INDEX_WATER_1      30
+#define TILE_INDEX_WATER_2      31
+#define TILE_INDEX_WATER_3      32
+#define TILE_INDEX_SPIKE_UP     33
+#define TILE_INDEX_SPIKE_DOWN   34
+#define TILE_INDEX_BG1          35
+#define TILE_INDEX_BG2          66
+#define TILE_INDEX_BRIDGE_1     78
+#define TILE_INDEX_BRIDGE_2     79
+#define TILE_INDEX_BRIDGE_3     80
+#define TILE_INDEX_BRIDGE_4     81
+#define TILE_INDEX_BRIDGE_5     82
+#define TILE_INDEX_BRIDGE_6     83
+#define TILE_INDEX_BRIDGE_GO_1  84
+#define TILE_INDEX_BRIDGE_GO_2  85
 
 #endif

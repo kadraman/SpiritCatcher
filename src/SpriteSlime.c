@@ -33,7 +33,7 @@ void UPDATE() {
 			}
 		} else {
 			//moving right
-			if(TranslateSprite(THIS, +1, 0)) {
+			if (TranslateSprite(THIS, +1, 0)) {
 				THIS->mirror = V_MIRROR;
 			} else if (!scroll_collisions[GetScrollTile(((THIS->x + THIS->coll_w) >> 3), (THIS->y >> 3) + 2u)]) {
 				THIS->mirror = V_MIRROR;

@@ -11,6 +11,7 @@ _STATE(StateWin)\
 STATE_DEF_END
 
 #define SPRITES \
+_SPRITE(SpritePlatform, platform,   FLIP_NONE)\
 _SPRITE(SpriteMushroom, mushroom,   FLIP_NONE)\
 _SPRITE(SpriteBat,      bat,        FLIP_NONE)\
 _SPRITE(SpriteSlime,    slime,      FLIP_NONE)\
