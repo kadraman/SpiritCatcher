@@ -9,7 +9,7 @@
 const UINT8 anim_goblin_move[] = {2, 0, 1};
 struct EnemyInfo
 {
-    BYTE wait;
+    UINT8 wait;
 };
 
 void START() {

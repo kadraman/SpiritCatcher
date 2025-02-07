@@ -11,7 +11,7 @@ const UINT8 anim_mushroom_move[] = {4, 1, 2, 3, 4};
 const UINT8 anim_mushroom_hit[] = {2, 5, 6};
 struct EnemyInfo
 {
-    BYTE wait;
+    UINT8 wait;
 };
 
 void START() {
@@ -29,7 +29,7 @@ void UPDATE() {
 		if (THIS->mirror == V_MIRROR) {
 			//moving left
 			if (TranslateSprite(THIS, -1, 0)) {
-				THIS->mirror = V_MIRROR;
+				THIS->mirror = NO_MIRROR;
 			} else if (!scroll_collisions[GetScrollTile((THIS->x >> 3) - 2u, (THIS->y >> 3) + 2u)]) {
 				THIS->mirror = NO_MIRROR;
 			}

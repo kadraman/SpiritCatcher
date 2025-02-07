@@ -9,7 +9,7 @@
 const UINT8 anim_slime_move[] = {9, 0, 1, 1, 1, 1, 1, 2, 1, 3};
 struct EnemyInfo
 {
-    BYTE wait;
+    UINT8 wait;
 };
 
 void START() {

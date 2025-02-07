@@ -63,7 +63,7 @@ UINT8 collision_tiles[] = {
 	0
 };
 UINT8 collision_tiles_down[] = { 
-	27, 0
+	TILE_INDEX_LADDER_LEFT, TILE_INDEX_LADDER_RIGHT, 0
 };
 UINT8 fastest_times[] = { 120 };
 
@@ -83,6 +83,10 @@ void START() {
 	g_player_dead = false;
 	min_x = min_y = 1;
 	// TODO: calculat max_x, max_y based on map loaded
+	size_t n = sizeof(collision_tiles)/sizeof(collision_tiles[0]);
+	for (int i = 0; i < n; i++) { 
+		EMU_printf("%d,", collision_tiles[i]);
+	}
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 

@@ -1,5 +1,6 @@
 #include "Banks/SetAutoBank.h"
 #include "main.h"
+#include <gbdk/emu_debug.h>
 
 #include <gb/gb.h>
 
@@ -9,7 +10,7 @@
 const UINT8 anim_platform[] = {1, 0};
 struct PlatformInfo
 {
-    BYTE wait;
+    UINT8 wait;
 };
 
 void START() {
@@ -22,21 +23,28 @@ void START() {
 
 void UPDATE() {
 	struct PlatformInfo* data = (struct PlatformInfo*)THIS->custom_data;
-	if (THIS->mirror == V_MIRROR) {
-		//moving left
-		if (TranslateSprite(THIS, -1, 0)) {
-			THIS->mirror = V_MIRROR;
-		} else if (!scroll_collisions[GetScrollTile((THIS->x >> 3) - 2u, (THIS->y >> 3))]) {
-			THIS->mirror = NO_MIRROR;
+	if (!data->wait) {
+		if (THIS->mirror == V_MIRROR) {
+			//moving left
+			//EMU_printf("SpritePlatform::UPDATE: moving left: %d:%d\n", (THIS->x >> 3), (THIS->y >> 3));
+			//UINT8 tile = GetScrollTile((THIS->x >> 3) - 2u, (THIS->y >> 3));
+			//EMU_printf("SpritePlatform::UPDATE: scroll tile: %d\n", tile);
+			if (TranslateSprite(THIS, -1, 0)) {
+				THIS->mirror = NO_MIRROR;
+			}
+		} else {
+			//moving right
+			//EMU_printf("SpritePlatform::UPDATE: moving right: %d:%d\n", ((THIS->x + THIS->coll_w) >> 3), (THIS->y >> 3));
+			//UINT8 tile = GetScrollTile(((THIS->x + THIS->coll_w) >> 3), (THIS->y >> 3));
+			//EMU_printf("SpritePlatform::UPDATE: scroll tile: %d\n", tile);
+			if (TranslateSprite(THIS, +1, 0)) {
+				THIS->mirror = V_MIRROR;
+			}
 		}
+		data->wait = 1;
 	} else {
-		//moving right
-		if (TranslateSprite(THIS, +1, 0)) {
-			THIS->mirror = V_MIRROR;
-		} else if (!scroll_collisions[GetScrollTile(((THIS->x + THIS->coll_w) >> 3), (THIS->y >> 3))]) {
-			THIS->mirror = V_MIRROR;
-		}
-	}
+		if (data->wait++ == 2) data->wait = 0;
+    }	
 }
 
 void DESTROY() {
