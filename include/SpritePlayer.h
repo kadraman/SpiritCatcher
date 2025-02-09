@@ -17,6 +17,7 @@
 #define	pInvincibleFlag			3	/* player is invincible, i.e. cannot lose a life */
 #define pAnimPlayingFlag		4	/* player animation is playing frames and needs to complete all of them */
 #define pCaughtSpiritFlag		5	/* player has caught the sprit */
+#define pOnPlatformFlag			6	/* player is on a (moving) platform */
 
 #define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
 #define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 
@@ -48,6 +49,7 @@ typedef enum {
 	PLAYER_STATE_FALLING,
 	PLAYER_STATE_PUSHING,
 	PLAYER_STATE_ATTACKING,
+	PLAYER_STATE_CLIMBING,
 	PLAYER_STATE_HIT,
 	PLAYER_STATE_DIE,
 	PLAYER_STATE_TIMEOVER,
@@ -64,6 +66,7 @@ typedef enum {
 	FALL,
 	PUSH,
     ATTACK,
+	CLIMB,
     HIT,
 	DIE,
 	APPEAR,

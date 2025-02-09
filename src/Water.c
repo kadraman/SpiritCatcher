@@ -27,9 +27,9 @@ static const unsigned char level_water3[] = {
 	0x80,0x7f,0x02,0xfd
 };
 
-#define WATER_TILE_1 (0x1D) // 29
-#define WATER_TILE_2 (0x1E) // 30
-#define WATER_TILE_3 (0x1F) // 31
+#define WATER_TILE_1 30
+#define WATER_TILE_2 31
+#define WATER_TILE_3 32
 
 UINT8 anim_water_counter = 0;
 

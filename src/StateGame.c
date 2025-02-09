@@ -82,11 +82,6 @@ void START() {
 	level_complete = false;
 	g_player_dead = false;
 	min_x = min_y = 1;
-	// TODO: calculat max_x, max_y based on map loaded
-	size_t n = sizeof(collision_tiles)/sizeof(collision_tiles[0]);
-	for (int i = 0; i < n; i++) { 
-		EMU_printf("%d,", collision_tiles[i]);
-	}
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 

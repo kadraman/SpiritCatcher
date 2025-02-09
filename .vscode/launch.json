@@ -10,7 +10,8 @@
             "stopOnEntry": false,
             "additionalSrcFolders": "${env:ZGB_PATH}",
             "emuliciousPath": "${env:ZGB_PATH}/../../env/Emulicious/Emulicious.jar",
-            "preLaunchTask": "DebugColor"
+            "preLaunchTask": "DebugColor",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "emulicious-debugger",
