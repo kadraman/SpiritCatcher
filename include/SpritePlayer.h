@@ -67,6 +67,7 @@ typedef enum {
 	PUSH,
     ATTACK,
 	CLIMB,
+	CLIMB_IDLE,
     HIT,
 	DIE,
 	APPEAR,
