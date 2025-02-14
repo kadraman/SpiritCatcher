@@ -43,19 +43,22 @@
 #define MAGIX_FULL				12
 
 typedef enum {
+	PLAYER_STATE_SPAWN,
 	PLAYER_STATE_IDLE,
-	PLAYER_STATE_WALKING,
-	PLAYER_STATE_JUMPING,
-	PLAYER_STATE_FALLING,
-	PLAYER_STATE_PUSHING,
-	PLAYER_STATE_ATTACKING,
-	PLAYER_STATE_CLIMBING,
+	PLAYER_STATE_WALK,
+	PLAYER_STATE_JUMP,
+	PLAYER_STATE_FALL,
+	PLAYER_STATE_ATTACK,
+	PLAYER_STATE_CLIMB,
+	PLAYER_STATE_PLATFORM,
 	PLAYER_STATE_HIT,
 	PLAYER_STATE_DIE,
-	PLAYER_STATE_TIMEOVER,
+	PLAYER_STATE_DROWN,
+	PLAYER_STATE_TIMEUP,
 	PLAYER_STATE_APPEAR,
 	PLAYER_STATE_DISAPPEAR,
-	PLAYER_STATE_DROWNING
+	PLAYER_STATE_VICTORY,
+	N_PLAYER_STATE
 } PlayerState;
 
 typedef enum {
@@ -88,7 +91,7 @@ typedef struct {
 void SetPlayerState(PlayerState state) BANKED;
 PlayerState GetPlayerState(void) BANKED;
 bool GetPlayerStateEquals(PlayerState ps) BANKED;
-AnimationState GetAnimationState(void) BANKED;
-void SetAnimationState(AnimationState state) BANKED;
+//AnimationState GetAnimationState(void) BANKED;
+//void SetAnimationState(AnimationState state) BANKED;
 
 #endif // SPRITEPLAYER_H
