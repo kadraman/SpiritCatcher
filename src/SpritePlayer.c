@@ -21,9 +21,9 @@ const UINT8 anim_walk_attack[] = {1, 20};
 const UINT8 anim_jump[] = {2, 6, 7};
 const UINT8 anim_fall[] = {1, 8};
 const UINT8 anim_jump_attack[] = {1, 20};
-const UINT8 anim_attack[] = {1, 20};
-const UINT8 anim_climb[] = {2, 21, 22};
-const UINT8 anim_climb_idle[] = {1, 21};
+const UINT8 anim_attack[] = {2, 19, 20};
+const UINT8 anim_climb[] = {2, 21, 22, 23};
+const UINT8 anim_climb_idle[] = {1, 22};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
 const UINT8 anim_die[] = {14, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12};
 const UINT8 anim_appear[] = {3, 15, 14, 13};
@@ -770,7 +770,8 @@ void UPDATE() {
 				CheckCollisionTile(THIS, THIS_IDX);
 				i = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
 			} else {
-				SetAnimationState(CLIMB_IDLE);
+				//EMU_printf("in here");
+				//SetAnimationState(CLIMB_IDLE);
 				//SetSpriteAnim(THIS, shoot_cooldown ? anim_ladder_idle_cooldown : anim_ladder_idle, 12u);
 			}
 			if (KEY_PRESSED(J_RIGHT)) {
@@ -780,8 +781,7 @@ void UPDATE() {
 			}
 
 			//Check the end of the ladder
-			if (i != TILE_INDEX_LADDER_LEFT && i != TILE_INDEX_LADDER_RIGHT)
-			{
+			if (i != TILE_INDEX_LADDER_LEFT && i != TILE_INDEX_LADDER_RIGHT) {
 				EMU_printf("SpritePlayer::UPDATE: off ladder: %i\n", i);
 				//TranslateSprite(THIS, 0, 1 << delta_time);
 				SetPlayerState(PLAYER_STATE_WALK);
@@ -790,7 +790,12 @@ void UPDATE() {
 
 			//Check jumping
 			if(KEY_TICKED(J_A)) {
-				Jump(THIS, THIS_IDX);
+				Jump();
+			}
+
+			if (keys == 0) {
+				EMU_printf("in here");
+				SetSpriteAnimFrame(THIS, 22);
 			}
 			break;
 		case PLAYER_STATE_HIT:

@@ -17,7 +17,8 @@
 #define	pInvincibleFlag			3	/* player is invincible, i.e. cannot lose a life */
 #define pAnimPlayingFlag		4	/* player animation is playing frames and needs to complete all of them */
 #define pCaughtSpiritFlag		5	/* player has caught the sprit */
-#define pOnPlatformFlag			6	/* player is on a (moving) platform */
+#define pOnPlatformFlag			6	/* player is on a platform */
+#define pOnLadder				7	/* player is on a ladder */
 
 #define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
 #define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 
