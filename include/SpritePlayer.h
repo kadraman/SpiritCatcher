@@ -62,24 +62,6 @@ typedef enum {
 	N_PLAYER_STATE
 } PlayerState;
 
-typedef enum {
-    NORMAL,
-	WALK,
-	WALK_IDLE,
-	JUMP,
-	FALL,
-	PUSH,
-    ATTACK,
-	CLIMB,
-	CLIMB_IDLE,
-    HIT,
-	DIE,
-	APPEAR,
-	DISAPPEAR,
-	DROWN,
-	VICTORY
-} AnimationState;
-
 typedef struct {
 	UINT8 flags;
 	UINT8 start_x;
@@ -91,8 +73,8 @@ typedef struct {
 
 void SetPlayerState(PlayerState state) BANKED;
 PlayerState GetPlayerState(void) BANKED;
+PlayerState GetPreviousPlayerState() BANKED;
+void SetPreviousPlayerState() BANKED;
 bool GetPlayerStateEquals(PlayerState ps) BANKED;
-//AnimationState GetAnimationState(void) BANKED;
-//void SetAnimationState(AnimationState state) BANKED;
 
 #endif // SPRITEPLAYER_H

@@ -22,7 +22,7 @@ const UINT8 anim_jump[] = {2, 6, 7};
 const UINT8 anim_fall[] = {1, 8};
 const UINT8 anim_jump_attack[] = {1, 20};
 const UINT8 anim_attack[] = {2, 19, 20};
-const UINT8 anim_climb[] = {2, 21, 22, 23};
+const UINT8 anim_climb[] = {3, 21, 22, 23};
 const UINT8 anim_climb_idle[] = {1, 22};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
 const UINT8 anim_die[] = {14, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12};
@@ -48,14 +48,14 @@ UINT8 reset_x;
 UINT8 reset_y;
 UINT8 magix_cooldown;
 UINT8 magix_recharge;
-UINT8 pause_secs;
-UINT8 pause_ticks;
 UINT8 invincible_secs;
 UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
 UINT8 player_spawned;
 UINT8 visible_skip;
 UINT8 tile_collision;
+
+UINT8 adjacent_tile;
 
 extern UINT16 timer_countdown;
 extern UINT16 level_max_time;
@@ -71,12 +71,7 @@ void SetPlayerState(PlayerState state) BANKED {
 		case PLAYER_STATE_SPAWN:
 			SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
 		case PLAYER_STATE_IDLE:
-			if (FLAG_CHECK(data->flags, pGroundedFlag)) {
-				SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED);
-			} else {
-				SetSpriteAnim(THIS, anim_climb_idle, DEFAULT_ANIM_SPEED);
-			}
-			break;
+			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_WALK:
 			SetSpriteAnim(THIS, anim_walk, WALK_ANIM_SPEED); break;
 		case PLAYER_STATE_JUMP:
@@ -109,12 +104,16 @@ PlayerState GetPlayerState(void) BANKED {
 	return curPlayerState;
 }
 
-bool GetPlayerStateEquals(PlayerState ps) BANKED {
-	return curPlayerState == ps;
+PlayerState GetPreviousPlayerState() BANKED {
+	return prevPlayerState;
 }
 
 void SetPreviousPlayerState() BANKED {
 	SetPlayerState(prevPlayerState);
+}
+
+bool GetPlayerStateEquals(PlayerState ps) BANKED {
+	return curPlayerState == ps;
 }
 
 UINT8 GetLastAnimFrame() BANKED {
@@ -227,6 +226,7 @@ void CheckOnPlatform() {
 }
 
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
+	//EMU_printf("tile collision: %d\n", tile_collision);
 	switch (tile_collision) {
 		case TILE_INDEX_SPIKE_UP:
 		case TILE_INDEX_SPIKE_DOWN:
@@ -257,7 +257,6 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
 	}
 	if (tile_collision) {
-		//EMU_printf("tile collision: %d\n", tile_collision);
 		accel_y = 0;
 		//SetPlayerState(PLAYER_STATE_IDLE);
 		FLAG_SET(data->flags, pGroundedFlag);
@@ -304,32 +303,21 @@ void ApplyMovementX(Sprite* sprite, UINT8 idx) {
 	}
 }
 
-void ClimbLadder(Sprite* sprite, UINT8 idx) {
-	accel_y = 0;
-	UINT8 i = TILE_INDEX_LADDER_LEFT;
+void CheckCanClimb() {
 	if (KEY_PRESSED(J_UP)) {
-		tile_collision = TranslateSprite(THIS, 0, -1 << delta_time);
-		CheckCollisionTile(THIS, THIS_IDX);
-		i = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
+		adjacent_tile = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 4u) >> 3);
+		if (adjacent_tile == TILE_INDEX_LADDER_LEFT || adjacent_tile == TILE_INDEX_LADDER_RIGHT) {
+			THIS->y = THIS->y - 1u;
+			accel_y = 0;
+			SetPlayerState(PLAYER_STATE_CLIMB);
+		}
 	} else if (KEY_PRESSED(J_DOWN)) {
-		tile_collision = TranslateSprite(THIS, 0, 1 << delta_time);
-		CheckCollisionTile(THIS, THIS_IDX);
-		i = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
-	} else {
-		//SetAnimationState(CLIMB_IDLE);
-	}
-	if (KEY_PRESSED(J_RIGHT)) {
-		THIS->mirror = NO_MIRROR;
-	} else if(KEY_PRESSED(J_LEFT)) {
-		THIS->mirror = V_MIRROR;
-	}
-
-	//Check the end of the ladder
-	if (i != TILE_INDEX_LADDER_LEFT && i != TILE_INDEX_LADDER_RIGHT)
-	{
-		EMU_printf("SpritePlayer::UPDATE: off ladder: %i\n", i);
-		//TranslateSprite(THIS, 0, 1 << delta_time);
-		SetPlayerState(PLAYER_STATE_WALK);
+		adjacent_tile = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
+		if (adjacent_tile == TILE_INDEX_LADDER_LEFT || adjacent_tile == TILE_INDEX_LADDER_RIGHT) {
+			THIS->y = THIS->y + 1u;
+			accel_y = 0;
+			SetPlayerState(PLAYER_STATE_CLIMB);
+		}
 	}
 }
 
@@ -343,7 +331,6 @@ void START() {
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
-	//data->lives = MAX_LIVES;
 	data->magix = 12;
 	data->coins = 0;
 	accel_y = 0;
@@ -356,14 +343,11 @@ void START() {
 	reset_y = 80;
 	attack1_sprite = 0;
 	anim_hit_counter = 0;
-	pause_secs = 0;
-	pause_ticks = 0;
 	visible_skip = 0;
 	tile_collision = 0;
 	SetPlayerState(PLAYER_STATE_SPAWN);
 }
 
-UINT8 adjacent_tile;
 void UpdateSpawn() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
 	if (THIS->anim_frame == GetLastAnimFrame()) {
@@ -377,23 +361,7 @@ void UpdateIdle() {
 	if (KEY_PRESSED(J_RIGHT) || KEY_PRESSED(J_LEFT)) {
 		SetPlayerState(PLAYER_STATE_WALK);
 	}
-	if (KEY_PRESSED(J_UP)) {
-		adjacent_tile = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 4u) >> 3);
-		if (adjacent_tile == TILE_INDEX_LADDER_LEFT || adjacent_tile == TILE_INDEX_LADDER_RIGHT) {
-			//EMU_printf("SpritePlayer::PRESSED_UP: climbing up: %d:%d\n", (THIS->x + 8u) >> 3, (THIS->y + 4u) >> 3);
-			THIS->y = THIS->y - 1u;
-			accel_y = 0;
-			SetPlayerState(PLAYER_STATE_CLIMB);
-		}
-	} else if (KEY_PRESSED(J_DOWN)) {
-		adjacent_tile = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
-		if (adjacent_tile == TILE_INDEX_LADDER_LEFT || adjacent_tile == TILE_INDEX_LADDER_RIGHT) {
-			//EMU_printf("SpritePlayer::PRESSED_DOWN: climbing down: %d:%d\n", (THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
-			THIS->y = THIS->y + 1u;
-			accel_y = 0;
-			SetPlayerState(PLAYER_STATE_CLIMB);
-		}
-	}
+	CheckCanClimb();
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag) || FLAG_CHECK(data->flags, pOnPlatformFlag))) {
 		Jump(THIS, THIS_IDX);
 	}
@@ -407,6 +375,7 @@ void UpdateWalking() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	ApplyMovementX(THIS, THIS_IDX);
 	ApplyGravity(THIS, THIS_IDX);
+	CheckCanClimb();
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag))) {
 		Jump(THIS, THIS_IDX);
 	}
@@ -448,6 +417,11 @@ void UpdateFalling() {
 }
 void UpdateAttacking() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	if (prevPlayerState != PLAYER_STATE_CLIMB) {
+		ApplyMovementX(THIS, THIS_IDX);
+		ApplyGravity(THIS, THIS_IDX);
+	}
 	//UpdateAttackPos();
 	if (THIS->anim_frame == GetLastAnimFrame()) {
 		SetPlayerState(prevPlayerState);
@@ -455,7 +429,41 @@ void UpdateAttacking() {
 }
 void UpdateClimbing(void) {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
-	ClimbLadder(THIS, THIS_IDX);
+	UINT8 i = TILE_INDEX_LADDER_LEFT;
+	if (KEY_PRESSED(J_UP)) {
+		SetSpriteAnim(THIS, anim_climb, DEFAULT_ANIM_SPEED);
+		tile_collision = TranslateSprite(THIS, 0, -1 << delta_time);
+		CheckCollisionTile(THIS, THIS_IDX);
+		if (tile_collision == TILE_INDEX_LADDER_LEFT || tile_collision == TILE_INDEX_LADDER_RIGHT) {
+			THIS->y = THIS->y - 1;
+		}
+		i = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
+	} else if (KEY_PRESSED(J_DOWN)) {
+		SetSpriteAnim(THIS, anim_climb, DEFAULT_ANIM_SPEED);
+		tile_collision = TranslateSprite(THIS, 0, 1 << delta_time);
+		CheckCollisionTile(THIS, THIS_IDX);
+		if (tile_collision == TILE_INDEX_LADDER_LEFT || tile_collision == TILE_INDEX_LADDER_RIGHT) {
+			THIS->y = THIS->y + 1;
+		}
+		i = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
+	} else {
+		SetSpriteAnim(THIS, anim_climb_idle, DEFAULT_ANIM_SPEED);
+	}
+	if (KEY_PRESSED(J_RIGHT)) {
+		THIS->mirror = NO_MIRROR;
+	} else if(KEY_PRESSED(J_LEFT)) {
+		THIS->mirror = V_MIRROR;
+	}
+
+	//Check the end of the ladder
+	if (i != TILE_INDEX_LADDER_LEFT && i != TILE_INDEX_LADDER_RIGHT)
+	{
+		//TranslateSprite(THIS, 0, 1 << delta_time);
+		SetPlayerState(PLAYER_STATE_IDLE);
+	}
+	if (KEY_TICKED(J_A)) {
+		Jump(THIS, THIS_IDX);
+	}
 	if (KEY_TICKED(J_B)) {
 		Magix();
 	}
@@ -536,16 +544,6 @@ void UPDATE() {
 	update_hooks[curPlayerState]();
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 
-	// pause
-	if (pause_secs) {
-		pause_ticks++;
-		if (pause_ticks == 25) {
-			pause_ticks = 0;
-			pause_secs--;
-		}
-		return;
-	}
-
 	// invincible
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) {
 		SetVisible(THIS, visible_skip++);
@@ -606,13 +604,13 @@ void UPDATE() {
 		Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom) {
 			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pInvincibleFlag))) {
-				//Hit(THIS, THIS_IDX);
+				Hit(THIS, THIS_IDX);
 			}
 		}
 		if (spr->type == SpritePlatform) {
 			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pOnPlatformFlag))) {
 				// player above platform
-				if (THIS->y <= spr->y) {
+				if (THIS->y <= spr->y && !(GetPlayerState() == PLAYER_STATE_DROWN)) {
 					//EMU_printf("SpritePlayer::player x:%d,y%d collided with platform: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 					FLAG_SET(data->flags, pOnPlatformFlag);
 					FLAG_SET(data->flags, pGroundedFlag);
@@ -627,7 +625,6 @@ void UPDATE() {
 				SetPlayerState(PLAYER_STATE_VICTORY);
 				FLAG_SET(data->flags, pAnimPlayingFlag);
 				level_complete = true;
-				//pause_secs = 5;
 			}
 		}
 	}
