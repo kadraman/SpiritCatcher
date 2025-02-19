@@ -1,6 +1,9 @@
 #!/bin/sh
 
+BUILD_TYPE=Debug
+#BUILD_TYPE=Release
+
 cd src
-make gbc-clean
+make BUILD_TYPE=$BUILD_TYPE gbc-clean
 cd ..
 rm -rf obj

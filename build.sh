@@ -1,5 +1,8 @@
 #!/bin/sh
 
+BUILD_TYPE=Debug
+#BUILD_TYPE=Release
+
 cd src
-make gbc
+make BUILD_TYPE=$BUILD_TYPE gbc
 cd ..

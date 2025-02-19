@@ -54,8 +54,8 @@ void UPDATE() {
         SetSpriteAnim(THIS, anim_bat_attack, 5u);
         if (frame_skip == ATTACK_DELAY) {
             INT16 e2 = data->err << 1;
-            if (e2 > data->dy) { data->err += data->dy; THIS->x += data->sx; }
-            if (e2 < data->dx) { data->err += data->dx; THIS->y += data->sy; }
+            if (e2 > data->dy) { data->err += data->dy; THIS->x += data->sx << delta_time; }
+            if (e2 < data->dx) { data->err += data->dx; THIS->y += data->sy << delta_time; }
             frame_skip = 0;
         } else {
             frame_skip++;

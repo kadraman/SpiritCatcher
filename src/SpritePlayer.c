@@ -250,11 +250,11 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 	if (accel_y < Y_SPEED_MAX && !FLAG_CHECK(data->flags, pOnPlatformFlag)) {
 		accel_y += Y_GRAVITY;
 	}
-	tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
+	tile_collision = TranslateSprite(THIS, 0, accel_y >> 6 << delta_time);
 	if (!tile_collision && delta_time != 0 && accel_y < Y_SPEED_MAX) { 
 		//do another iteration if there is no collision
 		accel_y += Y_GRAVITY;
-		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6);
+		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6 << delta_time);
 	}
 	if (tile_collision) {
 		accel_y = 0;
@@ -268,11 +268,11 @@ void AddDampening(Sprite* sprite, UINT8 idx) {
 	if (accel_x > 0) {
 		accel_x -= X_DAMPENING;
 		x_inc = accel_x >> 6;
-		tile_collision = TranslateSprite(sprite, x_inc, 0);
+		tile_collision = TranslateSprite(sprite, x_inc << delta_time, 0);
 	} else if (accel_x < 0) {
 		accel_x += X_DAMPENING;
 		x_inc = abs(accel_x) >> 6;
-		tile_collision = TranslateSprite(sprite, -x_inc, 0);
+		tile_collision = TranslateSprite(sprite, -x_inc << delta_time, 0);
 	}
 	CheckCollisionTile(sprite, idx);
 }
@@ -282,7 +282,7 @@ void ApplyMovementX(Sprite* sprite, UINT8 idx) {
 	if (KEY_PRESSED(J_RIGHT)) {
 		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
 		x_inc = accel_x >> 6;	
-		tile_collision = TranslateSprite(THIS, x_inc, 0);
+		tile_collision = TranslateSprite(THIS, x_inc << delta_time, 0);
 		CheckCollisionTile(THIS, THIS_IDX);
 		THIS->mirror = NO_MIRROR;
 		//CheckOnPlatform();
@@ -292,7 +292,7 @@ void ApplyMovementX(Sprite* sprite, UINT8 idx) {
 		if (THIS->x - x_inc < min_x) {
 			x_inc = accel_x = 0;
 		}
-		tile_collision = TranslateSprite(THIS, -x_inc, 0);
+		tile_collision = TranslateSprite(THIS, -x_inc << delta_time, 0);
 		CheckCollisionTile(THIS, THIS_IDX);
 		THIS->mirror = V_MIRROR;
 		//CheckOnPlatform();
