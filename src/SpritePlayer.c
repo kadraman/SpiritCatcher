@@ -51,7 +51,6 @@ UINT8 magix_recharge;
 UINT8 invincible_secs;
 UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
-UINT8 player_spawned;
 UINT8 visible_skip;
 UINT8 tile_collision;
 
@@ -336,7 +335,6 @@ void START() {
 	accel_y = 0;
 	accel_x = 0;
 	magix_cooldown = 0;
-	player_spawned = true;
 	level_complete = false;
 	scroll_target = THIS;
 	reset_x = 20;
@@ -604,6 +602,7 @@ void UPDATE() {
 		Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom) {
 			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pInvincibleFlag))) {
+				//EMU_printf("SpritePlayer::player x:%d,y%d collided with enemy: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				Hit(THIS, THIS_IDX);
 			}
 		}
@@ -620,7 +619,8 @@ void UPDATE() {
 			}
 		}
 		if (spr->type == SpritePortal) {
-			if (CheckCollision(THIS, spr) && !player_spawned && FLAG_CHECK(data->flags, pCaughtSpiritFlag) && THIS->x > 16) {
+			if (CheckCollision(THIS, spr) && FLAG_CHECK(data->flags, pCaughtSpiritFlag) && THIS->x > 50) {
+				//EMU_printf("SpritePlayer::player x:%d,y%d collided with portal: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				THIS->x = spr->x-8;
 				SetPlayerState(PLAYER_STATE_VICTORY);
 				FLAG_SET(data->flags, pAnimPlayingFlag);
