@@ -17,7 +17,7 @@ _SPRITE(SpriteBat,      bat,        FLIP_NONE)\
 _SPRITE(SpriteSlime,    slime,      FLIP_NONE)\
 _SPRITE(SpriteSpirit,   spirit,     FLIP_NONE)\
 _SPRITE(SpriteCoin,     coin,       FLIP_NONE)\
-_SPRITE(SpritePortal,   portal,     FLIP_NONE)\
+_SPRITE(SpriteJewell,   jewell,     FLIP_NONE)\
 _SPRITE(SpritePlayer,   player,     FLIP_NONE)\
 _SPRITE(SpriteMagix,    magix,      FLIP_NONE)\
 _SPRITE(SpriteParticle, particles,  FLIP_NONE)\

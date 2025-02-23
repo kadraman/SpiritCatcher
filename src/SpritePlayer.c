@@ -121,7 +121,7 @@ UINT8 GetLastAnimFrame() BANKED {
 
 void UpdateAttackPos() {
 	attack1_sprite->mirror = THIS->mirror;
-	if(THIS->mirror == V_MIRROR) 
+	if (THIS->mirror == V_MIRROR) 
 		attack1_sprite->x = THIS->x - 14u;
 	else
 		attack1_sprite->x = THIS->x + 14u; 
@@ -320,6 +320,31 @@ void CheckCanClimb() {
 	}
 }
 
+void CheckLevelComplete() {
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	// if the spirit has not been caught we can ignore
+	if (!FLAG_CHECK(data->flags, pCaughtSpiritFlag)) return;
+	if (THIS->mirror == NO_MIRROR) {
+		// moving right
+		adjacent_tile = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y) >> 3);
+		if (adjacent_tile >= TILE_INDEX_PORTAL_TOPLEFT && adjacent_tile <= TILE_INDEX_PORTAL_BOTTOMRIGHT) {
+			THIS->x = THIS->x + 8u;
+			accel_y = 0;
+			//level_complete = true;
+			SetPlayerState(PLAYER_STATE_VICTORY);
+		}
+	} else { // THIS->mirror == V_MIRROR
+		// moving left
+		adjacent_tile = GetScrollTile((THIS->x - 8u) >> 3, (THIS->y) >> 3);
+		if (adjacent_tile >= TILE_INDEX_PORTAL_TOPLEFT && adjacent_tile <= TILE_INDEX_PORTAL_BOTTOMRIGHT) {
+			THIS->x = THIS->x - 8u;
+			accel_y = 0;
+			//level_complete = true;
+			SetPlayerState(PLAYER_STATE_VICTORY);
+		}
+	}
+}
+
 //
 
 void START() {
@@ -360,6 +385,7 @@ void UpdateIdle() {
 		SetPlayerState(PLAYER_STATE_WALK);
 	}
 	CheckCanClimb();
+	CheckLevelComplete();
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag) || FLAG_CHECK(data->flags, pOnPlatformFlag))) {
 		Jump(THIS, THIS_IDX);
 	}
@@ -374,6 +400,7 @@ void UpdateWalking() {
 	ApplyMovementX(THIS, THIS_IDX);
 	ApplyGravity(THIS, THIS_IDX);
 	CheckCanClimb();
+	CheckLevelComplete();
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag))) {
 		Jump(THIS, THIS_IDX);
 	}
@@ -393,6 +420,7 @@ void UpdateJumping() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
 	ApplyMovementX(THIS, THIS_IDX);
 	ApplyGravity(THIS, THIS_IDX);
+	CheckLevelComplete();
 	// check if now FALLING?
 	if ((accel_y >> 6) > 1) {
 		SetPlayerState(PLAYER_STATE_FALL);
@@ -406,6 +434,7 @@ void UpdateFalling() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	ApplyMovementX(THIS, THIS_IDX);
 	ApplyGravity(THIS, THIS_IDX);
+	CheckLevelComplete();
 	if ((FLAG_CHECK(data->flags, pGroundedFlag))) {
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
@@ -518,6 +547,19 @@ void UpdateTimeUp(void) {
 }
 void UpdateVictory(void) {
 	EMU_printf("SpritePlayer::%s\n", __func__);
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	accel_x = accel_y = 0;
+	// update global dead variable once animation has compelted
+	if (THIS->anim_frame == GetLastAnimFrame()) {
+		level_complete = true;
+		/*if (g_level_current == MAX_LEVEL) {
+			SetState(StateWin);
+			HIDE_WIN;
+		} else {
+			g_level_current++;
+			SetState(StateGame);
+		}*/
+	}
 }
 
 // update hooks
@@ -572,8 +614,8 @@ void UPDATE() {
 	}
 
 	// level complete
-	if (level_complete) {
-		if (THIS->anim_frame == 2) {
+	/*if (level_complete) {
+		if (THIS->anim_frame == GetLastAnimFrame()) {
 			FLAG_CLEAR(data->flags, pAnimPlayingFlag);
 			if (g_level_current == MAX_LEVEL) {
 				SetState(StateWin);
@@ -584,7 +626,7 @@ void UPDATE() {
 			}
 		}
 		return;
-	}
+	}*/
 
 	// use / recharge magix
 	if (magix_cooldown) {
@@ -618,7 +660,7 @@ void UPDATE() {
 				}
 			}
 		}
-		if (spr->type == SpritePortal) {
+		/*if (spr->type == SpritePortal) {
 			if (CheckCollision(THIS, spr) && FLAG_CHECK(data->flags, pCaughtSpiritFlag) && THIS->x > 50) {
 				//EMU_printf("SpritePlayer::player x:%d,y%d collided with portal: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				THIS->x = spr->x-8;
@@ -626,7 +668,7 @@ void UPDATE() {
 				FLAG_SET(data->flags, pAnimPlayingFlag);
 				level_complete = true;
 			}
-		}
+		}*/
 	}
 
 }
