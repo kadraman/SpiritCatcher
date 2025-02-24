@@ -14,23 +14,13 @@ UINT8 next_state = StateGame;
 
 UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
 	if (current_state == StateGame) {
-		if (*tile_ptr > (255u - N_SPRITE_TYPES)) {
+		if(U_LESS_THAN(255 - (UINT16)*tile_ptr, N_SPRITE_TYPES)) {
+			// tile to the right (+1) will be the new background
+			*tile = *(tile_ptr+1);
 			EMU_printf("Replacing tile: %d:%d with %d\n", *tile_ptr, *tile, 255 - (UINT16)*tile_ptr);
-			*tile = (*(tile_ptr + 1));
-			EMU_printf("Replacing tile: %d:%d with %d\n", *tile_ptr, *tile, 255 - (UINT16)*tile_ptr);
-
-			return 255 - *tile_ptr;
-		} else {
-			*tile = *tile_ptr;
-			return 255u;
+			return 255 - (UINT16)*tile_ptr;
 		}
-		//if (U_LESS_THAN(255  - (UINT16)*tile_ptr, N_SPRITE_TYPES)) {
-		//	*tile = *tile_ptr;
-		//	EMU_printf("Replacing tile: %d %d with %d\n", *tile_ptr, *tile, 255 - (UINT16)*tile_ptr);
-		//	return 255 - (UINT16)*tile_ptr;
-		//}
-		//*tile = *tile_ptr;*/
-		//return (*tile_ptr > (255u - N_SPRITE_TYPES)) ? ((*tile = 0), (255u - *tile_ptr)) : ((*tile = *tile_ptr), 255);
+		*tile = *tile_ptr;
 	}
 	return 255u;
 }
