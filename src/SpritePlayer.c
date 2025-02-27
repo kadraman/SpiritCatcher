@@ -206,21 +206,29 @@ void Magix() {
 	// reset cooldown/coolup
 	magix_cooldown = MAGIX_COOLDOWN_TIME;
 	magix_recharge = MAGIX_RECHARGE_TIME;
+	SetPlayerState(prevPlayerState);
 }
 
 void CheckOnPlatform() {
 	// TODO: optimise this
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	for (UINT8 i = 0u; i != sprite_manager_updatables[0]; ++i) {
-		Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-		if (spr->type == SpritePlatform) {
-			if (CheckCollision(THIS, spr)) {
-				FLAG_SET(data->flags, pOnPlatformFlag);
-				SetPlayerState(PLAYER_STATE_PLATFORM);
-			} else {
-				FLAG_CLEAR(data->flags, pOnPlatformFlag);
+	if (FLAG_CHECK(data->flags, pOnPlatformFlag)) {
+
+		for (UINT8 i = 0u; i != sprite_manager_updatables[0]; ++i) {
+			Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
+			if (spr->type == SpritePlatform) {
+				if (CheckCollision(THIS, spr)) {
+					EMU_printf("player on platform\n", tile_collision);
+					FLAG_SET(data->flags, pOnPlatformFlag);
+					SetPlayerState(PLAYER_STATE_PLATFORM);
+				} else {
+					EMU_printf("player off platform\n", tile_collision);
+					FLAG_CLEAR(data->flags, pOnPlatformFlag);
+					SetPlayerState(PLAYER_STATE_IDLE);
+				}
 			}
 		}
+
 	}
 }
 
@@ -552,13 +560,6 @@ void UpdateVictory(void) {
 	// update global dead variable once animation has compelted
 	if (THIS->anim_frame == GetLastAnimFrame()) {
 		level_complete = true;
-		/*if (g_level_current == MAX_LEVEL) {
-			SetState(StateWin);
-			HIDE_WIN;
-		} else {
-			g_level_current++;
-			SetState(StateGame);
-		}*/
 	}
 }
 
@@ -612,21 +613,6 @@ void UPDATE() {
 		SetState(StateTimeUp);
 		HIDE_WIN;
 	}
-
-	// level complete
-	/*if (level_complete) {
-		if (THIS->anim_frame == GetLastAnimFrame()) {
-			FLAG_CLEAR(data->flags, pAnimPlayingFlag);
-			if (g_level_current == MAX_LEVEL) {
-				SetState(StateWin);
-				HIDE_WIN;
-			} else {
-				g_level_current++;
-				SetState(StateGame);
-			}
-		}
-		return;
-	}*/
 
 	// use / recharge magix
 	if (magix_cooldown) {
