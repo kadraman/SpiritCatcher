@@ -6,7 +6,7 @@
 
 #include "GameTypes.h"
 
-const UINT8 anim_jewell[] = {1, 0};
+const UINT8 anim_mana[] = {1, 0};
 
 extern Sprite* player_sprite;
 extern UINT8 item_collected;
@@ -26,7 +26,7 @@ void START() {
 		data->start_y = THIS->y;
 		data->frame = 0;
 	}
-	SetSpriteAnim(THIS, anim_jewell, 20u);
+	SetSpriteAnim(THIS, anim_mana, 20u);
 	//SetFrame(THIS, (((THIS->x >> 3) & 0x2) == 0) ? 0 : 1);
 }
 

@@ -9,9 +9,6 @@
 
 #include "GameTypes.h"
 
-#define DEFAULT_ANIM_SPEED		10u
-#define DISAPPEAR_ANIM_SPEED 	10u
-
 const UINT8 anim_portal_appear[] = VECTOR(10, 6, 6, 5, 4, 3, 2, 1, 5, 6, 6);
 const UINT8 anim_portal_stable[] = VECTOR(5, 0, 1, 2, 3, 4);
 const UINT8 anim_portal_disappear[] = VECTOR(3, 5, 6, 6);
@@ -44,21 +41,21 @@ void UPDATE() {
 	if (FLAG_CHECK(player_data->flags, pCaughtSpiritFlag)) {
 		THIS->visible = true;
 		data->stable = true;
-		EMU_printf("SpritePortal::%s portal visible\n", __func__);
+		//EMU_printf("SpritePortal::%s portal visible\n", __func__);
 		//SetSpriteAnim(THIS, anim_portal_stable, DEFAULT_ANIM_SPEED);
 	} else {
-		EMU_printf("SpritePortal::%s portal not visible\n", __func__);
+		//EMU_printf("SpritePortal::%s portal not visible\n", __func__);
 	}
 	// if exit portal and not set to disappear change animation state
 	if (level_complete && THIS->visible) {
-		EMU_printf("SpritePortal::%s level complete - portal disappearing\n", __func__);
+		//EMU_printf("SpritePortal::%s level complete - portal disappearing\n", __func__);
 		data->stable = false;
 		data->disappear = true;
 		SetSpriteAnim(THIS, anim_portal_disappear, DISAPPEAR_ANIM_SPEED);
 	}
 	// if exit portal remove it after X frames
 	if (level_complete && data->disappear && THIS->anim_frame == VECTOR_LEN(anim_portal_disappear)-1) {
-		EMU_printf("SpritePortal::%s level complete - portal remove\n", __func__);
+		//EMU_printf("SpritePortal::%s level complete - portal remove\n", __func__);
 		TakeCollectable(THIS, ITEM_PORTAL);
 		SpriteManagerRemove(THIS_IDX);
 	}

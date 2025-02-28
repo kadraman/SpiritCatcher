@@ -47,7 +47,7 @@ struct MapInfoBanked {
 };
 
 const struct MapInfoBanked levels[] = {
-	BANKED_MAP(l1, 2, 104, 120),
+	BANKED_MAP(l1, 2, 104, 240),
 
 	LEVELS_END
 };
@@ -128,6 +128,10 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 	collectables_taken[++ collectables_taken[0]] = collectable->unique_id;
 	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
 	switch (itype) {
+		case ITEM_MANA:
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			player_data->magix++;
+			break;
 		case ITEM_COIN:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 			player_data->coins++;

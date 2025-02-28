@@ -139,18 +139,18 @@ void Jump(Sprite* sprite, UINT8 idx) {
 
 void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
+	if (GetPlayerState() == PLAYER_STATE_HIT) return;
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
-	if (--g_player_lives <= 0) {
+	if (g_player_lives == 1) { // last life
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-		FLAG_SET(data->flags, pAnimPlayingFlag);
 		//invincible_secs = 10;
 	} else {
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-		FLAG_SET(data->flags, pAnimPlayingFlag);
 		FLAG_SET(data->flags, pInvincibleFlag);
-		invincible_secs = 3;
+		g_player_lives--;
+		invincible_secs = 5;
 	}
 	Hud_Update();	
 }
@@ -160,26 +160,8 @@ void Drown(Sprite* sprite, UINT8 idx) {
 	if (GetPlayerState() == PLAYER_STATE_DROWN) return;
 	SetPlayerState(PLAYER_STATE_DROWN);
 	PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-	FLAG_SET(data->flags, pAnimPlayingFlag);
 	//THIS->y = THIS->y + 1;
 	//invincible_secs = 10;
-}
-
-void Collected(Sprite* sprite, ItemType itype, UINT8 idx) {
-	PlayerData* data = (PlayerData*)THIS->custom_data;
-	switch (itype) {
-		case ITEM_COIN:
-			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-			data->coins++;
-			break;
-		case ITEM_SPIRIT:
-			FLAG_SET(data->flags, pCaughtSpiritFlag);
-			PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
-			break;
-		default:
-			break;
-	}
-	Hud_Update();
 }
 
 void Attack() {
@@ -218,11 +200,11 @@ void CheckOnPlatform() {
 			Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 			if (spr->type == SpritePlatform) {
 				if (CheckCollision(THIS, spr)) {
-					EMU_printf("player on platform\n", tile_collision);
+					//EMU_printf("player on platform\n", tile_collision);
 					FLAG_SET(data->flags, pOnPlatformFlag);
 					SetPlayerState(PLAYER_STATE_PLATFORM);
 				} else {
-					EMU_printf("player off platform\n", tile_collision);
+					//EMU_printf("player off platform\n", tile_collision);
 					FLAG_CLEAR(data->flags, pOnPlatformFlag);
 					SetPlayerState(PLAYER_STATE_IDLE);
 				}
@@ -534,7 +516,6 @@ void UpdateDie(void) {
 	accel_x = 0;
 	// update global dead variable once animation has completed
 	if (THIS->anim_frame == GetLastAnimFrame()) {
-		//EMU_printf("SpritePlayer::UPDATE: player has died in state: %d\n", GetPlayerState());
 		FLAG_SET(data->flags, pDeadFlag);
 		g_player_dead = true;
 	}
@@ -646,15 +627,14 @@ void UPDATE() {
 				}
 			}
 		}
-		/*if (spr->type == SpritePortal) {
+		if (spr->type == SpritePortal) {
 			if (CheckCollision(THIS, spr) && FLAG_CHECK(data->flags, pCaughtSpiritFlag) && THIS->x > 50) {
 				//EMU_printf("SpritePlayer::player x:%d,y%d collided with portal: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				THIS->x = spr->x-8;
 				SetPlayerState(PLAYER_STATE_VICTORY);
-				FLAG_SET(data->flags, pAnimPlayingFlag);
 				level_complete = true;
 			}
-		}*/
+		}
 	}
 
 }

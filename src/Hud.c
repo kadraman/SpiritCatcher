@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <gbdk/emu_debug.h>
 
 #include "Banks/SetAutoBank.h"
 #include <gbdk/platform.h>
@@ -28,6 +29,7 @@ extern INT16 accel_x, accel_y;
 extern UINT16 x_inc, y_inc;
 
 void Hud_Init(void) BANKED {
+    //EMU_printf("Hud::%s lives:%d\n", __func__, g_player_lives);
 #ifdef DEBUG_HUD
     IMPORT_MAP(debughud);
     INIT_HUD(debughud);
@@ -139,6 +141,7 @@ void Hud_Update(void) BANKED {
     }
 
     if (last_lives != g_player_lives) {
+        //EMU_printf("Hud::%s lives:%d\n", __func__, g_player_lives);
         last_lives = g_player_lives;
         for (UINT8 i = 0; i < MAX_LIVES; ++i) {
             UPDATE_HUD_TILE(19 - i, 0, i < g_player_lives ? 18 : 19);

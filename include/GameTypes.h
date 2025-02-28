@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#define MAX_LIVES 6
+#define MAX_LIVES 5
 #define MAX_LEVEL 1
 
 extern UINT16	g_player_score;
@@ -18,9 +18,10 @@ typedef struct {
 
 typedef enum {
 	ITEM_PORTAL,
+	ITEM_MANA,
+	ITEM_SPIRIT,
 	ITEM_COIN,
-	ITEM_BULLET,
-	ITEM_SPIRIT
+	ITEM_BULLET
 } ItemType;
 
 #endif // GAMETYPES_H
