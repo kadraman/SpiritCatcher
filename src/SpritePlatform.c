@@ -34,7 +34,7 @@ void UPDATE() {
 		if (THIS->mirror == V_MIRROR) {
 			//moving left
 			//EMU_printf("SpritePlatform::UPDATE: moving left: %d:%d\n", (THIS->x >> 3), (THIS->y >> 3));
-			//UINT8 tile = GetScrollTile((THIS->x >> 3) - 2u, (THIS->y >> 3));
+			//UINT8 tile = GetScrollTile((THIS->x >> 3) - 4u, (THIS->y >> 3));
 			//EMU_printf("SpritePlatform::UPDATE: scroll tile: %d\n", tile);
 			if (TranslateSprite(THIS, -1 << delta_time, 0)) {
 				THIS->mirror = NO_MIRROR;
@@ -45,12 +45,12 @@ void UPDATE() {
 		} else {
 			//moving right
 			//EMU_printf("SpritePlatform::UPDATE: moving right: %d:%d\n", ((THIS->x + THIS->coll_w) >> 3), (THIS->y >> 3));
-			//UINT8 tile = GetScrollTile(((THIS->x + THIS->coll_w) >> 3), (THIS->y >> 3));
+			//UINT8 tile = GetScrollTile(((THIS->x + THIS->coll_w) >> 3) + 4u, (THIS->y >> 3));
 			//EMU_printf("SpritePlatform::UPDATE: scroll tile: %d\n", tile);
 			if (TranslateSprite(THIS, +1 << delta_time, 0)) {
 				THIS->mirror = V_MIRROR;
 			}
-			if (FLAG_CHECK(player_data->flags, pOnPlatformFlag)) {
+			if (FLAG_CHECK(player_data->flags, pOnPlatformFlag) && tile == TILE_IN) {
 				TranslateSprite(player_sprite, +1 << delta_time, 0);
 			}
 		}

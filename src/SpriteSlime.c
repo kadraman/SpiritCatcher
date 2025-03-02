@@ -22,7 +22,7 @@ void START() {
 
 void UPDATE() {
 	struct EnemyInfo* data = (struct EnemyInfo*)THIS->custom_data;
-	if (THIS->anim_frame > 1 && THIS->anim_frame < 7) return;
+	//if (THIS->anim_frame > 1 && THIS->anim_frame < 7) return;
 	if (!data->wait) {
 		if (THIS->mirror == V_MIRROR) {
 			//moving left

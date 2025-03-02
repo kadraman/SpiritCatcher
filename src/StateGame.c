@@ -18,10 +18,10 @@
 #include "GameTypes.h"
 
 UINT8 g_level_current = 1;
-UINT8 g_player_lives = MAX_LIVES; 
+UINT8 g_player_lives; 
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
-bool level_complete;
+bool g_level_complete;
 bool g_player_dead;
 
 extern UINT16 collectables_taken[];
@@ -78,7 +78,8 @@ void START() {
 	scroll_top_movement_limit = 72;
 	scroll_bottom_movement_limit = 110;
 	level_max_time = level->seconds;
-	level_complete = false;
+	g_level_complete = false;
+	g_player_lives = MAX_LIVES;
 	g_player_dead = false;
 	min_x = min_y = 1;
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
@@ -95,13 +96,14 @@ void START() {
 void UPDATE() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	if (g_player_dead) {
-		EMU_printf("StateGame::UPDATE: player is dead\n");
+		//EMU_printf("StateGame::UPDATE: player is dead\n");
+		HIDE_HUD;
 		SpriteManagerRemoveSprite(player_sprite);
 		SpriteManagerFlushRemove();
 		player_sprite = NULL;
 		SetState(StateGameOver);
 	}
-	if (level_complete) {
+	if (g_level_complete) {
 		g_level_current++;
 		if (levels[g_level_current-1].map == 0) {
 			SetState(StateWin);

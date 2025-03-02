@@ -25,7 +25,7 @@ const UINT8 anim_attack[] = {2, 19, 20};
 const UINT8 anim_climb[] = {3, 21, 22, 23};
 const UINT8 anim_climb_idle[] = {1, 22};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
-const UINT8 anim_die[] = {14, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12};
+const UINT8 anim_die[] = {16, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12};
 const UINT8 anim_appear[] = {3, 15, 14, 13};
 const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
 const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18};
@@ -56,9 +56,10 @@ UINT8 tile_collision;
 
 UINT8 adjacent_tile;
 
+extern UINT8 g_level_complete;
+
 extern UINT16 timer_countdown;
 extern UINT16 level_max_time;
-extern UINT8 level_complete;
 extern UINT16 level_width;
 extern UINT16 level_height;
 
@@ -146,6 +147,12 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		//invincible_secs = 10;
 	} else {
+		// knockback
+		if (THIS->mirror == NO_MIRROR) {
+			THIS->x = THIS->x - 4;
+		} else { // THIS->mirror == V_MIRROR
+			THIS->x = THIS->x + 4;
+		}
 		SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		FLAG_SET(data->flags, pInvincibleFlag);
@@ -247,7 +254,6 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 	}
 	if (tile_collision) {
 		accel_y = 0;
-		//SetPlayerState(PLAYER_STATE_IDLE);
 		FLAG_SET(data->flags, pGroundedFlag);
 		CheckCollisionTile(THIS, THIS_IDX);
 	}
@@ -320,7 +326,6 @@ void CheckLevelComplete() {
 		if (adjacent_tile >= TILE_INDEX_PORTAL_TOPLEFT && adjacent_tile <= TILE_INDEX_PORTAL_BOTTOMRIGHT) {
 			THIS->x = THIS->x + 8u;
 			accel_y = 0;
-			//level_complete = true;
 			SetPlayerState(PLAYER_STATE_VICTORY);
 		}
 	} else { // THIS->mirror == V_MIRROR
@@ -329,7 +334,6 @@ void CheckLevelComplete() {
 		if (adjacent_tile >= TILE_INDEX_PORTAL_TOPLEFT && adjacent_tile <= TILE_INDEX_PORTAL_BOTTOMRIGHT) {
 			THIS->x = THIS->x - 8u;
 			accel_y = 0;
-			//level_complete = true;
 			SetPlayerState(PLAYER_STATE_VICTORY);
 		}
 	}
@@ -350,7 +354,7 @@ void START() {
 	accel_y = 0;
 	accel_x = 0;
 	magix_cooldown = 0;
-	level_complete = false;
+	g_level_complete = false;
 	scroll_target = THIS;
 	reset_x = 20;
 	reset_y = 80;
@@ -506,6 +510,9 @@ void UpdatePlatform(void) {
 }
 void UpdateHit(void) {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	ApplyGravity(THIS, THIS_IDX);
+	//if (FLAG_CHECK(data->flags, pDeadFlag)) return;
 	if (THIS->anim_frame == GetLastAnimFrame()) {
 		SetPreviousPlayerState();
 	}
@@ -514,9 +521,9 @@ void UpdateDie(void) {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	accel_x = 0;
+	ApplyGravity(THIS, THIS_IDX);
 	// update global dead variable once animation has completed
-	if (THIS->anim_frame == GetLastAnimFrame()) {
-		FLAG_SET(data->flags, pDeadFlag);
+	if (THIS->anim_frame == GetLastAnimFrame()-1) {
 		g_player_dead = true;
 	}
 }
@@ -526,21 +533,20 @@ void UpdateDrown(void) {
 	accel_x = 0;
 	// update global dead variable once animation has compelted
 	if (THIS->anim_frame == GetLastAnimFrame()) {
-		//EMU_printf("SpritePlayer::UPDATE: player has died in state: %d\n", GetPlayerState());
-		FLAG_SET(data->flags, pDeadFlag);
+		//FLAG_SET(data->flags, pDeadFlag);
 		g_player_dead = true;
 	}
 }	
 void UpdateTimeUp(void) {
-	EMU_printf("SpritePlayer::%s\n", __func__);
+	//EMU_printf("SpritePlayer::%s\n", __func__);
 }
 void UpdateVictory(void) {
-	EMU_printf("SpritePlayer::%s\n", __func__);
+	//EMU_printf("SpritePlayer::%s\n", __func__);
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	accel_x = accel_y = 0;
-	// update global dead variable once animation has compelted
+	// update g_level_complete variable once animation has compelted
 	if (THIS->anim_frame == GetLastAnimFrame()) {
-		level_complete = true;
+		g_level_complete = true;
 	}
 }
 
@@ -632,7 +638,7 @@ void UPDATE() {
 				//EMU_printf("SpritePlayer::player x:%d,y%d collided with portal: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				THIS->x = spr->x-8;
 				SetPlayerState(PLAYER_STATE_VICTORY);
-				level_complete = true;
+				g_level_complete = true;
 			}
 		}
 	}

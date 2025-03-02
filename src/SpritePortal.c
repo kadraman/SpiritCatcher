@@ -23,7 +23,7 @@ struct PortalInfo
 	UINT8 disappear;
 };
 extern Sprite* player_sprite;
-extern UINT8 level_complete;
+extern UINT8 g_level_complete;
  
 void START() {
 	struct PortalInfo* data = (struct PortalInfo*)THIS->custom_data;
@@ -47,14 +47,14 @@ void UPDATE() {
 		//EMU_printf("SpritePortal::%s portal not visible\n", __func__);
 	}
 	// if exit portal and not set to disappear change animation state
-	if (level_complete && THIS->visible) {
+	if (g_level_complete && THIS->visible) {
 		//EMU_printf("SpritePortal::%s level complete - portal disappearing\n", __func__);
 		data->stable = false;
 		data->disappear = true;
 		SetSpriteAnim(THIS, anim_portal_disappear, DISAPPEAR_ANIM_SPEED);
 	}
 	// if exit portal remove it after X frames
-	if (level_complete && data->disappear && THIS->anim_frame == VECTOR_LEN(anim_portal_disappear)-1) {
+	if (g_level_complete && data->disappear && THIS->anim_frame == VECTOR_LEN(anim_portal_disappear)-1) {
 		//EMU_printf("SpritePortal::%s level complete - portal remove\n", __func__);
 		TakeCollectable(THIS, ITEM_PORTAL);
 		SpriteManagerRemove(THIS_IDX);
