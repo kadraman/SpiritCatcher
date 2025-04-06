@@ -384,7 +384,8 @@ void UpdateIdle() {
 		Jump(THIS, THIS_IDX);
 	}
 	if (KEY_TICKED(J_B)) {
-		Magix();
+		Attack();
+		//Magix();
 	}
 }
 UINT8 idle_reset = 0;
@@ -399,7 +400,8 @@ void UpdateWalking() {
 		Jump(THIS, THIS_IDX);
 	}
 	if (KEY_TICKED(J_B)) {
-		Magix();
+		Attack();
+		//Magix();
 	}
 	if (keys == 0) {
 		//SetFrame(THIS, 1);
@@ -420,7 +422,8 @@ void UpdateJumping() {
 		SetPlayerState(PLAYER_STATE_FALL);
 	}
 	if (KEY_TICKED(J_B)) {
-		Magix();
+		Attack();
+		//Magix();
 	}
 }
 void UpdateFalling() {
@@ -433,7 +436,8 @@ void UpdateFalling() {
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
 	if (KEY_TICKED(J_B)) {
-		Magix();
+		Attack();
+		//Magix();
 	}
 }
 void UpdateAttacking() {
@@ -443,7 +447,7 @@ void UpdateAttacking() {
 		ApplyMovementX(THIS, THIS_IDX);
 		ApplyGravity(THIS, THIS_IDX);
 	}
-	//UpdateAttackPos();
+	UpdateAttackPos();
 	if (THIS->anim_frame == GetLastAnimFrame()) {
 		SetPlayerState(prevPlayerState);
 	}
@@ -486,7 +490,8 @@ void UpdateClimbing(void) {
 		Jump(THIS, THIS_IDX);
 	}
 	if (KEY_TICKED(J_B)) {
-		Magix();
+		Attack();
+		//Magix();
 	}
 }
 void UpdatePlatform(void) {
@@ -504,7 +509,8 @@ void UpdatePlatform(void) {
 		Jump(THIS, THIS_IDX);
 	}
 	if (KEY_TICKED(J_B)) {
-		Magix();
+		Attack();
+		//Magix();
 	}
 	CheckOnPlatform();
 }
