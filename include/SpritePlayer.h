@@ -20,6 +20,9 @@
 #define pOnPlatformFlag			6	/* player is on a platform */
 #define pOnLadderFlag			7	/* player is on a ladder */
 
+#define pWeaponKnife			0
+#define pWeaponMagix			1
+
 #define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
 #define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 
 #define FLAG_CHECK(var, flag) 	((var) &   (1 << (flag))) 
@@ -67,7 +70,8 @@ typedef struct {
 	UINT8 start_x;
 	UINT8 start_y;
 	UINT8 lives;
-	UINT8 coins;
+	UINT8 weapon;	// weapon player has currently selected
+	UINT8 spirits;	// number of spirits remaining
 	UINT8 magix;
 } PlayerData;
 

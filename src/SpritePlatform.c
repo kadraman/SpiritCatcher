@@ -15,11 +15,13 @@
 extern Sprite *player_sprite;
 
 const UINT8 anim_platform[] = {1, 0};
-struct PlatformInfo
+
+// Define the PlatformInfo structure
+typedef struct PlatformInfo
 {
-    bool wait;
+	bool wait;
 	UINT8 wait_ticks;
-};
+} PlatformInfo;
 
 void START() {
 	struct PlatformInfo* data = (struct PlatformInfo*)THIS->custom_data;

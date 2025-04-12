@@ -14,9 +14,10 @@
 //#define DEBUG_HUD   1
 
 // saved last drawn values, to work out what to update on hud
-static UINT8 last_has_spirit = 0;
+static UINT8 last_spirits = 0;
 static UINT8 last_magix = 0;
 static UINT8 last_lives = 0;
+static UINT8 last_weapon = 0;
 static UINT16 last_timer = 0;
 
 // level timer and countdown 
@@ -38,9 +39,10 @@ void Hud_Init(void) BANKED {
     INIT_HUD(hud);
 #endif
     // prime the last values so they all get updated
-    last_has_spirit = 0;
+    last_spirits = 0;
     last_magix = 0;
     last_lives = 0;
+    last_weapon = pWeaponKnife;
     timer_countdown = level_max_time;
     timer_clock = 0;
     last_timer = 0;
@@ -127,18 +129,30 @@ void Hud_Update(void) BANKED {
         FLAG_SET(player_data->flags, pTimeUpFlag);
     }
 
-    if (last_has_spirit != FLAG_CHECK(player_data->flags, pCaughtSpiritFlag)) {
-        last_has_spirit = FLAG_CHECK(player_data->flags, pCaughtSpiritFlag);
-        UPDATE_HUD_TILE(5, 0, 17);
+    if (last_weapon != player_data->weapon) {
+        last_weapon = player_data->weapon;
+        if (last_weapon == pWeaponKnife) {
+            UPDATE_HUD_TILE(0, 0, 15);
+        } else {
+            UPDATE_HUD_TILE(0, 0, 12);
+        }
     }
 
-    if (last_magix != player_data->magix) {
-        last_magix = player_data->magix;
-        tens = getTens(player_data->magix);
-        ones = player_data->magix - (tens * 10);
-        UPDATE_HUD_TILE(1, 0, 1 + tens);
-        UPDATE_HUD_TILE(2, 0, last_magix = 0 ? 1 : 1 + ones);
+    if (last_spirits != player_data->spirits) {
+        last_spirits = player_data->spirits;
+        tens = getTens(player_data->spirits);
+        ones = player_data->spirits - (tens * 10);
+        UPDATE_HUD_TILE(4, 0, 1 + tens);
+        UPDATE_HUD_TILE(5, 0, last_spirits == 0 ? 1 : 1 + ones);
     }
+
+    //if (last_magix != player_data->magix) {
+    //    last_magix = player_data->magix;
+    //    tens = getTens(player_data->magix);
+    //    ones = player_data->magix - (tens * 10);
+    //    UPDATE_HUD_TILE(1, 0, 1 + tens);
+    //    UPDATE_HUD_TILE(2, 0, last_magix = 0 ? 1 : 1 + ones);
+    //}
 
     if (last_lives != g_player_lives) {
         //EMU_printf("Hud::%s lives:%d\n", __func__, g_player_lives);

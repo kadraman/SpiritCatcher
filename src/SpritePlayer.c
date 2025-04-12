@@ -63,6 +63,10 @@ extern UINT16 level_max_time;
 extern UINT16 level_width;
 extern UINT16 level_height;
 
+// attack function
+typedef void (*attack_func_t)(void);
+attack_func_t attack_function;
+
 void SetPlayerState(PlayerState state) BANKED {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	prevPlayerState = curPlayerState;
@@ -171,7 +175,7 @@ void Drown(Sprite* sprite, UINT8 idx) {
 	//invincible_secs = 10;
 }
 
-void Attack() {
+void Slash() {
 	SetPlayerState(PLAYER_STATE_ATTACK);
 	attack1_sprite = SpriteManagerAdd(SpriteAttack1, THIS->x, THIS->y);
 	UpdateAttackPos();
@@ -196,6 +200,17 @@ void Magix() {
 	magix_cooldown = MAGIX_COOLDOWN_TIME;
 	magix_recharge = MAGIX_RECHARGE_TIME;
 	SetPlayerState(prevPlayerState);
+}
+
+void ChangeWeapon() {
+	PlayerData* data = (PlayerData*)THIS->custom_data;
+	if (data->weapon == pWeaponKnife) {
+		data->weapon = pWeaponMagix;
+		attack_function = Magix;
+	} else {
+		data->weapon = pWeaponKnife;
+		attack_function = Slash;
+	}
 }
 
 void CheckOnPlatform() {
@@ -350,7 +365,8 @@ void START() {
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
 	data->magix = 12;
-	data->coins = 0;
+	data->weapon = pWeaponKnife;
+	attack_function = Slash;
 	accel_y = 0;
 	accel_x = 0;
 	magix_cooldown = 0;
@@ -383,10 +399,8 @@ void UpdateIdle() {
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag) || FLAG_CHECK(data->flags, pOnPlatformFlag))) {
 		Jump(THIS, THIS_IDX);
 	}
-	if (KEY_TICKED(J_B)) {
-		Attack();
-		//Magix();
-	}
+	if (KEY_TICKED(J_B)) attack_function();
+	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
 UINT8 idle_reset = 0;
 void UpdateWalking() {
@@ -399,10 +413,8 @@ void UpdateWalking() {
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag))) {
 		Jump(THIS, THIS_IDX);
 	}
-	if (KEY_TICKED(J_B)) {
-		Attack();
-		//Magix();
-	}
+	if (KEY_TICKED(J_B)) attack_function();
+	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 	if (keys == 0) {
 		//SetFrame(THIS, 1);
 		idle_reset++; 
@@ -421,10 +433,8 @@ void UpdateJumping() {
 	if ((accel_y >> 6) > 1) {
 		SetPlayerState(PLAYER_STATE_FALL);
 	}
-	if (KEY_TICKED(J_B)) {
-		Attack();
-		//Magix();
-	}
+	if (KEY_TICKED(J_B)) attack_function();
+	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
 void UpdateFalling() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
@@ -435,10 +445,8 @@ void UpdateFalling() {
 	if ((FLAG_CHECK(data->flags, pGroundedFlag))) {
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
-	if (KEY_TICKED(J_B)) {
-		Attack();
-		//Magix();
-	}
+	if (KEY_TICKED(J_B)) attack_function();
+	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
 void UpdateAttacking() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
@@ -489,10 +497,8 @@ void UpdateClimbing(void) {
 	if (KEY_TICKED(J_A)) {
 		Jump(THIS, THIS_IDX);
 	}
-	if (KEY_TICKED(J_B)) {
-		Attack();
-		//Magix();
-	}
+	if (KEY_TICKED(J_B)) attack_function();
+	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
 void UpdatePlatform(void) {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
@@ -508,10 +514,8 @@ void UpdatePlatform(void) {
 		THIS->y = THIS->y - 1u;
 		Jump(THIS, THIS_IDX);
 	}
-	if (KEY_TICKED(J_B)) {
-		Attack();
-		//Magix();
-	}
+	if (KEY_TICKED(J_B)) attack_function();
+	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 	CheckOnPlatform();
 }
 void UpdateHit(void) {
