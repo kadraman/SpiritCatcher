@@ -6,7 +6,7 @@
 #include "Scroll.h"
 #include "SpriteManager.h"
 
-const UINT8 anim_goblin_move[] = {2, 0, 1};
+const UINT8 anim_rockard_move[] = {2, 0, 1};
 struct EnemyInfo
 {
     UINT8 wait;
@@ -15,7 +15,7 @@ struct EnemyInfo
 void START() {
 	struct EnemyInfo* data = (struct EnemyInfo*)THIS->custom_data;
 	data->wait = 0;
-	SetSpriteAnim(THIS, anim_goblin_move, 5u);
+	SetSpriteAnim(THIS, anim_rockard_move, 5u);
 	THIS->lim_x = 160u;
 	THIS->lim_y = 160u;
 }
