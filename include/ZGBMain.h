@@ -12,6 +12,7 @@ STATE_DEF_END
 
 #define SPRITES \
 _SPRITE(SpritePlatform, platform,   FLIP_NONE)\
+_SPRITE(SpriteRockard,  rockard,    FLIP_NONE)\
 _SPRITE(SpriteMushroom, mushroom,   FLIP_NONE)\
 _SPRITE(SpriteBat,      bat,        FLIP_NONE)\
 _SPRITE(SpriteSlime,    slime,      FLIP_NONE)\
@@ -23,6 +24,7 @@ _SPRITE(SpritePlayer,   player,     FLIP_NONE)\
 _SPRITE(SpriteMagix,    magix,      FLIP_NONE)\
 _SPRITE(SpriteParticle, particles,  FLIP_NONE)\
 _SPRITE(SpriteAttack1,  attack1,    FLIP_NONE)\
+_SPRITE(SpriteBullet,   bullet,     FLIP_NONE)\
 SPRITE_DEF_END
 
 #include "ZGBMain_Init.h"
