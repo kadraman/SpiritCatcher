@@ -82,9 +82,9 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
 	for (y = 0; y < map->height; ++ y) {
 		for (x = 0; x < map->width; ++ x) {
 			tile = *(data ++);
-			if (tile == 251) {	// spirit
+			if (tile == 250) {	// spirit
 				EMU_printf("LocateStuff: found spirit at %d:%d\n", x, y);
-				num_spirits ++;
+				num_spirits++;
 			}
 		}
 	}

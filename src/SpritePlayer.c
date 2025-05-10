@@ -268,6 +268,7 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6 << delta_time);
 	}
 	if (tile_collision) {
+		//EMU_printf("SpritePlayer::%s tile collision: %d\n", __func__, tile_collision);
 		accel_y = 0;
 		FLAG_SET(data->flags, pGroundedFlag);
 		CheckCollisionTile(THIS, THIS_IDX);
@@ -426,12 +427,16 @@ void UpdateWalking() {
 }
 void UpdateJumping() {	
 	//EMU_printf("SpritePlayer::%s\n", __func__);
+	PlayerData* data = (PlayerData*)THIS->custom_data;
 	ApplyMovementX(THIS, THIS_IDX);
 	ApplyGravity(THIS, THIS_IDX);
 	CheckLevelComplete();
 	// check if now FALLING?
 	if ((accel_y >> 6) > 1) {
 		SetPlayerState(PLAYER_STATE_FALL);
+	}
+	if ((FLAG_CHECK(data->flags, pGroundedFlag))) {
+		SetPlayerState(PLAYER_STATE_IDLE);
 	}
 	if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
@@ -524,7 +529,12 @@ void UpdateHit(void) {
 	ApplyGravity(THIS, THIS_IDX);
 	//if (FLAG_CHECK(data->flags, pDeadFlag)) return;
 	if (THIS->anim_frame == GetLastAnimFrame()) {
-		SetPreviousPlayerState();
+		if (GetPreviousPlayerState() != PLAYER_STATE_HIT) {
+			//EMU_printf("SpritePlayer::%s set previous player state\n", __func__);
+			SetPlayerState(GetPreviousPlayerState());
+		} else {
+			SetPlayerState(PLAYER_STATE_IDLE);
+		}
 	}
 }
 void UpdateDie(void) {

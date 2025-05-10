@@ -132,9 +132,9 @@ void Hud_Update(void) BANKED {
     if (last_weapon != player_data->weapon) {
         last_weapon = player_data->weapon;
         if (last_weapon == pWeaponKnife) {
-            UPDATE_HUD_TILE(0, 0, 15);
+            UPDATE_HUD_TILE(0, 0, 14);
         } else {
-            UPDATE_HUD_TILE(0, 0, 12);
+            UPDATE_HUD_TILE(0, 0, 13);
         }
     }
 
@@ -144,6 +144,11 @@ void Hud_Update(void) BANKED {
         ones = player_data->spirits - (tens * 10);
         UPDATE_HUD_TILE(4, 0, 1 + tens);
         UPDATE_HUD_TILE(5, 0, last_spirits == 0 ? 1 : 1 + ones);
+        if (player_data->spirits == 0) {
+            UPDATE_HUD_TILE(3, 0, 16);
+        } else {    
+            UPDATE_HUD_TILE(3, 0, 17);
+        }
     }
 
     //if (last_magix != player_data->magix) {
