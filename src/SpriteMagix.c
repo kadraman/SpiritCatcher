@@ -34,8 +34,8 @@ void UPDATE() {
 
 	for(i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom) {
-			if(CheckCollision(THIS, spr)) {
+		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom || spr->type == SpriteRockard) {
+			if (CheckCollision(THIS, spr)) {
 				//if(spr->type != XXXX || spr->anim_data[1 + spr->anim_frame] == 1u) { //XXX can only die on frame 1
 				//	SpriteManagerRemove(i);
 				//	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);

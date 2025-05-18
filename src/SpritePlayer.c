@@ -635,7 +635,8 @@ void UPDATE() {
 	// check enemy sprite collision - item colission is in each item sprite
 	for (UINT8 i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom) {
+		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteMushroom || spr->type == SpriteRockard
+			|| spr->type == SpriteEnemyBullet) {
 			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pInvincibleFlag))) {
 				//EMU_printf("SpritePlayer::player x:%d,y%d collided with enemy: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				Hit(THIS, THIS_IDX);

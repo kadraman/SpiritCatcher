@@ -30,6 +30,11 @@ void UPDATE() {
 					SpriteManagerRemove(i);
 				}
 			}
+			if (spr->type == SpriteRockard) {
+				if (CheckCollision(THIS, spr)) {
+					// cannot kill rockard with knife, just make a sound ...
+				}
+			}
 		}
 	}
 }

@@ -24,7 +24,7 @@ _SPRITE(SpritePlayer,   player,     FLIP_NONE)\
 _SPRITE(SpriteMagix,    magix,      FLIP_NONE)\
 _SPRITE(SpriteParticle, particles,  FLIP_NONE)\
 _SPRITE(SpriteAttack1,  attack1,    FLIP_NONE)\
-_SPRITE(SpriteBullet,   bullet,     FLIP_NONE)\
+_SPRITE(SpriteEnemyBullet,   enemybullet,     FLIP_NONE)\
 SPRITE_DEF_END
 
 #include "ZGBMain_Init.h"
