@@ -36,8 +36,8 @@ void START() {
     CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
     startx = THIS->x; starty = THIS->y;
 	SetSpriteAnim(THIS, anim_bat_move, 5u);
-	THIS->lim_x = 160u;
-	THIS->lim_y = 160u;
+	THIS->lim_x = 64u;
+	THIS->lim_y = 0u;
 }
 
 void UPDATE() {

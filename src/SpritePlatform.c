@@ -28,8 +28,8 @@ void START() {
 	data->wait = false;
 	data->wait_ticks = 0;
 	SetSpriteAnim(THIS, anim_platform, 20u);
-	THIS->lim_x = 160u;
-	THIS->lim_y = 160u;
+	THIS->lim_x = 64u;
+	THIS->lim_y = 0u;
 	THIS->mirror = V_MIRROR;
 }
 

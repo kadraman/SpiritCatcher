@@ -26,8 +26,8 @@ void START() {
 	struct EnemyInfo* data = (struct EnemyInfo*)THIS->custom_data;
 	data->wait = 0;
 	//SetSpriteAnim(THIS, anim_rockard_move, 5u);
-	//THIS->lim_x = 160u;
-	//THIS->lim_y = 160u;
+	THIS->lim_x = 64u;
+	THIS->lim_y = 0u;
 	data->start_x = THIS->x;
 }
 
