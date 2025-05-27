@@ -37,6 +37,8 @@ DECLARE_MUSIC(cognition);
 
 #define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS}
 #define LEVELS_END {0, 0, 0, 0, 0}
+#define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS}
+#define LEVELS_END {0, 0, 0, 0, 0}
 
 struct MapInfoBanked {
 	UINT8 bank;
@@ -48,6 +50,7 @@ struct MapInfoBanked {
 };
 
 const struct MapInfoBanked levels[] = {
+	BANKED_MAP(l1, 2, 104, 2, 240),
 	BANKED_MAP(l1, 2, 104, 2, 240),
 
 	LEVELS_END
@@ -72,6 +75,7 @@ void pause(UINT16 time) BANKED {
 }
 
 /*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
+/*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
 	UINT8 x, y, tile;
 	UINT8* data;
 	PUSH_BANK(map_bank);
@@ -87,6 +91,7 @@ void pause(UINT16 time) BANKED {
 	}
 	POP_BANK;
 }*/
+}*/
 
 void START() {
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
@@ -97,6 +102,7 @@ void START() {
 	g_player_lives = MAX_LIVES;
 	g_player_dead = false;
 	min_x = min_y = 1;
+	//LocateStuff(level->bank, level->map);
 	//LocateStuff(level->bank, level->map);
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;

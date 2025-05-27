@@ -31,7 +31,6 @@ const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
 const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18};
 //const UINT8 anim_victory[] = {2, 21, 22}; // TBD
 
-
 Sprite* player_sprite = 0;
 Sprite* attack1_sprite = 0;
 extern Sprite* attack_particle;

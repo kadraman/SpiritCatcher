@@ -22,6 +22,8 @@
 #define TILE_INDEX_PORTAL_BOTTOMRIGHT   38
 #define TILE_INDEX_BG1                  39
 #define TILE_INDEX_BG2                  70
+#define TILE_INDEX_BG1                  39
+#define TILE_INDEX_BG2                  70
 //#define TILE_INDEX_BRIDGE_1     78
 //#define TILE_INDEX_BRIDGE_2     79
 //#define TILE_INDEX_BRIDGE_3     80
