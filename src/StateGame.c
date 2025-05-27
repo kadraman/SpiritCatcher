@@ -91,7 +91,6 @@ void pause(UINT16 time) BANKED {
 	}
 	POP_BANK;
 }*/
-}*/
 
 void START() {
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
@@ -102,7 +101,6 @@ void START() {
 	g_player_lives = MAX_LIVES;
 	g_player_dead = false;
 	min_x = min_y = 1;
-	//LocateStuff(level->bank, level->map);
 	//LocateStuff(level->bank, level->map);
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
