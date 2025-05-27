@@ -21,7 +21,6 @@ UINT8 g_level_current = 1;
 UINT8 g_player_lives; 
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
-UINT8 num_spirits = 0;
 bool g_level_complete;
 bool g_player_dead;
 
@@ -36,26 +35,27 @@ IMPORT_MAP(l1);
 
 DECLARE_MUSIC(cognition);
 
-#define BANKED_MAP(MAP, X, Y, SECONDS) {BANK(MAP), &MAP, X, Y, SECONDS}
-#define LEVELS_END {0, 0, 0, 0}
+#define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS}
+#define LEVELS_END {0, 0, 0, 0, 0}
 
 struct MapInfoBanked {
 	UINT8 bank;
 	struct MapInfo* map;
 	UINT16 start_x;			// player starting location
 	UINT16 start_y;			// player starting location
-	UINT8  seconds;			// ax time to complete level
+	UINT8 spirits;			// number of spirits to collect
+	UINT8 seconds;			// max time to complete level
 };
 
 const struct MapInfoBanked levels[] = {
-	BANKED_MAP(l1, 2, 104, 240),
+	BANKED_MAP(l1, 2, 104, 2, 240),
 
 	LEVELS_END
 };
 
 UINT8 collision_tiles[] = {
 	TILE_INDEX_WATER_1, TILE_INDEX_WATER_2, TILE_INDEX_WATER_3,
-	71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+	72, 73, 74, 75, 76, 77, 78, 79, 80,
 	81,
 	0
 };
@@ -71,7 +71,7 @@ void pause(UINT16 time) BANKED {
 	if (time) while (time--) vsync();	
 }
 
-void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
+/*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
 	UINT8 x, y, tile;
 	UINT8* data;
 	PUSH_BANK(map_bank);
@@ -86,7 +86,7 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
 		}
 	}
 	POP_BANK;
-}
+}*/
 
 void START() {
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
@@ -97,12 +97,10 @@ void START() {
 	g_player_lives = MAX_LIVES;
 	g_player_dead = false;
 	min_x = min_y = 1;
-	num_spirits = 0;
-	LocateStuff(level->bank, level->map);
-	EMU_printf("StateGame::%s: level %d, spirits %d\n", __func__, g_level_current, num_spirits);
+	//LocateStuff(level->bank, level->map);
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
-	data->spirits = num_spirits;
+	data->spirits = level->spirits;
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));

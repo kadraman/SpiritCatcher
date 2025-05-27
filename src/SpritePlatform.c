@@ -15,16 +15,15 @@
 extern Sprite *player_sprite;
 
 const UINT8 anim_platform[] = {1, 0};
-
-// Define the PlatformInfo structure
-typedef struct PlatformInfo
+typedef struct
 {
 	bool wait;
 	UINT8 wait_ticks;
-} PlatformInfo;
+} CUSTOM_DATA;
+CHECK_CUSTOM_DATA_SIZE(CUSTOM_DATA); // check that CUSTOM_DATA struct fits the CUSTOM_DATA_SIZE space
 
 void START() {
-	struct PlatformInfo* data = (struct PlatformInfo*)THIS->custom_data;
+    CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
 	data->wait = false;
 	data->wait_ticks = 0;
 	SetSpriteAnim(THIS, anim_platform, 20u);
@@ -35,7 +34,7 @@ void START() {
 
 UINT8 tile = 0;
 void UPDATE() {
-	struct PlatformInfo* data = (struct PlatformInfo*)THIS->custom_data;
+    CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
 	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
 	if (!data->wait) {
 		if (THIS->mirror == V_MIRROR) {
@@ -63,7 +62,7 @@ void UPDATE() {
 		}
 		if (tile != TILE_INDEX_BG1 && tile != 255u) data->wait = true;
 	} else {
-		if (data->wait_ticks++ == MAX_WAIT_TICKS) {
+		if (data->wait_ticks++ >= MAX_WAIT_TICKS) {
 			data->wait = false;
 			data->wait_ticks = 0;
 		}
