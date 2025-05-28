@@ -8,7 +8,7 @@
 
 #include "Sound.h"
 
-const UINT8 anim_magix[] = {4, 0, 1, 2, 3};
+const UINT8 anim_magix[] = {1, 0};
 
 
 void START() {

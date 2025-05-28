@@ -15,20 +15,20 @@
 
 // player animations - the first number indicates the number of frames
 const UINT8 anim_walk_idle[] = {1, 0};		
-const UINT8 anim_walk_idle_attack[] = {1, 20};		
+const UINT8 anim_walk_idle_attack[] = {1, 16};		
 const UINT8 anim_walk[] = {4, 1, 3, 4, 5};
-const UINT8 anim_walk_attack[] = {1, 20};
+const UINT8 anim_walk_attack[] = {1, 16};
 const UINT8 anim_jump[] = {2, 6, 7};
 const UINT8 anim_fall[] = {1, 8};
-const UINT8 anim_jump_attack[] = {1, 20};
-const UINT8 anim_attack[] = {2, 19, 20};
-const UINT8 anim_climb[] = {3, 21, 22, 23};
-const UINT8 anim_climb_idle[] = {1, 22};
+const UINT8 anim_jump_attack[] = {1, 16};
+const UINT8 anim_attack[] = {2, 16, 17};
+const UINT8 anim_climb[] = {3, 18, 19, 20};
+const UINT8 anim_climb_idle[] = {1, 19};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
 const UINT8 anim_die[] = {16, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12};
-const UINT8 anim_appear[] = {3, 15, 14, 13};
-const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
-const UINT8 anim_drown[] = {10, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18};
+//const UINT8 anim_appear[] = {3, 15, 14, 13};
+//const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
+const UINT8 anim_drown[] = {10, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15};
 //const UINT8 anim_victory[] = {2, 21, 22}; // TBD
 
 Sprite* player_sprite = 0;
@@ -72,7 +72,7 @@ void SetPlayerState(PlayerState state) BANKED {
 	curPlayerState = state;
 	switch (state) {
 		case PLAYER_STATE_SPAWN:
-			SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
+			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_IDLE:
 			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_WALK:
@@ -94,10 +94,10 @@ void SetPlayerState(PlayerState state) BANKED {
 		case PLAYER_STATE_TIMEUP:
 			SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
 		case PLAYER_STATE_APPEAR:
-			SetSpriteAnim(THIS, anim_appear, DISAPPEAR_ANIM_SPEED); break;
+			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_DISAPPEAR:
 		case PLAYER_STATE_VICTORY:
-			SetSpriteAnim(THIS, anim_disappear, DISAPPEAR_ANIM_SPEED); break;
+			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
 		default:
 			break;
 	}
@@ -383,9 +383,9 @@ void START() {
 
 void UpdateSpawn() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
-	if (THIS->anim_frame == GetLastAnimFrame()) {
+	//if (THIS->anim_frame == GetLastAnimFrame()) {
 		SetPlayerState(PLAYER_STATE_IDLE);
-	}
+	//}
 }	
 void UpdateIdle() {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
@@ -523,7 +523,7 @@ void UpdatePlatform(void) {
 	CheckOnPlatform();
 }
 void UpdateHit(void) {
-	//EMU_printf("SpritePlayer::%s\n", __func__);
+	EMU_printf("SpritePlayer::%s\n", __func__);
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	ApplyGravity(THIS, THIS_IDX);
 	//if (FLAG_CHECK(data->flags, pDeadFlag)) return;
@@ -635,7 +635,7 @@ void UPDATE() {
 	for (UINT8 i = 0u; i != sprite_manager_updatables[0]; ++i) {
 		Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteRockard
-			|| spr->type == SpriteEnemyBullet) {
+			|| spr->type == SpriteRocklette) {
 			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pInvincibleFlag))) {
 				//EMU_printf("SpritePlayer::player x:%d,y%d collided with enemy: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
 				Hit(THIS, THIS_IDX);

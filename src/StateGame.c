@@ -50,8 +50,8 @@ struct MapInfoBanked {
 };
 
 const struct MapInfoBanked levels[] = {
-	BANKED_MAP(l1, 2, 104, 2, 240),
-	BANKED_MAP(l1, 2, 104, 2, 240),
+	BANKED_MAP(l1, 2, 104, 3, 240),
+	BANKED_MAP(l1, 2, 104, 3, 240),
 
 	LEVELS_END
 };
@@ -74,7 +74,6 @@ void pause(UINT16 time) BANKED {
 	if (time) while (time--) vsync();	
 }
 
-/*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
 /*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
 	UINT8 x, y, tile;
 	UINT8* data;

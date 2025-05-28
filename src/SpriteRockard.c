@@ -11,8 +11,8 @@
 // player sprite pointer declaration, initialized in the SpritePlayer.c
 extern Sprite *player_sprite;
 
-// create enemy bullet function
-//void CreateEnemyBullet(UINT16 x, UINT16 y, INT8 vx, INT8 vy) BANKED;
+// create rocklette function
+void CreateRocklette(UINT16 x, UINT16 y, INT8 vx, INT8 vy) BANKED;
 
 // animation frames - set directly below 
 const UINT8 anim_rockard_move[] = {4, 0, 1, 2, 1};
@@ -44,31 +44,19 @@ void UPDATE() {
 		data->firing = false;
 	}
 	// TODO: check if player is within range (Y coordinate)
+	// TODO: prevent firing into a wall
 	// if player is within range, fire a rocklette
 	if ((THIS->anim_frame == 1 && !data->firing) && (player_sprite->x < THIS->x)) {
 		//EMU_printf("SpriteRockard::UPDATE: firing left\n");
+		CreateRocklette(THIS->x + 4, THIS->y + 6, -1, 0);
 		data->firing = true;
 	}
 	if ((THIS->anim_frame == (UINT8)VECTOR_LEN(THIS->anim_data)-1 && !data->firing) && (player_sprite->x > THIS->x)) {
 		//EMU_printf("SpriteRockard::UPDATE: firing right\n");
+		CreateRocklette(THIS->x + 12, THIS->y + 6, 1, 0);
 		data->firing = true;
 	}
 }
 
 void DESTROY() {
 }
-
-/*
-		//SetVisible(THIS, 0);
-		//if (THIS->mirror == V_MIRROR && player_sprite->mirror == NO_MIRROR) {
-		if (THIS->mirror == V_MIRROR && player_sprite->x > THIS->x) {
-			//THIS->x = data->start_x - 5u;
-			//CreateEnemyBullet(THIS->x + 12, THIS->y + 6, 1, 0);
-			EMU_printf("player_sprite->x: %d\n", player_sprite->x);
-		//} else if (THIS->mirror == NO_MIRROR && player_sprite->mirror == V_MIRROR) {
-		} else if (THIS->mirror == NO_MIRROR && player_sprite->x < THIS->x) {
-			//THIS->x = data->start_x + 5u;
-			//CreateEnemyBullet(THIS->x + 4, THIS->y + 6, -1, 0);
-			EMU_printf("player_sprite->x: %d\n", player_sprite->x);
-		}
-*/

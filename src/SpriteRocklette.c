@@ -12,9 +12,10 @@ typedef struct {
 	INT8 vx;
 	INT8 vy;
 } CUSTOM_DATA;
+CHECK_CUSTOM_DATA_SIZE(CUSTOM_DATA); // check that CUSTOM_DATA struct fits the CUSTOM_DATA_SIZE space
 
-void CreateEnemyBullet(UINT16 x, UINT16 y, INT8 vx, INT8 vy) BANKED {
-	Sprite* spr = SpriteManagerAdd(SpriteEnemyBullet, x, y);
+void CreateRocklette(UINT16 x, UINT16 y, INT8 vx, INT8 vy) BANKED {
+	Sprite* spr = SpriteManagerAdd(SpriteRocklette, x, y);
 	CUSTOM_DATA* data = (CUSTOM_DATA*)spr->custom_data;
 
 	data->vx = vx;
