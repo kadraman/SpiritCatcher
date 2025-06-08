@@ -42,7 +42,7 @@ void Hud_Init(void) BANKED {
     last_spirits = 0;
     last_magix = 0;
     last_lives = 0;
-    last_weapon = pWeaponKnife;
+    //last_weapon = pWeaponKnife;
     timer_countdown = level_max_time;
     timer_clock = 0;
     last_timer = 0;
@@ -130,12 +130,9 @@ void Hud_Update(void) BANKED {
     }
 
     if (last_weapon != player_data->weapon) {
+        EMU_printf("Hud::%s last_weapon: %d, player_data->weapon:%d\n", __func__, last_weapon, player_data->weapon);
+        UPDATE_HUD_TILE(0, 0, 13+player_data->weapon);
         last_weapon = player_data->weapon;
-        if (last_weapon == pWeaponKnife) {
-            UPDATE_HUD_TILE(0, 0, 14);
-        } else {
-            UPDATE_HUD_TILE(0, 0, 13);
-        }
     }
 
     if (last_spirits != player_data->spirits) {

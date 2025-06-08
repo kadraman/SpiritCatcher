@@ -40,7 +40,7 @@ void UPDATE() {
 				//	SpriteManagerRemove(i);
 				//	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
 				//}
-				//spr2 = SpriteManagerAdd(SpriteParticle, spr->x, spr->y);
+				spr2 = SpriteManagerAdd(SpriteParticle, spr->x, spr->y);
 				// remove enemy
 				SpriteManagerRemove(i);
 				// remove magix

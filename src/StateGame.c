@@ -38,8 +38,6 @@ DECLARE_MUSIC(cognition);
 
 #define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS}
 #define LEVELS_END {0, 0, 0, 0, 0}
-#define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS}
-#define LEVELS_END {0, 0, 0, 0, 0}
 
 struct MapInfoBanked {
 	UINT8 bank;
@@ -52,14 +50,13 @@ struct MapInfoBanked {
 
 const struct MapInfoBanked levels[] = {
 	BANKED_MAP(l1, 2, 104, 3, 240),
-	BANKED_MAP(l1, 2, 104, 3, 240),
-
+	// Add more levels here
 	LEVELS_END
 };
 
 UINT8 collision_tiles[] = {
 	TILE_INDEX_WATER_1, TILE_INDEX_WATER_2, TILE_INDEX_WATER_3,
-	72, 73, 74, 75, 76, 77, 78, 79, 80,
+	71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
 	81,
 	0
 };
@@ -96,24 +93,22 @@ void UpdateEnemies(UINT16 player_x, UINT16 player_y) BANKED {
 	switch (g_level_current) {
 		case 1:
 			if (player_x > 0 && player_x <= 250 && g_player_region <= 0) {
-				SpriteManagerAdd(SpriteSlime, 19 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 22 << 3, 10 << 3);
+				SpriteManagerAdd(SpriteSlime, 18 << 3, 13 << 3);
+				SpriteManagerAdd(SpriteBat, 24 << 3, 9 << 3);
 				g_player_region = 1; break;
 			}
 			if (player_x > 250 && player_x < 500 && g_player_region <= 1) {
 				SpriteManagerAdd(SpriteSlime, 41 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 45 << 3, 10 << 3);
-				SpriteManagerAdd(SpritePlatform, 57 << 3, 14 << 3);
+				SpriteManagerAdd(SpriteBat, 54 << 3, 10 << 3);
 				g_player_region = 2; break;
 			} 
 			if (player_x > 500 && player_x < 750 && g_player_region <= 2) {
-				SpriteManagerAdd(SpriteRockard, 80 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 77 << 3, 8 << 3);
-				SpriteManagerAdd(SpritePlatform, 92 << 3, 14 << 3);
+				SpriteManagerAdd(SpriteRockard, 79 << 3, 13 << 3);
+				SpriteManagerAdd(SpriteBat, 69 << 3, 9 << 3);
 				g_player_region = 3; break;
 			}
-			if (player_x > 500 && player_x < 750 && g_player_region <= 3) {
-				SpriteManagerAdd(SpriteBat, 100 << 3, 8 << 3);
+			if (player_x > 750 && player_x < 1000 && g_player_region <= 3) {
+				SpriteManagerAdd(SpriteBat, 95 << 3, 2 << 3);
 				SpriteManagerAdd(SpriteSlime, 113 << 3, 4 << 3);
 				g_player_region = 4; break;
 			} 
@@ -143,13 +138,14 @@ void START() {
 
 	Hud_Init();
 
-	PlayMusic(cognition, 1);
+	INIT_SOUND();
+	//PlayMusic(cognition, 1);
 
 }
 
 void UPDATE() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
-	//UpdateEnemies(player_sprite->x, player_sprite->y);
+	UpdateEnemies(player_sprite->x, player_sprite->y);
 	if (g_player_dead) {
 		//EMU_printf("StateGame::UPDATE: player is dead\n");
 		HIDE_HUD;

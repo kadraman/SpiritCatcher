@@ -26,7 +26,7 @@ void UPDATE() {
 			spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 			if (spr->type == SpriteSlime || spr->type == SpriteBat) {
 				if (CheckCollision(THIS, spr)) {
-					//spr2 = SpriteManagerAdd(SpriteParticle, spr->x, spr->y-5);
+					spr2 = SpriteManagerAdd(SpriteParticle, spr->x, spr->y-5);
 					SpriteManagerRemove(i);
 				}
 			}

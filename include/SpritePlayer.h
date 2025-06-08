@@ -23,6 +23,8 @@
 #define pWeaponKnife			0
 #define pWeaponMagix			1
 
+#define MAX_WEAPON				1
+
 #define FLAG_SET(var, flag) 	((var) |=  (1 << (flag))) 
 #define FLAG_CLEAR(var, flag) 	((var) &= ~(1 << (flag))) 
 #define FLAG_CHECK(var, flag) 	((var) &   (1 << (flag))) 

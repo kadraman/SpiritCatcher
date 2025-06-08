@@ -205,13 +205,24 @@ void Magix() {
 
 void ChangeWeapon() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	if (data->weapon == pWeaponKnife) {
-		data->weapon = pWeaponMagix;
-		attack_function = Magix;
+	EMU_printf("SpritePlayer::%s current weapon:%d\n", __func__, data->weapon);
+	if (data->weapon >= MAX_WEAPON) {
+		data->weapon = 0; // reset to first weapon
 	} else {
-		data->weapon = pWeaponKnife;
-		attack_function = Slash;
+		data->weapon++;
 	}
+	switch (data->weapon) {
+		case pWeaponKnife:
+			attack_function = Slash;
+			break;
+		case pWeaponMagix:
+			attack_function = Magix;
+			break;
+		default:
+			EMU_printf("SpritePlayer::%s unknown weapon:%d\n", __func__, data->weapon);
+			break;
+	}
+	EMU_printf("SpritePlayer::%s change weapon:%d\n", __func__, data->weapon);
 }
 
 void CheckOnPlatform() {
