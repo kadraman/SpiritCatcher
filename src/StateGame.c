@@ -19,6 +19,7 @@
 
 UINT8 g_level_current = 1;
 UINT8 g_player_lives; 
+UINT8 g_player_region;
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
 bool g_level_complete;
@@ -91,6 +92,37 @@ void pause(UINT16 time) BANKED {
 	POP_BANK;
 }*/
 
+void UpdateEnemies(UINT16 player_x, UINT16 player_y) BANKED {
+	switch (g_level_current) {
+		case 1:
+			if (player_x > 0 && player_x <= 250 && g_player_region <= 0) {
+				SpriteManagerAdd(SpriteSlime, 19 << 3, 13 << 3);
+				SpriteManagerAdd(SpriteBat, 22 << 3, 10 << 3);
+				g_player_region = 1; break;
+			}
+			if (player_x > 250 && player_x < 500 && g_player_region <= 1) {
+				SpriteManagerAdd(SpriteSlime, 41 << 3, 13 << 3);
+				SpriteManagerAdd(SpriteBat, 45 << 3, 10 << 3);
+				SpriteManagerAdd(SpritePlatform, 57 << 3, 14 << 3);
+				g_player_region = 2; break;
+			} 
+			if (player_x > 500 && player_x < 750 && g_player_region <= 2) {
+				SpriteManagerAdd(SpriteRockard, 80 << 3, 13 << 3);
+				SpriteManagerAdd(SpriteBat, 77 << 3, 8 << 3);
+				SpriteManagerAdd(SpritePlatform, 92 << 3, 14 << 3);
+				g_player_region = 3; break;
+			}
+			if (player_x > 500 && player_x < 750 && g_player_region <= 3) {
+				SpriteManagerAdd(SpriteBat, 100 << 3, 8 << 3);
+				SpriteManagerAdd(SpriteSlime, 113 << 3, 4 << 3);
+				g_player_region = 4; break;
+			} 
+			break;
+		default:
+			break;
+	}
+}
+
 void START() {
 	const struct MapInfoBanked* level = &levels[g_level_current-1];
 	scroll_top_movement_limit = 72;
@@ -99,6 +131,7 @@ void START() {
 	g_level_complete = false;
 	g_player_lives = MAX_LIVES;
 	g_player_dead = false;
+	g_player_region = 0;
 	min_x = min_y = 1;
 	//LocateStuff(level->bank, level->map);
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
@@ -116,6 +149,7 @@ void START() {
 
 void UPDATE() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
+	//UpdateEnemies(player_sprite->x, player_sprite->y);
 	if (g_player_dead) {
 		//EMU_printf("StateGame::UPDATE: player is dead\n");
 		HIDE_HUD;
@@ -130,7 +164,7 @@ void UPDATE() {
 			SetState(StateWin);
 			HIDE_HUD;
 		} else {
-			SetState(StateOverworld);
+			SetState(StateGame);
 		}
 	} else {
 		Hud_Update();

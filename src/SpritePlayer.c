@@ -50,6 +50,7 @@ UINT8 magix_recharge;
 UINT8 invincible_secs;
 UINT8 invincible_ticks;
 UINT8 anim_hit_counter;
+UINT8 anim_hit_ticks;
 UINT8 visible_skip;
 UINT8 tile_collision;
 
@@ -160,7 +161,8 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		FLAG_SET(data->flags, pInvincibleFlag);
 		g_player_lives--;
-		invincible_secs = 5;
+		invincible_secs = 10;
+		anim_hit_counter = 10;
 	}
 	Hud_Update();	
 }
@@ -378,6 +380,7 @@ void START() {
 	anim_hit_counter = 0;
 	visible_skip = 0;
 	tile_collision = 0;
+	invincible_secs = 0;
 	SetPlayerState(PLAYER_STATE_SPAWN);
 }
 
@@ -523,11 +526,12 @@ void UpdatePlatform(void) {
 	CheckOnPlatform();
 }
 void UpdateHit(void) {
-	EMU_printf("SpritePlayer::%s\n", __func__);
+	//EMU_printf("SpritePlayer::%s\n", __func__);
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	ApplyGravity(THIS, THIS_IDX);
 	//if (FLAG_CHECK(data->flags, pDeadFlag)) return;
-	if (THIS->anim_frame == GetLastAnimFrame()) {
+	EMU_printf("SpritePlayer::%s frame %d/%d\n", __func__, THIS->anim_frame, GetLastAnimFrame());
+	if (THIS->anim_frame == GetLastAnimFrame() || anim_hit_counter == 0) {
 		if (GetPreviousPlayerState() != PLAYER_STATE_HIT) {
 			//EMU_printf("SpritePlayer::%s set previous player state\n", __func__);
 			SetPlayerState(GetPreviousPlayerState());
@@ -595,16 +599,25 @@ void UPDATE() {
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) {
 		SetVisible(THIS, visible_skip++);
 		if (visible_skip > 3) visible_skip = 0;
-	}
-	if (invincible_secs) {
-		invincible_ticks++;
-		if (invincible_ticks == 25) {
-			invincible_ticks = 0;
-			invincible_secs--;
+		if (invincible_secs > 0) {
+			invincible_ticks++;
+			if (invincible_ticks == 25) {
+				invincible_ticks = 0;
+				invincible_secs--;
+			}
+		} else {
+			FLAG_CLEAR(data->flags, pInvincibleFlag);
+			SetVisible(THIS, true);
 		}
-	} else {
-		FLAG_CLEAR(data->flags, pInvincibleFlag);
-		SetVisible(THIS, true);
+	}
+
+	// hit
+	if (anim_hit_counter > 0) {
+		anim_hit_ticks++;
+		if (anim_hit_ticks == 25) {
+			anim_hit_ticks = 0;
+			anim_hit_counter--;
+		}
 	}
 
 	// timeup

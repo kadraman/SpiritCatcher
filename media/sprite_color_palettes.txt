@@ -1,0 +1,22 @@
+// palette 1
+const palette_color_t player_palettes[4] = {	RGB8(155,188, 15), RGB8(231, 24, 57), RGB8(140, 24, 33), RGB8(  0,  0,  0) };
+const palette_color_t particles_palettes[4] = {	RGB8(155,188, 15), RGB8(231, 24, 57), RGB8(140, 24, 33), RGB8(  0,  0,  0) };
+const palette_color_t magix_palettes[4] = { 	RGB8(155,188, 15), RGB8(231, 24, 57), RGB8(140, 24, 33), RGB8(  0,  0,  0) };
+const palette_color_t health_palettes[4] = { 	RGB8(155,188, 15), RGB8(231, 24, 57), RGB8(140, 24, 33), RGB8(  0,  0,  0) };
+
+// palette 2
+const palette_color_t slime_palettes[4] = {	RGB8(155,188, 15), RGB8( 16,148,222), RGB8( 24, 72,156), RGB8(  0,  0,  0) };
+const palette_color_t portal_palettes[4] = {	RGB8(155,188, 15), RGB8( 16,148,222), RGB8( 24, 72,156), RGB8(  0,  0,  0) };
+const palette_color_t mana_palettes[4] = { 	RGB8(155,188, 15), RGB8( 16,148,222), RGB8( 24, 72,156), RGB8(  0,  0,  0) };
+
+// palette 3
+const palette_color_t attack1_palettes[4] = { 	RGB8(155,188, 15), RGB8(255,255,247), RGB8(190,190,190), RGB8(  0,  0,  0) };
+const palette_color_t spirit_palettes[4] = { 	RGB8(155,188, 15), RGB8(255,255,247), RGB8(190,190,190), RGB8(  0,  0,  0) };
+
+// palette 4
+const palette_color_t bat_palettes[4] = { 	RGB8(155,188, 15), RGB8(171,171,171), RGB8( 89, 89, 89), RGB8(  0,  0,  0) };
+const palette_color_t rockard_palettes[4] = {	RGB8(155,188, 15), RGB8(171,171,171), RGB8( 89, 89, 89), RGB8(  0,  0,  0) };
+const palette_color_t rocklette_palettes[4] = {	RGB8(155,188, 15), RGB8(171,171,171), RGB8( 89, 89, 89), RGB8(  0,  0,  0) };
+const palette_color_t platform_palettes[4] = {	RGB8(155,188, 15), RGB8(171,171,171), RGB8( 89, 89, 89), RGB8(  0,  0,  0) };
+
+// palette 5
