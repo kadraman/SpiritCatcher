@@ -11,7 +11,7 @@ const UINT8 anim_health[] = {1, 0};
 extern Sprite* player_sprite;
 extern UINT8 item_collected;
 UINT8 IsCollected(Sprite* collectable) BANKED;
-void TakeCollectable(Sprite* collectable) BANKED;
+void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
 typedef struct {
 	UINT16 start_y;
     UINT8 pos_counter;
@@ -40,7 +40,7 @@ void UPDATE() {
 		data->pos_counter = 0;
 	}
 	if (CheckCollision(THIS, player_sprite)) {
-		TakeCollectable(THIS);
+		TakeCollectable(THIS, ITEM_HEALTH);
 		PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 		SpriteManagerRemove(THIS_IDX);
 	}

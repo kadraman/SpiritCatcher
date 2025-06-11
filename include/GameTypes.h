@@ -21,6 +21,7 @@ typedef enum {
 	ITEM_MANA,
 	ITEM_SPIRIT,
 	ITEM_COIN,
+	ITEM_HEALTH,
 	ITEM_BULLET
 } ItemType;
 

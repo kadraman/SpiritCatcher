@@ -74,7 +74,7 @@ typedef struct {
 	UINT8 lives;
 	UINT8 weapon;	// weapon player has currently selected
 	UINT8 spirits;	// number of spirits remaining
-	UINT8 magix;
+	UINT8 magix;	// number of magix remaining
 } PlayerData;
 
 void SetPlayerState(PlayerState state) BANKED;

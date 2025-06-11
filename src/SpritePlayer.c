@@ -157,7 +157,7 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		} else { // THIS->mirror == V_MIRROR
 			THIS->x = THIS->x + 4;
 		}
-		SetPlayerState(PLAYER_STATE_HIT);
+		//SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		FLAG_SET(data->flags, pInvincibleFlag);
 		g_player_lives--;
@@ -198,8 +198,8 @@ void Magix() {
 	magix_sprite->y = THIS->y + 5u;
 	data->magix--;
 	// reset cooldown/coolup
-	magix_cooldown = MAGIX_COOLDOWN_TIME;
-	magix_recharge = MAGIX_RECHARGE_TIME;
+	//magix_cooldown = MAGIX_COOLDOWN_TIME;
+	//magix_recharge = MAGIX_RECHARGE_TIME;
 	SetPlayerState(prevPlayerState);
 }
 
@@ -222,7 +222,8 @@ void ChangeWeapon() {
 			EMU_printf("SpritePlayer::%s unknown weapon:%d\n", __func__, data->weapon);
 			break;
 	}
-	EMU_printf("SpritePlayer::%s change weapon:%d\n", __func__, data->weapon);
+	EMU_printf("SpritePlayer::%s changed weapon:%d\n", __func__, data->weapon);
+	Hud_Update();
 }
 
 void CheckOnPlatform() {
@@ -377,12 +378,12 @@ void START() {
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
-	data->magix = 12;
+	data->magix = 0;
 	data->weapon = pWeaponKnife;
 	attack_function = Slash;
 	accel_y = 0;
 	accel_x = 0;
-	magix_cooldown = 0;
+	//magix_cooldown = 0;
 	g_level_complete = false;
 	scroll_target = THIS;
 	reset_x = 20;
@@ -645,15 +646,15 @@ void UPDATE() {
 	}
 
 	// use / recharge magix
-	if (magix_cooldown) {
-		magix_cooldown--;
-	} else if (magix_recharge) {
-		magix_recharge--;
-	}
-	if (!magix_recharge && data->magix < MAGIX_FULL) {
-		data->magix++;
-		magix_recharge = MAGIX_RECHARGE_TIME;
-	}
+	//if (magix_cooldown) {
+	//	magix_cooldown--;
+	//} else if (magix_recharge) {
+	//	magix_recharge--;
+	//}
+	//if (!magix_recharge && data->magix < MAGIX_FULL) {
+	//	data->magix++;
+	//	magix_recharge = MAGIX_RECHARGE_TIME;
+	//}
 
 	// check enemy sprite collision - item colission is in each item sprite
 	for (UINT8 i = 0u; i != sprite_manager_updatables[0]; ++i) {

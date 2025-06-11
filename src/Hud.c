@@ -42,10 +42,11 @@ void Hud_Init(void) BANKED {
     last_spirits = 0;
     last_magix = 0;
     last_lives = 0;
-    //last_weapon = pWeaponKnife;
+    last_weapon = 0;
     timer_countdown = level_max_time;
     timer_clock = 0;
     last_timer = 0;
+    UPDATE_HUD_TILE(0, 0, 14); // default weapon is knife
 }
 
 static UINT8 getHundreds(UINT8 full) {
@@ -131,7 +132,16 @@ void Hud_Update(void) BANKED {
 
     if (last_weapon != player_data->weapon) {
         EMU_printf("Hud::%s last_weapon: %d, player_data->weapon:%d\n", __func__, last_weapon, player_data->weapon);
-        UPDATE_HUD_TILE(0, 0, 13+player_data->weapon);
+        if (player_data->weapon == pWeaponKnife) {
+            UPDATE_HUD_TILE(0, 0, 14); // knife
+        }
+        if (player_data->weapon == pWeaponMagix) {
+            if (last_magix == 0) {
+                 UPDATE_HUD_TILE(0, 0, 12); // magix - empty
+            } else {
+                 UPDATE_HUD_TILE(0, 0, 13); // magix - full
+            }
+        }
         last_weapon = player_data->weapon;
     }
 
@@ -148,13 +158,15 @@ void Hud_Update(void) BANKED {
         }
     }
 
-    //if (last_magix != player_data->magix) {
-    //    last_magix = player_data->magix;
-    //    tens = getTens(player_data->magix);
-    //    ones = player_data->magix - (tens * 10);
-    //    UPDATE_HUD_TILE(1, 0, 1 + tens);
-    //    UPDATE_HUD_TILE(2, 0, last_magix = 0 ? 1 : 1 + ones);
-    //}
+    if (last_magix != player_data->magix) {
+        if (player_data->weapon == pWeaponMagix) {
+            if (last_magix == 0) {
+                 UPDATE_HUD_TILE(0, 0, 12); // magix - empty
+            } else {
+                 UPDATE_HUD_TILE(0, 0, 13); // magix - full
+            }
+        }
+    }
 
     if (last_lives != g_player_lives) {
         //EMU_printf("Hud::%s lives:%d\n", __func__, g_player_lives);
