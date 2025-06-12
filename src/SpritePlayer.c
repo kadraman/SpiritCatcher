@@ -146,7 +146,7 @@ void Hit(Sprite* sprite, UINT8 idx) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT) return;
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
-	if (g_player_lives == 1) { // last life
+	if (data->lives == 1) { // last life
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		//invincible_secs = 10;
@@ -160,7 +160,7 @@ void Hit(Sprite* sprite, UINT8 idx) {
 		//SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		FLAG_SET(data->flags, pInvincibleFlag);
-		g_player_lives--;
+		if (data->lives > 0 && data->lives < UCHAR_MAX) data->lives--;
 		invincible_secs = 10;
 		anim_hit_counter = 10;
 	}
@@ -375,6 +375,7 @@ void START() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	g_player_dead = false;
 	player_sprite = THIS;
+	data->lives = MAX_LIVES;
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
@@ -634,9 +635,9 @@ void UPDATE() {
 
 	// timeup
 	if (FLAG_CHECK(data->flags, pTimeUpFlag)) {
-		g_player_lives--;
+		if (data->lives > 0 && data->lives < UCHAR_MAX) data->lives--;
 		Hud_Update();
-		if (g_player_lives <= 0) { 
+		if (data->lives <= 0) { 
 			//SetState(StateGameOver);
 			//HIDE_WIN;
 			g_player_dead = true;

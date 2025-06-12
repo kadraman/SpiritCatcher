@@ -14,11 +14,11 @@
 //#define DEBUG_HUD   1
 
 // saved last drawn values, to work out what to update on hud
-static UINT8 last_spirits = 0;
-static UINT8 last_magix = 0;
-static UINT8 last_lives = 0;
-static UINT8 last_weapon = 0;
-static UINT16 last_timer = 0;
+static UINT8 last_spirits;
+static UINT8 last_magix;
+static UINT8 last_lives;
+static UINT8 last_weapon;
+static UINT16 last_timer;
 
 // level timer and countdown 
 UINT16 level_max_time;       // maximum time for level
@@ -30,7 +30,6 @@ extern INT16 accel_x, accel_y;
 extern UINT16 x_inc, y_inc;
 
 void Hud_Init(void) BANKED {
-    //EMU_printf("Hud::%s lives:%d\n", __func__, g_player_lives);
 #ifdef DEBUG_HUD
     IMPORT_MAP(debughud);
     INIT_HUD(debughud);
@@ -39,10 +38,10 @@ void Hud_Init(void) BANKED {
     INIT_HUD(hud);
 #endif
     // prime the last values so they all get updated
-    last_spirits = 0;
-    last_magix = 0;
-    last_lives = 0;
-    last_weapon = 0;
+    last_spirits = 0xFF; // 255
+    last_magix = 0xFF; // 255
+    last_lives = 0xFF; // 255
+    last_weapon = pWeaponKnife; // default weapon is knife
     timer_countdown = level_max_time;
     timer_clock = 0;
     last_timer = 0;
@@ -131,7 +130,6 @@ void Hud_Update(void) BANKED {
     }
 
     if (last_weapon != player_data->weapon) {
-        EMU_printf("Hud::%s last_weapon: %d, player_data->weapon:%d\n", __func__, last_weapon, player_data->weapon);
         if (player_data->weapon == pWeaponKnife) {
             UPDATE_HUD_TILE(0, 0, 14); // knife
         }
@@ -146,7 +144,6 @@ void Hud_Update(void) BANKED {
     }
 
     if (last_spirits != player_data->spirits) {
-        last_spirits = player_data->spirits;
         tens = getTens(player_data->spirits);
         ones = player_data->spirits - (tens * 10);
         UPDATE_HUD_TILE(4, 0, 1 + tens);
@@ -156,6 +153,7 @@ void Hud_Update(void) BANKED {
         } else {    
             UPDATE_HUD_TILE(3, 0, 17);
         }
+        last_spirits = player_data->spirits;
     }
 
     if (last_magix != player_data->magix) {
@@ -166,15 +164,16 @@ void Hud_Update(void) BANKED {
                  UPDATE_HUD_TILE(0, 0, 13); // magix - full
             }
         }
+        last_magix = player_data->magix;
     }
 
-    if (last_lives != g_player_lives) {
-        //EMU_printf("Hud::%s lives:%d\n", __func__, g_player_lives);
-        last_lives = g_player_lives;
+    if (last_lives != player_data->lives) {
         for (UINT8 i = 0; i < MAX_LIVES; ++i) {
-            UPDATE_HUD_TILE(19 - i, 0, i < g_player_lives ? 18 : 19);
+            UPDATE_HUD_TILE(19 - i, 0, i < player_data->lives ? 18 : 19);
         }
+        last_lives = player_data->lives;
     }
+    
 #endif
 }
 

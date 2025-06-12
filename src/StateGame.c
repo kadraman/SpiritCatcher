@@ -18,7 +18,7 @@
 #include "GameTypes.h"
 
 UINT8 g_level_current = 1;
-UINT8 g_player_lives; 
+//UINT8 g_player_lives; 
 UINT8 g_player_region;
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
@@ -124,7 +124,7 @@ void START() {
 	scroll_bottom_movement_limit = 110;
 	level_max_time = level->seconds;
 	g_level_complete = false;
-	g_player_lives = MAX_LIVES;
+	//g_player_lives = MAX_LIVES;
 	g_player_dead = false;
 	g_player_region = 0;
 	min_x = min_y = 1;
@@ -132,6 +132,7 @@ void START() {
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	data->spirits = level->spirits;
+	//data->lives = MAX_LIVES;
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));
@@ -184,15 +185,15 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 		case ITEM_MANA:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 			player_data->magix++;
-			EMU_printf("SpritePlayer::%s: player has %d magix\n", __func__, player_data->magix);
+			EMU_printf("SpritePlayer::%s: player now has %d magix\n", __func__, player_data->magix);
 			Hud_Update();
 			break;
 		case ITEM_HEALTH:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			if (g_player_lives < MAX_LIVES) {
-				g_player_lives++;
-				//player_data->lives++;
+			if (player_data->lives < MAX_LIVES && player_data->lives < UCHAR_MAX) {
+				player_data->lives++;
 			}
+			EMU_printf("SpritePlayer::%s: player now has %d lives\n", __func__, player_data->lives);
 			Hud_Update();
 			break;
 		case ITEM_SPIRIT:
