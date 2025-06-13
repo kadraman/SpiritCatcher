@@ -205,7 +205,7 @@ void Magix() {
 
 void ChangeWeapon() {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
-	EMU_printf("SpritePlayer::%s current weapon:%d\n", __func__, data->weapon);
+	EMU_printf("SpritePlayer::%s current weapon:%u\n", __func__, data->weapon);
 	if (data->weapon >= MAX_WEAPON) {
 		data->weapon = 0; // reset to first weapon
 	} else {
@@ -219,10 +219,10 @@ void ChangeWeapon() {
 			attack_function = Magix;
 			break;
 		default:
-			EMU_printf("SpritePlayer::%s unknown weapon:%d\n", __func__, data->weapon);
+			EMU_printf("SpritePlayer::%s unknown weapon:%u\n", __func__, data->weapon);
 			break;
 	}
-	EMU_printf("SpritePlayer::%s changed weapon:%d\n", __func__, data->weapon);
+	EMU_printf("SpritePlayer::%s changed weapon:%u\n", __func__, data->weapon);
 	Hud_Update();
 }
 
@@ -250,7 +250,7 @@ void CheckOnPlatform() {
 }
 
 void CheckCollisionTile(Sprite* sprite, UINT8 idx) {
-	//EMU_printf("tile collision: %d\n", tile_collision);
+	//EMU_printf("tile collision: %u\n", tile_collision);
 	switch (tile_collision) {
 		case TILE_INDEX_SPIKE_UP:
 		case TILE_INDEX_SPIKE_DOWN:
@@ -281,7 +281,7 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 		tile_collision = TranslateSprite(THIS, 0, accel_y >> 6 << delta_time);
 	}
 	if (tile_collision) {
-		//EMU_printf("SpritePlayer::%s tile collision: %d\n", __func__, tile_collision);
+		//EMU_printf("SpritePlayer::%s tile collision: ud\n", __func__, tile_collision);
 		accel_y = 0;
 		FLAG_SET(data->flags, pGroundedFlag);
 		CheckCollisionTile(THIS, THIS_IDX);
@@ -371,8 +371,8 @@ void CheckLevelComplete() {
 //
 
 void START() {
-	memset((PlayerData*)(THIS->custom_data), 0, CUSTOM_DATA_SIZE);
 	PlayerData* data = (PlayerData*)THIS->custom_data;
+	memset(data, 0, sizeof(PlayerData));
 	g_player_dead = false;
 	player_sprite = THIS;
 	data->lives = MAX_LIVES;
@@ -543,7 +543,7 @@ void UpdateHit(void) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	ApplyGravity(THIS, THIS_IDX);
 	//if (FLAG_CHECK(data->flags, pDeadFlag)) return;
-	EMU_printf("SpritePlayer::%s frame %d/%d\n", __func__, THIS->anim_frame, GetLastAnimFrame());
+	EMU_printf("SpritePlayer::%s frame %u/%u\n", __func__, THIS->anim_frame, GetLastAnimFrame());
 	if (THIS->anim_frame == GetLastAnimFrame() || anim_hit_counter == 0) {
 		if (GetPreviousPlayerState() != PLAYER_STATE_HIT) {
 			//EMU_printf("SpritePlayer::%s set previous player state\n", __func__);

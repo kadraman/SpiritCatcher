@@ -144,6 +144,7 @@ void Hud_Update(void) BANKED {
     }
 
     if (last_spirits != player_data->spirits) {
+        EMU_printf("Spirits: %u:%u\n", last_spirits, player_data->spirits);
         tens = getTens(player_data->spirits);
         ones = player_data->spirits - (tens * 10);
         UPDATE_HUD_TILE(4, 0, 1 + tens);

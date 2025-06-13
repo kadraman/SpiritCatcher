@@ -41,7 +41,7 @@ void UPDATE() {
 			//moving left
 			//EMU_printf("SpritePlatform::UPDATE: moving left: %d:%d\n", (THIS->x), (THIS->y));
 			tile = GetScrollTile((THIS->x - 4) >> 3, (THIS->y >> 3));
-			//EMU_printf("SpritePlatform::UPDATE: moving left scroll tile: %d\n", tile);
+			//EMU_printf("SpritePlatform::UPDATE: moving left scroll tile: %u\n", tile);
 			if (TranslateSprite(THIS, -1 << delta_time, 0)) {
 				THIS->mirror = NO_MIRROR;
 			}
@@ -52,7 +52,7 @@ void UPDATE() {
 			//moving right
 			//EMU_printf("SpritePlatform::UPDATE: moving right: %d:%d\n", (THIS->x), (THIS->y));
 			tile = GetScrollTile((THIS->x + THIS->coll_w + 4) >> 3, (THIS->y >> 3));
-			//EMU_printf("SpritePlatform::UPDATE: moving right scroll tile: %d\n", tile);
+			//EMU_printf("SpritePlatform::UPDATE: moving right scroll tile: %u\n", tile);
 			if (TranslateSprite(THIS, +1 << delta_time, 0)) {
 				THIS->mirror = V_MIRROR;
 			}

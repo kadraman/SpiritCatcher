@@ -185,7 +185,7 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 		case ITEM_MANA:
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
 			player_data->magix++;
-			EMU_printf("SpritePlayer::%s: player now has %d magix\n", __func__, player_data->magix);
+			EMU_printf("SpritePlayer::%s: player now has %u magix\n", __func__, player_data->magix);
 			Hud_Update();
 			break;
 		case ITEM_HEALTH:
@@ -193,14 +193,15 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 			if (player_data->lives < MAX_LIVES && player_data->lives < UCHAR_MAX) {
 				player_data->lives++;
 			}
-			EMU_printf("SpritePlayer::%s: player now has %d lives\n", __func__, player_data->lives);
+			EMU_printf("SpritePlayer::%s: player now has %u lives\n", __func__, player_data->lives);
 			Hud_Update();
 			break;
 		case ITEM_SPIRIT:
+			EMU_printf("SpritePlayer::%s: player caught spirit\n", __func__);
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			player_data->spirits--;
+			player_data->spirits = player_data->spirits > 0 ? player_data->spirits - 1 : 0;
 			if (player_data->spirits == 0) {
-				EMU_printf("SpritePlayer::%s: player has all spirits\n", __func__);
+				EMU_printf("SpritePlayer::%s: player has caught all spirits\n", __func__);
 				FLAG_SET(player_data->flags, pCaughtSpiritFlag);
 			}
 			Hud_Update();
