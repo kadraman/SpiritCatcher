@@ -27,6 +27,7 @@
         "xutility": "c",
         "sprite.h": "c",
         "setautobank.h": "c",
-        "statetitlesc": "cpp"
+        "statetitlesc": "cpp",
+        "spriteplayer.h": "c"
     }
 }

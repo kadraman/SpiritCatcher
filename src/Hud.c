@@ -8,10 +8,9 @@
 #include "Sprite.h"
 #include "SpriteManager.h"
 
-#include "SpritePlayer.h"
 #include "GameTypes.h"
-
-//#define DEBUG_HUD   1
+#include "SpritePlayer.h"
+#include "Hud.h"
 
 // saved last drawn values, to work out what to update on hud
 static UINT8 last_spirits;
@@ -37,15 +36,10 @@ void Hud_Init(void) BANKED {
     IMPORT_MAP(hud);
     INIT_HUD(hud);
 #endif
-    // prime the last values so they all get updated
-    last_spirits = 0xFF; // 255
-    last_magix = 0xFF; // 255
-    last_lives = 0xFF; // 255
+    last_spirits = 254;  // forced to 254, so that it will be updated on first call
     last_weapon = pWeaponKnife; // default weapon is knife
     timer_countdown = level_max_time;
-    timer_clock = 0;
-    last_timer = 0;
-    UPDATE_HUD_TILE(0, 0, 14); // default weapon is knife
+    UPDATE_HUD_TILE(0, 0, 14); // knife
 }
 
 static UINT8 getHundreds(UINT8 full) {
@@ -144,7 +138,7 @@ void Hud_Update(void) BANKED {
     }
 
     if (last_spirits != player_data->spirits) {
-        EMU_printf("Spirits: %u:%u\n", last_spirits, player_data->spirits);
+        EMU_printf("Spirits was: %u:%u\n", last_spirits, player_data->spirits);
         tens = getTens(player_data->spirits);
         ones = player_data->spirits - (tens * 10);
         UPDATE_HUD_TILE(4, 0, 1 + tens);
@@ -155,6 +149,7 @@ void Hud_Update(void) BANKED {
             UPDATE_HUD_TILE(3, 0, 17);
         }
         last_spirits = player_data->spirits;
+        EMU_printf("Spirits now: %u:%u\n", last_spirits, player_data->spirits);
     }
 
     if (last_magix != player_data->magix) {

@@ -8,8 +8,6 @@
 #include "ZGBMain.h"
 #include "ZGBUtils.h"
 
-#include "GameTypes.h"
-#include "Hud.h"
 
 #define pGroundedFlag			0	/* player is on the ground, i.e. not jumping */
 #define pDeadFlag				1	/* player has died, drowned etc. */
@@ -71,16 +69,16 @@ typedef struct {
 	UINT8 flags;
 	UINT8 start_x;
 	UINT8 start_y;
-	UINT8 lives;
+	UINT8 lives;	// number of lives player has
 	UINT8 weapon;	// weapon player has currently selected
-	UINT8 spirits;	// number of spirits remaining
+	UINT8 spirits;	// number of spirits remaining to be c
 	UINT8 magix;	// number of magix remaining
 } PlayerData;
 
 void SetPlayerState(PlayerState state) BANKED;
 PlayerState GetPlayerState(void) BANKED;
-PlayerState GetPreviousPlayerState() BANKED;
-void SetPreviousPlayerState() BANKED;
+PlayerState GetPreviousPlayerState(void) BANKED;
+void SetPreviousPlayerState(void) BANKED;
 bool GetPlayerStateEquals(PlayerState ps) BANKED;
 
 #endif // SPRITEPLAYER_H

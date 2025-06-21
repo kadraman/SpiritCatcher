@@ -46,12 +46,12 @@ void UPDATE() {
 	// TODO: check if player is within range (Y coordinate)
 	// TODO: prevent firing into a wall
 	// if player is within range, fire a rocklette
-	if ((THIS->anim_frame == 1 && !data->firing) && (player_sprite->x < THIS->x)) {
+	if ((THIS->anim_frame == 1 && !data->firing) && (player_sprite->x < THIS->x) && (THIS->x - player_sprite->x < 120)) {
 		//EMU_printf("SpriteRockard::UPDATE: firing left\n");
 		CreateRocklette(THIS->x + 4, THIS->y + 6, -1, 0);
 		data->firing = true;
 	}
-	if ((THIS->anim_frame == (UINT8)VECTOR_LEN(THIS->anim_data)-1 && !data->firing) && (player_sprite->x > THIS->x)) {
+	if ((THIS->anim_frame == (UINT8)VECTOR_LEN(THIS->anim_data)-1 && !data->firing) && (player_sprite->x > THIS->x) && (player_sprite->x - THIS->x < 120)) {
 		//EMU_printf("SpriteRockard::UPDATE: firing right\n");
 		CreateRocklette(THIS->x + 12, THIS->y + 6, 1, 0);
 		data->firing = true;
