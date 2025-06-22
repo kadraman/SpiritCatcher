@@ -155,6 +155,26 @@ UINT8 GetLastAnimFrame(void) BANKED {
 }
 
 
+bool PlayerIsOnTopOfPlatform(Sprite* player, Sprite* platform) BANKED {
+    // Player's feet position (center of the bottom of the player sprite)
+    UINT16 player_feet_x = player->x + (player->coll_w >> 1);
+    UINT16 player_feet_y = player->y + player->coll_h; // bottom of player
+
+    // Platform bounds
+    UINT16 plat_left = platform->x;
+    UINT16 plat_right = platform->x + platform->coll_w;
+    UINT16 plat_top = platform->y;
+
+    // Only on platform if feet are horizontally within platform,
+    // and vertically just above the top (allowing a small tolerance)
+    return (
+        player_feet_x >= plat_left - 1 &&
+        player_feet_x <= plat_right + 1 &&
+        player_feet_y >= plat_top - 2 &&
+        player_feet_y <= plat_top + 2
+    );
+}
+
 void UpdateAttackPos(void) {
 	attack1_sprite->mirror = THIS->mirror;
 	if (THIS->mirror == V_MIRROR) 
@@ -700,13 +720,17 @@ void UPDATE() {
 		}
 		if (spr->type == SpritePlatform) {
 			if (CheckCollision(THIS, spr) && !(FLAG_CHECK(data->flags, pOnPlatformFlag))) {
-				// player above platform
-				if (THIS->y <= spr->y && !(GetPlayerState() == PLAYER_STATE_DROWN)) {
-					//EMU_printf("SpritePlayer::player x:%d,y%d collided with platform: x:%d,y:%d\n", THIS->x, THIS->y, spr->x, spr->y);
+				if (PlayerIsOnTopOfPlatform(THIS, spr) && !(GetPlayerState() == PLAYER_STATE_DROWN)) {
 					FLAG_SET(data->flags, pOnPlatformFlag);
 					FLAG_SET(data->flags, pGroundedFlag);
 					accel_x = accel_y = 0;
 					SetPlayerState(PLAYER_STATE_PLATFORM);
+				}
+			}
+			// If already on platform, check if player has stepped off
+			if (FLAG_CHECK(data->flags, pOnPlatformFlag)) {
+				if (!PlayerIsOnTopOfPlatform(THIS, spr)) {
+					FLAG_CLEAR(data->flags, pOnPlatformFlag);
 				}
 			}
 		}

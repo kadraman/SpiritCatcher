@@ -80,5 +80,6 @@ PlayerState GetPlayerState(void) BANKED;
 PlayerState GetPreviousPlayerState(void) BANKED;
 void SetPreviousPlayerState(void) BANKED;
 bool GetPlayerStateEquals(PlayerState ps) BANKED;
+bool PlayerIsOnTopOfPlatform(Sprite* player, Sprite* platform) BANKED;
 
 #endif // SPRITEPLAYER_H
