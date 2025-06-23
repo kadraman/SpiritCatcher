@@ -65,15 +65,15 @@ void UPDATE() {
     CustomData* data = (CustomData*)THIS->custom_data;
 
     // Show/hide logic
-    if (data->hide_counter < 80) { // show for 80 frames
-        data->hide_counter++;
-        THIS->visible = 1;
-    } else if (data->hide_counter < 160) { // hide for 80 frames
-        data->hide_counter++;
-        THIS->visible = 0;
-    } else { // reset counter
-        data->hide_counter = 0;
-    }
+    //if (data->hide_counter < 80) { // show for 80 frames
+    //    data->hide_counter++;
+    //    THIS->visible = 1;
+    //} else if (data->hide_counter < 160) { // hide for 80 frames
+    //    data->hide_counter++;
+    //    THIS->visible = 0;
+    //} else { // reset counter
+    //    data->hide_counter = 0;
+    //}
 
     // Movement logic (circular, around starting position)
     data->frame_toggle ^= 1;
@@ -87,7 +87,7 @@ void UPDATE() {
     THIS->y = data->start_y + ((sin_table[(data->pos_counter + 32) & 127] * 3) >> 4);
 
     // Only allow collection if visible
-    if (CheckCollision(THIS, player_sprite) && THIS->visible) {
+    if (CheckCollision(THIS, player_sprite) && GetPlayerState() == PLAYER_STATE_CATCH) {
         TakeCollectable(THIS, ITEM_MANA);
         PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
         SpriteManagerRemove(THIS_IDX);

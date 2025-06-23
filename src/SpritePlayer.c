@@ -55,6 +55,7 @@ UINT8 anim_hit_counter;
 UINT8 anim_hit_ticks;
 UINT8 visible_skip;
 UINT8 tile_collision;
+UINT8 prev_keys;
 
 UINT8 adjacent_tile;
 
@@ -71,6 +72,7 @@ void Hit(void);
 void Drown(void);
 void Slash(void);
 void Magix(void);
+void CatchSpirit(void);
 void ChangeWeapon(void);
 void CheckOnPlatform(void);
 void CheckCollisionTile(Sprite* sprite, UINT8 idx);
@@ -143,7 +145,11 @@ PlayerState GetPreviousPlayerState(void) BANKED {
 }
 
 void SetPreviousPlayerState(void) BANKED {
-	SetPlayerState(prevPlayerState);
+	if (prevPlayerState == curPlayerState) {
+		SetPlayerState(PLAYER_STATE_IDLE);
+	} else {
+		return SetPlayerState(prevPlayerState);
+	}
 }
 
 bool GetPlayerStateEquals(PlayerState ps) BANKED {
@@ -252,6 +258,11 @@ void Magix(void) {
 	//magix_cooldown = MAGIX_COOLDOWN_TIME;
 	//magix_recharge = MAGIX_RECHARGE_TIME;
 	SetPlayerState(prevPlayerState);
+}
+
+void CatchSpirit(void) {
+	EMU_printf("SpritePlayer::%s catching spirit\n", __func__);
+	SetPlayerState(PLAYER_STATE_CATCH);
 }
 
 void ChangeWeapon(void) {
@@ -445,6 +456,7 @@ void START() {
 	visible_skip = 0;
 	tile_collision = 0;
 	invincible_secs = 0;
+	prev_keys = 0;
 	SetPlayerState(PLAYER_STATE_SPAWN);
 }
 
@@ -466,6 +478,7 @@ void UpdateIdle(void) {
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag) || FLAG_CHECK(data->flags, pOnPlatformFlag))) {
 		Jump();
 	}
+	if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
 	if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
@@ -480,6 +493,7 @@ void UpdateWalking(void) {
 	if (KEY_TICKED(J_A) && (FLAG_CHECK(data->flags, pGroundedFlag))) {
 		Jump();
 	}
+	if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
 	if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 	if (keys == 0) {
@@ -531,6 +545,15 @@ void UpdateAttacking(void) {
 		SetPlayerState(prevPlayerState);
 	}
 }
+void UpdateCatching(void) {
+	//EMU_printf("SpritePlayer::%s; previous state:%d\n", __func__, GetPreviousPlayerState());
+	if ( ( (prev_keys & J_UP) && !(keys & J_UP) ) ||
+		( (prev_keys & J_B)  && !(keys & J_B) ) ) {
+		// Either J_UP or J_B was just released
+		EMU_printf("SpritePlayer::%s stopped catching\n", __func__);
+		SetPlayerState(PLAYER_STATE_IDLE);
+	}
+}
 void UpdateClimbing(void) {
 	//EMU_printf("SpritePlayer::%s\n", __func__);
 	UINT8 i = TILE_INDEX_LADDER_LEFT;
@@ -565,9 +588,9 @@ void UpdateClimbing(void) {
 		//TranslateSprite(THIS, 0, 1 << delta_time);
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
-	if (KEY_TICKED(J_A)) {
-		Jump();
-	}
+	if (KEY_TICKED(J_A)) Jump();
+	// can't catch on a ladder
+	//if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
 	if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
@@ -585,6 +608,8 @@ void UpdatePlatform(void) {
 		THIS->y = THIS->y - 1u;
 		Jump();
 	}
+	// can we catch on a platform?
+	if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
 	if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 	CheckOnPlatform();
@@ -646,6 +671,7 @@ const update_hook_t const update_hooks[N_PLAYER_STATE] = {
 	[PLAYER_STATE_JUMP]      	= UpdateJumping,
 	[PLAYER_STATE_FALL]      	= UpdateFalling,
 	[PLAYER_STATE_ATTACK] 		= UpdateAttacking,
+	[PLAYER_STATE_CATCH]		= UpdateCatching,
 	[PLAYER_STATE_CLIMB]		= UpdateClimbing,
 	[PLAYER_STATE_PLATFORM]		= UpdatePlatform,
 	[PLAYER_STATE_HIT]			= UpdateHit,
@@ -743,6 +769,8 @@ void UPDATE() {
 			}
 		}
 	}
+
+	prev_keys = keys;
 
 }
 
