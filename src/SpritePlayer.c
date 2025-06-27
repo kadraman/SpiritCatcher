@@ -24,8 +24,9 @@ const UINT8 anim_jump[] = {2, 6, 7};
 const UINT8 anim_fall[] = {1, 8};
 const UINT8 anim_jump_attack[] = {1, 16};
 const UINT8 anim_attack[] = {2, 16, 17};
-const UINT8 anim_climb[] = {3, 18, 19, 20};
-const UINT8 anim_climb_idle[] = {1, 19};
+const UINT8 anim_catch[] = {1, 18};
+const UINT8 anim_climb[] = {3, 19, 20, 21};
+const UINT8 anim_climb_idle[] = {1, 20};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
 const UINT8 anim_die[] = {16, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12};
 //const UINT8 anim_appear[] = {3, 15, 14, 13};
@@ -116,6 +117,8 @@ void SetPlayerState(PlayerState state) BANKED {
 			SetSpriteAnim(THIS, anim_fall, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_ATTACK:
 			SetSpriteAnim(THIS, anim_attack, DEFAULT_ANIM_SPEED); break;
+		case PLAYER_STATE_CATCH:
+			SetSpriteAnim(THIS, anim_catch, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_CLIMB:
 			SetSpriteAnim(THIS, anim_climb, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_HIT:
