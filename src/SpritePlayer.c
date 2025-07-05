@@ -36,6 +36,7 @@ const UINT8 anim_drown[] = {10, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15};
 
 Sprite* player_sprite = 0;
 Sprite* attack1_sprite = 0;
+Sprite* lantern_sprite = 0;
 extern Sprite* attack_particle;
 extern UINT8 start_x, start_y;
 extern INT16 scroll_x, scroll_y;
@@ -95,6 +96,8 @@ void UpdateDie(void);
 void UpdateDrown(void);
 void UpdateTimeUp(void);
 void UpdateVictory(void);
+
+void RemoveLantern(Sprite *sprite) BANKED;
 
 // attack function
 typedef void (*attack_func_t)(void);
@@ -266,6 +269,8 @@ void Magix(void) {
 void CatchSpirit(void) {
 	EMU_printf("SpritePlayer::%s catching spirit\n", __func__);
 	SetPlayerState(PLAYER_STATE_CATCH);
+	lantern_sprite = SpriteManagerAdd(SpriteLantern, THIS->x+8, THIS->y-8);
+	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
 }
 
 void ChangeWeapon(void) {
@@ -482,7 +487,7 @@ void UpdateIdle(void) {
 		Jump();
 	}
 	if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
-	if (KEY_TICKED(J_B)) attack_function();
+	else if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 }
 UINT8 idle_reset = 0;
@@ -497,7 +502,7 @@ void UpdateWalking(void) {
 		Jump();
 	}
 	if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
-	if (KEY_TICKED(J_B)) attack_function();
+	else if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 	if (keys == 0) {
 		//SetFrame(THIS, 1);
@@ -554,6 +559,7 @@ void UpdateCatching(void) {
 		( (prev_keys & J_B)  && !(keys & J_B) ) ) {
 		// Either J_UP or J_B was just released
 		EMU_printf("SpritePlayer::%s stopped catching\n", __func__);
+		SpriteManagerRemoveSprite(lantern_sprite);
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
 }
@@ -613,7 +619,7 @@ void UpdatePlatform(void) {
 	}
 	// can we catch on a platform?
 	if ((keys & J_UP) && (keys & J_B)) CatchSpirit();
-	if (KEY_TICKED(J_B)) attack_function();
+	else if (KEY_TICKED(J_B)) attack_function();
 	if (KEY_TICKED(J_SELECT)) ChangeWeapon();
 	CheckOnPlatform();
 }

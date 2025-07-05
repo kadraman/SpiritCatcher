@@ -34,7 +34,7 @@ const INT8 sin_table[128] = {
    -73, -77, -77, -81, -81, -85, -85, -89
 };
 
-extern Sprite* player_sprite;
+extern Sprite* lantern_sprite;
 extern UINT8 item_collected;
 UINT8 IsCollected(Sprite* collectable) BANKED;
 void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
@@ -87,8 +87,8 @@ void UPDATE() {
     THIS->y = data->start_y + ((sin_table[(data->pos_counter + 32) & 127] * 3) >> 4);
 
     // Only allow collection if visible
-    if (CheckCollision(THIS, player_sprite) && GetPlayerState() == PLAYER_STATE_CATCH) {
-        TakeCollectable(THIS, ITEM_MANA);
+    if (CheckCollision(THIS, lantern_sprite) && GetPlayerState() == PLAYER_STATE_CATCH) {
+        TakeCollectable(THIS, ITEM_SPIRIT);
         PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
         SpriteManagerRemove(THIS_IDX);
     }
