@@ -1,6 +1,8 @@
 #ifndef ZGBMAIN_H
 #define ZGBMAIN_H
 
+#define ASSERT_CUSTOM_DATA_SIZE(type, size) _Static_assert(sizeof(type) <= (size), #type " exceeds " #size " bytes")
+
 #define STATES \
 _STATE(StateSplash)\
 _STATE(StateOverworld)\
