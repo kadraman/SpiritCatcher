@@ -95,7 +95,7 @@ void UpdateEnemies(UINT16 player_x, UINT16 player_y) BANKED {
 		case 1:
 			if (player_x > 0 && player_x <= 250 && g_player_region <= 0) {
 				SpriteManagerAdd(SpriteSlime, 18 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 24 << 3, 6 << 3);
+				SpriteManagerAdd(SpriteBat, 24 << 3, 7 << 3);
 				g_player_region = 1; break;
 			}
 			if (player_x > 250 && player_x < 500 && g_player_region <= 1) {

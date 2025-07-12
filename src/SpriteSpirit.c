@@ -7,10 +7,12 @@
 #include "Vector.h"
 #include "SpriteManager.h"
 
+#include "ZGBMain.h"
 #include "GameTypes.h"
 #include "SpritePlayer.h"
 
 const UINT8 anim_spirit[] = {3, 0, 1, 2};
+const UINT8 anim_spirit_caught[] = {5, 3, 3, 3, 3, 3};
 const INT8 sin_table[128] = {
       0,   4,   6,  10,  12,  16,  18,  22,
      24,  28,  30,  34,  36,  40,  42,  46,
@@ -41,13 +43,16 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
 typedef struct {
 	UINT16 start_x;
 	UINT16 start_y;
-    UINT8 pos_counter;
+	UINT8 pos_counter;
 	UINT8 frame_toggle;
 	UINT8 hide_counter;
-} CustomData;
+	UINT8 caught; 
+} CUSTOM_DATA;
+ASSERT_CUSTOM_DATA_SIZE(CUSTOM_DATA, 8);
 
 void START() {
-	CustomData* data = (CustomData*)THIS->custom_data;
+	CUSTOM_DATA* data = (CUSTOM_DATA*)THIS->custom_data;
+    memset(data, 0, sizeof(CUSTOM_DATA));
 	if (IsCollected(THIS) != 255) {
 		SpriteManagerRemove(THIS_IDX);
 	} else {
@@ -62,7 +67,7 @@ void START() {
 }
 
 void UPDATE() {
-    CustomData* data = (CustomData*)THIS->custom_data;
+    CUSTOM_DATA* data = (CUSTOM_DATA*)THIS->custom_data;
 
     // Show/hide logic
     //if (data->hide_counter < 80) { // show for 80 frames
@@ -86,11 +91,18 @@ void UPDATE() {
     THIS->x = data->start_x + ((sin_table[data->pos_counter] * 3) >> 4);
     THIS->y = data->start_y + ((sin_table[(data->pos_counter + 32) & 127] * 3) >> 4);
 
-    // Only allow collection if visible
-    if (CheckCollision(THIS, lantern_sprite) && GetPlayerState() == PLAYER_STATE_CATCH) {
-        TakeCollectable(THIS, ITEM_SPIRIT);
-        PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-        SpriteManagerRemove(THIS_IDX);
+    if (!data->caught) {
+        if (CheckCollision(THIS, lantern_sprite) && GetPlayerState() == PLAYER_STATE_CATCH) {
+            SetSpriteAnim(THIS, anim_spirit_caught, 20u);
+            data->caught = 1;
+        }
+    } else {
+        // Wait for animation to finish
+        if (THIS->anim_frame == VECTOR_LEN(anim_spirit_caught) - 1) {
+            TakeCollectable(THIS, ITEM_SPIRIT);
+            PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+            SpriteManagerRemove(THIS_IDX);
+        }
     }
 }
 

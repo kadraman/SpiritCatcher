@@ -200,7 +200,9 @@ void Jump(void) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	FLAG_CLEAR(data->flags, pGroundedFlag);
 	FLAG_CLEAR(data->flags, pOnPlatformFlag);
-	PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
+	//PlayFx(CHANNEL_1, 5, 0x17, 0x9f, 0xf3, 0xc9, 0xc4);
+	PlayFx(CHANNEL_1, 5, 0x19, 0x81, 0x65, 0x8c, 0x85);
+
 	SetPlayerState(PLAYER_STATE_JUMP);
 	accel_y = -Y_JUMP_HEIGHT;
 }
@@ -243,7 +245,9 @@ void Slash(void) {
 	SetPlayerState(PLAYER_STATE_ATTACK);
 	attack1_sprite = SpriteManagerAdd(SpriteAttack1, THIS->x, THIS->y);
 	UpdateAttackPos();
-	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
+	//PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
+	PlayFx(CHANNEL_4, 10, 0x14, 0x51, 0x21, 0xc0);
+
 }
 
 void Magix(void) {
@@ -267,9 +271,15 @@ void Magix(void) {
 }
 
 void CatchSpirit(void) {
-	EMU_printf("SpritePlayer::%s catching spirit\n", __func__);
+	//EMU_printf("SpritePlayer::%s catching spirit\n", __func__);
 	SetPlayerState(PLAYER_STATE_CATCH);
-	lantern_sprite = SpriteManagerAdd(SpriteLantern, THIS->x+8, THIS->y-8);
+	if (THIS->mirror == V_MIRROR) {
+        // Facing left
+        lantern_sprite = SpriteManagerAdd(SpriteLantern, THIS->x - 6, THIS->y - 7);
+    } else {
+        // Facing right
+        lantern_sprite = SpriteManagerAdd(SpriteLantern, THIS->x + 10, THIS->y - 7);
+    }
 	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
 }
 
@@ -558,7 +568,7 @@ void UpdateCatching(void) {
 	if ( ( (prev_keys & J_UP) && !(keys & J_UP) ) ||
 		( (prev_keys & J_B)  && !(keys & J_B) ) ) {
 		// Either J_UP or J_B was just released
-		EMU_printf("SpritePlayer::%s stopped catching\n", __func__);
+		//EMU_printf("SpritePlayer::%s stopped catching\n", __func__);
 		SpriteManagerRemoveSprite(lantern_sprite);
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
