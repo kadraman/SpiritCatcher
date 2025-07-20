@@ -18,7 +18,7 @@
 #include "SpritePlayer.h"
 #include "Water.h"
 
-UINT8 g_level_current = 1;
+//UINT8 g_level_current = 1;
 //UINT8 g_player_lives; 
 UINT8 g_player_region;
 UINT8 start_x, start_y;

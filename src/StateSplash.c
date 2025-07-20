@@ -1,6 +1,7 @@
 #include "Banks/SetAutoBank.h"
 #include "main.h"
 #include <gbdk/platform.h>
+
 #include <stdint.h>
 #include <gbdk/platform.h>
 #include <gbdk/metasprites.h>

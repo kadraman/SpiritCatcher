@@ -4,12 +4,10 @@
 #include "GameTypes.h"
 #include <gbdk/emu_debug.h>
 
-UINT16 g_player_score = 0;
-
 #ifdef NDEBUG
 UINT8 next_state = StateSplash;
 #else
-UINT8 next_state = StateSplash;
+UINT8 next_state = StateOverworld;
 #endif
 
 UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
