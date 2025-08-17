@@ -14,10 +14,10 @@
 
 #define DEFAULT_ANIM_SPEED 8
 
-const UINT8 anim_idle[] = {1, 0};
-const UINT8 anim_walk_across[] = {2, 0, 1};
-const UINT8 anim_walk_up[] = {2, 2, 3};
-const UINT8 anim_walk_down[] = {2, 4, 5};
+const UINT8 anim_idle[] = {3, 0, 1, 2};
+const UINT8 anim_walk_across[] = {2, 3, 4, 5};
+const UINT8 anim_walk_up[] = {2, 6, 7};
+const UINT8 anim_walk_down[] = {2, 8, 9};
 
 Sprite* overplayer_sprite = 0;
 

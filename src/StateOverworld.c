@@ -26,15 +26,15 @@ typedef struct {
 
 #define NUM_PORTALS 3
 const PortalStartPos portal_start_positions[NUM_PORTALS+1] = {
-    { 1, 14 },   	// player start position
-    { 10, 14 },   	// Portal 1 start position 10, 14
-    { 16, 9 },   	// Portal 2 start position: 16, 9
-	{ 7, 4 }   		// Portal 2 start position: 7, 4
+    { 5, 11 },   	// player start position
+
+    { 10, 8 },   	// Portal 1 start position 10, 14
+    { 23, 10 },   	// Portal 2 start position: 16, 9
+	{ 30, 6 }   	// Portal 3 start position: 7, 4
 };
 
 UINT8 overworld_collision_tiles[] = {
-	48, 49, 50, 
-	51, 52, 53, 54, 55, 56, 57,	58, 59, 60, 
+	58, 59, 60, 
 	61, 62, 63,	64, 65, 66, 67, 68, 69, 70,
 	71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
 	81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
