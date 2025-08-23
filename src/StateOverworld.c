@@ -8,6 +8,7 @@
 #include "Music.h"
 #include "SpriteManager.h"
 #include "GameTypes.h"
+#include "Stars.h"
 
 //UINT8 start_x;
 //UINT8 start_y;
@@ -77,4 +78,5 @@ void UPDATE() {
 	/*if (ANY_KEY_PRESSED) {
 		SetState(StateGame);
 	}*/
+	Stars_Animate();
 }
