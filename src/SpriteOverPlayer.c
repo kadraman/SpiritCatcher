@@ -15,15 +15,19 @@
 #define DEFAULT_ANIM_SPEED 8
 
 const UINT8 anim_idle[] = {3, 0, 1, 2};
-const UINT8 anim_walk_across[] = {2, 3, 4, 5};
-const UINT8 anim_walk_up[] = {2, 6, 7};
-const UINT8 anim_walk_down[] = {2, 8, 9};
+const UINT8 anim_walk_across[] = {3, 0, 1, 2};
+const UINT8 anim_walk_up[] = {3, 0, 1, 2};
+const UINT8 anim_walk_down[] = {3, 0, 1, 2};
 
 Sprite* overplayer_sprite = 0;
+Sprite* overplayer_eyes_sprite = NULL;
 
 void START() {
     overplayer_sprite = THIS; // Store the pointer to the player sprite
     SetSpriteAnim(THIS, anim_walk_across, DEFAULT_ANIM_SPEED);
+
+     // Add eyes sprite at the same position
+    overplayer_eyes_sprite = SpriteManagerAdd(SpriteOverPlayerEyes, THIS->x, THIS->y);
 }
 
 void UPDATE() {
@@ -45,18 +49,21 @@ void UPDATE() {
         SetSpriteAnim(THIS, anim_idle, DEFAULT_ANIM_SPEED);
     }
 
-    // check for collision with level sprite
-    /*for (UINT8 i = 0u; i != sprite_manager_updatables[0]; ++i) {
-        Sprite* spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
-        if (spr->type == SpriteLevelOpen || spr->type == SpriteLevelClosed) {
-            if (CheckCollision(THIS, spr) && spr->type == SpriteLevelOpen) {
-                EMU_printf("OverPlayer::UPDATE: Collision with level sprite at (%u, %u)\n", spr->x, spr->y);
-                // Handle collision with level sprite
-                // For example, you might want to change the state or trigger an event
-                // SetState(StateOverworld); // Example action
-            }   
+    // Update eyes sprite to follow player
+    if (overplayer_eyes_sprite) {
+        overplayer_eyes_sprite->x = THIS->x;
+        if (THIS->anim_frame == 0) {
+            overplayer_eyes_sprite->y = THIS->y;
+        } else if (THIS->anim_frame == 1) {
+            overplayer_eyes_sprite->y = THIS->y + 1;
+        } else {
+            overplayer_eyes_sprite->y = THIS->y - 2;
         }
-    }*/
+        overplayer_eyes_sprite->mirror = THIS->mirror;
+
+         // Synchronize animation and frame
+        SetSpriteAnimFrame(overplayer_eyes_sprite, THIS->anim_frame);  
+    }
 }
 
 void DESTROY() {

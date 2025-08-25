@@ -29,7 +29,7 @@ typedef struct {
 } CUSTOM_DATA;
 ASSERT_CUSTOM_DATA_SIZE(CUSTOM_DATA, 8);
 
-void AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED {
+Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED {
     Sprite* spr = SpriteManagerAdd(SpriteOverPortal, x, y);
     CUSTOM_DATA* data = (CUSTOM_DATA*)spr->custom_data;
 
@@ -45,6 +45,8 @@ void AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x
     } else {
         SetSpriteAnim(spr, anim_closed, DEFAULT_ANIM_SPEED);
     }
+
+    return spr;
 }
 
 void START() {

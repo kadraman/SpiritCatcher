@@ -28,6 +28,7 @@ _SPRITE(SpriteAttack1,      attack1,    FLIP_NONE)\
 _SPRITE(SpriteLantern,      lantern,    FLIP_NONE)\
 _SPRITE(SpriteRocklette,    rocklette,  FLIP_NONE)\
 _SPRITE(SpriteOverPlayer,   overplayer, FLIP_NONE)\
+_SPRITE(SpriteOverPlayerEyes,   overplayereyes, FLIP_NONE)\
 _SPRITE(SpriteOverPortal,   overportal, FLIP_NONE)\
 SPRITE_DEF_END
 

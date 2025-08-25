@@ -9,11 +9,12 @@
 #include "SpriteManager.h"
 #include "GameTypes.h"
 #include "Stars.h"
+#include <BankManager.h>
 
 //UINT8 start_x;
 //UINT8 start_y;
 
-void AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED;
+Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED;
 
 extern Sprite* overplayer_sprite;
 
@@ -33,6 +34,7 @@ const PortalStartPos portal_start_positions[NUM_PORTALS+1] = {
     { 23, 10 },   	// Portal 2 start position: 16, 9
 	{ 30, 6 }   	// Portal 3 start position: 7, 4
 };
+static Sprite* portal_sprites[NUM_PORTALS+1] = { NULL };
 
 UINT8 overworld_collision_tiles[] = {
 	58, 59, 60, 
@@ -53,7 +55,7 @@ void START() {
 	InitScroll(BANK(overworld), &overworld, overworld_collision_tiles, 0);
 
 	// Add all portals and enable only the one for g_next_portal
-    for (UINT8 i = 1; i <= NUM_PORTALS; ++i) {
+    /*for (UINT8 i = 1; i <= NUM_PORTALS; ++i) {
 		AddPortal(
 			portal_start_positions[i].x << 3, 
 			portal_start_positions[i].y << 3, 
@@ -69,7 +71,7 @@ void START() {
         //pdata->is_open = (i == g_next_portal) ? true : false;
         //pdata->level = i;
         // Set other portal data as needed
-    }
+    }*/
 	
 	//PlayMusic(timeup, 0);
 }
@@ -78,5 +80,28 @@ void UPDATE() {
 	/*if (ANY_KEY_PRESSED) {
 		SetState(StateGame);
 	}*/
+	
+    for (UINT8 i = 1; i <= NUM_PORTALS; ++i) {
+        UINT16 portal_x = portal_start_positions[i].x << 3;
+        UINT16 portal_y = portal_start_positions[i].y << 3;
+
+        if (portal_x >= scroll_x && portal_x < scroll_x + SCREEN_WIDTH &&
+            portal_y >= scroll_y && portal_y < scroll_y + SCREEN_HEIGHT) {
+            if (portal_sprites[i] == NULL) {
+                portal_sprites[i] = AddPortal(
+                    portal_x,
+                    portal_y,
+                    (i == g_next_portal), // is_open
+                    i, 0, 0, 0, 0
+                );
+            }
+        } else {
+            // Optionally remove portal if it leaves the screen
+            if (portal_sprites[i] != NULL) {
+                SpriteManagerRemoveSprite(portal_sprites[i]);
+                portal_sprites[i] = NULL;
+            }
+        }
+    }
 	Stars_Animate();
 }
