@@ -1,1 +1,1 @@
--keep_palette_order -rel_paths -keep_duplicate_tiles -source_tileset overworldtiles.png -entity_tileset meta/objects.png
+-keep_palette_order -rel_paths -keep_duplicate_tiles -source_tileset overworldtiles.png -entity_tileset meta/overworldobjects.png

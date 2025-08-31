@@ -52,7 +52,8 @@ Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_til
 void START() {
     CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
     memset(data, 0, sizeof(CUSTOM_DATA));
-    SetSpriteAnim(THIS, anim_closed, DEFAULT_ANIM_SPEED);
+    data->is_open = true;
+    SetSpriteAnim(THIS, anim_open, DEFAULT_ANIM_SPEED);
 }
 
 void UPDATE() {
