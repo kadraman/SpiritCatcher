@@ -27,7 +27,7 @@ void START() {
     SetSpriteAnim(THIS, anim_walk_across, DEFAULT_ANIM_SPEED);
 
      // Add eyes sprite at the same position
-    overplayer_eyes_sprite = SpriteManagerAdd(SpriteOverPlayerEyes, THIS->x, THIS->y);
+    //overplayer_eyes_sprite = SpriteManagerAdd(SpriteOverPlayerEyes, THIS->x, THIS->y);
 }
 
 void UPDATE() {
@@ -50,6 +50,7 @@ void UPDATE() {
     }
 
     // Update eyes sprite to follow player
+    /*
     if (overplayer_eyes_sprite) {
         overplayer_eyes_sprite->x = THIS->x;
         if (THIS->anim_frame == 0) {
@@ -63,7 +64,7 @@ void UPDATE() {
 
          // Synchronize animation and frame
         SetSpriteAnimFrame(overplayer_eyes_sprite, THIS->anim_frame);  
-    }
+    }*/
 }
 
 void DESTROY() {

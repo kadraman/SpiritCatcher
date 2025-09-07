@@ -31,8 +31,13 @@ typedef struct {
 PortalStartPos* portal_start_positions = NULL;
 UINT8 num_portals = 0;
 
-#define DEFAULT_OVERPLAYER_TILE_X 5
-#define DEFAULT_OVERPLAYER_TILE_Y 11
+#define DEFAULT_OVERPLAYER_TILE_X 3
+#define DEFAULT_OVERPLAYER_TILE_Y 8
+
+#define HUD_HEIGHT_TILES 5
+#define SCREEN_HEIGHT_TILES 18
+
+#define HUD_TILE_BLANK 0
 
 /*
 #define NUM_PORTALS 3
@@ -118,7 +123,6 @@ void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked {
 }
 
 void START() {
-	HIDE_HUD;
     LocateStuff(BANK(overworld), &overworld);
 	PortalStartPos pos = portal_start_positions[g_level_current-1];
     if (g_level_current == 1) {
@@ -132,6 +136,9 @@ void START() {
 	scroll_target = SpriteManagerAdd(SpriteOverPlayer, pos.x << 3, pos.y << 3);
 	InitScroll(BANK(overworld), &overworld, overworld_collision_tiles, 0);
 
+    Overworld_Hud_Init();
+
+    INIT_SOUND();
 	// Add all portals and enable only the one for g_level_current
     /*for (UINT8 i = 1; i <= NUM_PORTALS; ++i) {
 		AddPortal(
@@ -182,6 +189,7 @@ void UPDATE() {
             }
         }
     }*/
+    Overworld_Hud_Update();
 	Stars_Animate();
 }
 
