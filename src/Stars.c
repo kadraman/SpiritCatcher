@@ -55,17 +55,18 @@ static const unsigned char level_stars7[] = {
 	0xff,0xff,0xff,0xff
 };
 
-#define STARS_TILE_1 1
-#define STARS_TILE_2 2
-#define STARS_TILE_3 3
-#define STARS_TILE_4 4
-#define STARS_TILE_5 5
-#define STARS_TILE_6 6
-#define STARS_TILE_7 7
-#define STARS_TILE_8 8
-#define STARS_TILE_9 9
-#define STARS_TILE_10 10
-#define STARS_TILE_11 11
+#define STARS_TILE_BASE 27
+#define STARS_TILE_1 (STARS_TILE_BASE + 0)
+#define STARS_TILE_2 (STARS_TILE_BASE + 1)
+#define STARS_TILE_3 (STARS_TILE_BASE + 2)
+#define STARS_TILE_4 (STARS_TILE_BASE + 3)
+#define STARS_TILE_5 (STARS_TILE_BASE + 4)
+#define STARS_TILE_6 (STARS_TILE_BASE + 5)
+#define STARS_TILE_7 (STARS_TILE_BASE + 6)
+#define STARS_TILE_8 (STARS_TILE_BASE + 7)
+#define STARS_TILE_9 (STARS_TILE_BASE + 8)
+#define STARS_TILE_10 (STARS_TILE_BASE + 9)
+#define STARS_TILE_11 (STARS_TILE_BASE + 10)
 
 UINT8 anim_stars_counter = 0;
 
