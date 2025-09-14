@@ -20,6 +20,6 @@ void START() {
 
 void UPDATE() {
 	if (ANY_KEY_PRESSED) {
-		SetState(StateGame);
+		SetState(StateOverworld);
 	}
 }

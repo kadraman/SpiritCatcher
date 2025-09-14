@@ -67,15 +67,14 @@ UINT8 overworld_collision_tiles[] = {
 };
 
 void START() {
-	PortalStatus pos = portal_positions[g_level_current-1];
     if (g_level_current == 1) {
         // Default start position for level 1
         player_start_x = DEFAULT_OVERPLAYER_TILE_X;
         player_start_y = DEFAULT_OVERPLAYER_TILE_Y;
     } else {
         // Set position based on portal data
-        player_start_x = portal_positions[g_level_current].exit_tile_x;   
-        player_start_y = portal_positions[g_level_current].exit_tile_y;
+        player_start_x = portal_positions[g_level_current-1].exit_tile_x;   
+        player_start_y = portal_positions[g_level_current-1].exit_tile_y;
     }
 	scroll_target = SpriteManagerAdd(SpriteOverPlayer, player_start_x << 3, player_start_y << 3);
 	InitScroll(BANK(overworld), &overworld, overworld_collision_tiles, 0);                
@@ -100,7 +99,7 @@ void UPDATE() {
 
             // Check against all portal_positions
             for (UINT8 j = 0; j < NUM_PORTALS; j++) {
-                EMU_printf("UPDATE: Checking portal sprite at %d:%d against portal_positions[%d] at %d:%d\n", portal_tile_x, portal_tile_y, j, portal_positions[j].x, portal_positions[j].y);
+                //EMU_printf("UPDATE: Checking portal sprite at %d:%d against portal_positions[%d] at %d:%d\n", portal_tile_x, portal_tile_y, j, portal_positions[j].x, portal_positions[j].y);
                 if (portal_tile_x == portal_positions[j].x && portal_tile_y == portal_positions[j].y) {
                     // Enable portal if needed
                     if (portal_positions[j].level == g_level_current) {

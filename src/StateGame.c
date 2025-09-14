@@ -51,6 +51,7 @@ struct MapInfoBanked {
 
 const struct MapInfoBanked levels[] = {
 	BANKED_MAP(l1, 2, 104, 3, 240),
+	BANKED_MAP(l1, 2, 104, 3, 240),
 	// Add more levels here
 	LEVELS_END
 };
@@ -162,7 +163,7 @@ void UPDATE() {
 			SetState(StateWin);
 			HIDE_HUD;
 		} else {
-			SetState(StateGame);
+			SetState(StateOverworld);
 		}
 	} else {
 		Hud_Update();

@@ -84,7 +84,7 @@ void UPDATE() {
             // If the player collides with the portal, change the level
             EMU_printf("SpriteOverPortal::UPDATE: Player entered portal to level %d\n", data->level);
             //ChangeLevel(data->level, data->entry_tile, data->exit_tile);
-            SetState(StateGame); // Example action, change to your level change logic
+            SetState(StateGame);
         }
     } else {
         SetSpriteAnim(THIS, anim_closed, DEFAULT_ANIM_SPEED);

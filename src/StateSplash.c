@@ -48,6 +48,6 @@ void UPDATE() {
 
 	if (ANY_KEY_PRESSED) {
 		g_level_current = 1;
-		SetState(StateGame);
+		SetState(StateOverworld);
 	}
 }
