@@ -12,30 +12,28 @@
 #include "Stars.h"
 #include <BankManager.h>
 
-//UINT8 start_x;
-//UINT8 start_y;
-
-Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED;
-
-extern Sprite* overplayer_sprite;
-Sprite** portal_sprites = NULL;
+//Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED;
+Sprite* EnablePortal(Sprite* spr) BANKED;
+Sprite* DisablePortal(Sprite* spr) BANKED;
 
 IMPORT_MAP(overworld);
 //DECLARE_MUSIC(overworld);
 
 typedef struct {
-    UINT8 x;
-    UINT8 y;
-    bool is_open;
-} PortalStartPos;
+    UINT8 x;    // x coordinate in tiles
+    UINT8 y;    // y coordinate in tiles
+    UINT8 level; // level number this portal leads to
+    bool is_open; // true if the portal is open
+    bool is_complete; // true if the level has been completed
+    UINT8 exit_tile_x;  // x coordinate of the exit tile in the level map
+    UINT8 exit_tile_y;  // y coordinate of the exit tile in the level map
+} PortalStatus;
 
-PortalStartPos* portal_start_positions = NULL;
-UINT8 num_portals = 0;
 UINT8 player_start_x = 0;
 UINT8 player_start_y = 0;
 
 #define DEFAULT_OVERPLAYER_TILE_X 3
-#define DEFAULT_OVERPLAYER_TILE_Y 8
+#define DEFAULT_OVERPLAYER_TILE_Y 7
 
 #define HUD_HEIGHT_TILES 5
 #define SCREEN_HEIGHT_TILES 18
@@ -43,17 +41,18 @@ UINT8 player_start_y = 0;
 #define HUD_TILE_BLANK 0
 #define PORTAL_TILE_INDEX 307
 
-/*
-#define NUM_PORTALS 3
-const PortalStartPos portal_start_positions[NUM_PORTALS+1] = {
-    { 5, 11 },   	// player start position
 
-    { 10, 8 },   	// Portal 1 start position 10, 14
-    { 23, 10 },   	// Portal 2 start position: 16, 9
-	{ 30, 6 }   	// Portal 3 start position: 7, 4
+#define NUM_PORTALS 8
+const PortalStatus portal_positions[NUM_PORTALS] = {
+    { 7, 3, 1, false, false, 8, 3 },
+    { 16, 3, 2, false, false, 17, 3 },
+    { 25, 3, 3, false, false, 26, 3 },
+    { 32, 7, 4, false, false, 31, 7 },
+    { 11, 9, 5, false, false, 12, 9 },
+    { 7, 12, 6, false, false, 8, 12 },
+    { 27, 12, 7, false, false, 24, 12 },
+    { 29, 10, 8, false, false, 30, 10 }
 };
-static Sprite* portal_sprites[NUM_PORTALS+1] = { NULL };
-*/
 
 UINT8 overworld_collision_tiles[] = {
 	58, 59, 60, 
@@ -67,157 +66,51 @@ UINT8 overworld_collision_tiles[] = {
 	131, 132, 133, 134, 135, 136, 137, 138, 139, 140
 };
 
-/*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
-    UINT8 x, y, tile;
-    UINT8* data;
-    UINT8 found_portals = 0;
-
-    // First, count portals
-	PUSH_BANK(map_bank);
-	data = map->data;
-    EMU_printf("LocateStuff: map size %d x %d\n", map->width, map->height);
-	for (y = 0; y < map->height; ++ y) {
-		for (x = 0; x < map->width; ++ x) {
-			tile = *(data ++);
-            if (tile == 1) {
-                // found player start position
-                EMU_printf("LocateStuff: found player start at %d:%d\n", x, y);
-                //set_bkg_tile_xy(x, y, 1);
-                player_start_x = x;
-                player_start_y = y;
-            }
-			if (tile > 1 && tile <= 10) {	// numbered portal
-				EMU_printf("LocateStuff: found portal at %d:%d\n", x, y);
-                found_portals++;
-                //set_bkg_tile_xy(x, y, 1); // Replace with your desired tile index
-                //UPDATE_BKG_TILE(x, y, 1);
-			}
-		}
-	}
-	POP_BANK;
-
-    // Allocate array
-    portal_start_positions = malloc(sizeof(PortalStartPos) * found_portals);
-    num_portals = found_portals;
-}*/
-
-void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked {
-    UINT8 x, y, tile;
-    UINT8* data;
-    UINT8 found_portals = 0;
-
-    // First, count portals
-    PUSH_BANK(map_bank);
-    data = map->data;
-    for (y = 0; y < map->height; ++y) {
-        for (x = 0; x < map->width; ++x) {
-            tile = *(data++);
-			if (tile > 1 && tile <= 10) {	// numbered portal
-				EMU_printf("LocateStuff: found portal at %d:%d\n", x, y);
-                found_portals++;
-			}
-        }
-    }
-    POP_BANK;
-
-    // Allocate array
-    portal_start_positions = malloc(sizeof(PortalStartPos) * found_portals);
-    num_portals = found_portals;
-
-    // Fill array
-    PUSH_BANK(map_bank);
-    data = map->data;
-    UINT8 idx = 0;
-    for (y = 0; y < map->height; ++y) {
-        for (x = 0; x < map->width; ++x) {
-            tile = *(data++); idx=tile-1;
-             if (tile == 1) {
-                // found player start position
-                //EMU_printf("LocateStuff: found player start at %d:%d\n", x, y);
-                //set_bkg_tile_xy(x, y, 1);
-                portal_start_positions[0].x = x;
-                portal_start_positions[0].y = y;
-                portal_start_positions[idx].is_open = false;
-            }
-            if (tile > 1 && tile <= 10) {    // numbered portal
-                portal_start_positions[idx].x = x;
-                portal_start_positions[idx].y = y;
-                portal_start_positions[idx].is_open = (idx == g_level_current);
-                EMU_printf("LocateStuff: portal %d at %d:%d, is_open=%d\n", idx, x, y, portal_start_positions[idx].is_open);
-            }
-        }
-    }
-    POP_BANK;
-}
-
 void START() {
-    LocateStuff(BANK(overworld), &overworld);
-    //for (UINT8 i = 0; i < num_portals; ++i) {
-    //    EMU_printf("Portal %d at %d:%d, is_open=%d\n", i, portal_start_positions[i].x, portal_start_positions[i].y, portal_start_positions[i].is_open);
-    //}
-	PortalStartPos pos = portal_start_positions[g_level_current-1];
+	PortalStatus pos = portal_positions[g_level_current-1];
     if (g_level_current == 1) {
-        player_start_x = pos.x;
-        player_start_y = pos.y;
+        // Default start position for level 1
+        player_start_x = DEFAULT_OVERPLAYER_TILE_X;
+        player_start_y = DEFAULT_OVERPLAYER_TILE_Y;
     } else {
         // Set position based on portal data
-        player_start_x = portal_start_positions[g_level_current].x+1;   // TODO: use exit tile from portal data
-        player_start_y = portal_start_positions[g_level_current].y;
+        player_start_x = portal_positions[g_level_current].exit_tile_x;   
+        player_start_y = portal_positions[g_level_current].exit_tile_y;
     }
 	scroll_target = SpriteManagerAdd(SpriteOverPlayer, player_start_x << 3, player_start_y << 3);
-	InitScroll(BANK(overworld), &overworld, overworld_collision_tiles, 0);
-    set_bkg_tile_xy(player_start_x, player_start_y, PORTAL_TILE_INDEX);
-    set_bkg_attribute_xy(player_start_x, player_start_y, 2);                   
-    
+	InitScroll(BANK(overworld), &overworld, overworld_collision_tiles, 0);                
+
     Overworld_Hud_Init();
 
     INIT_SOUND();
-	// Add all portals and enable only the one for g_level_current
-    for (UINT8 i = 1; i <= num_portals; ++i) {
-		AddPortal(
-			portal_start_positions[i].x << 3, 
-			portal_start_positions[i].y << 3, 
-			(i == g_level_current), // is_open
-			i, // level
-			0, // entry_tile_x
-			0, // entry_tile_y
-			0, // exit_tile_x
-			0  // exit_tile_y
-		);
-        EMU_printf("START: setting portal tile at %d:%d to tile ^%d\n", portal_start_positions[i].x, portal_start_positions[i].y, PORTAL_TILE_INDEX);
-        //set_bkg_tile_xy(portal_start_positions[i].x, portal_start_positions[i].y, PORTAL_TILE_INDEX);
-    }
 
-    if (portal_sprites) free(portal_sprites);
-    portal_sprites = malloc(sizeof(Sprite*) * num_portals);
-    for (UINT8 i = 0; i < num_portals; ++i) portal_sprites[i] = NULL;
-	
 	//PlayMusic(overworld, 0);
 }
 
 void UPDATE() {
-	
-    for (UINT8 i = 1; i < num_portals; ++i) {
-        UINT16 portal_x = portal_start_positions[i].x << 3;
-        UINT16 portal_y = portal_start_positions[i].y << 3;
+    UINT8 i;
+    Sprite* spr;
 
-        if (portal_x >= scroll_x && portal_x < scroll_x + SCREEN_WIDTH &&
-            portal_y >= scroll_y && portal_y < scroll_y + SCREEN_HEIGHT) {
-            if (portal_sprites[i] == NULL) {
-                portal_sprites[i] = AddPortal(
-                    portal_x,
-                    portal_y,
-                    (i == g_level_current), // is_open
-                    i, 0, 0, 0, 0
-                );
-                set_bkg_tile_xy(portal_start_positions[i].x, portal_start_positions[i].y, PORTAL_TILE_INDEX);
-                set_bkg_attribute_xy(portal_start_positions[i].x, portal_start_positions[i].y, 2);
+    SPRITEMANAGER_ITERATE(i, spr) {
+        //EMU_printf("UPDATE: Checking sprite %d of type %d at %d:%d\n", i, spr->type, spr->x, spr->y);
+        if (spr->type == SpriteOverPortal) {
+            //EMU_printf("UPDATE: Found portal sprite at %d:%d\n", spr->x, spr->y);
+            UINT8 portal_tile_x = spr->x >> 3;
+            UINT8 portal_tile_y = spr->y >> 3;
+
+            // Check against all portal_positions
+            for (UINT8 j = 0; j < NUM_PORTALS; j++) {
+                EMU_printf("UPDATE: Checking portal sprite at %d:%d against portal_positions[%d] at %d:%d\n", portal_tile_x, portal_tile_y, j, portal_positions[j].x, portal_positions[j].y);
+                if (portal_tile_x == portal_positions[j].x && portal_tile_y == portal_positions[j].y) {
+                    // Enable portal if needed
+                    if (portal_positions[j].level == g_level_current) {
+                        EnablePortal(spr);
+                    } else {
+                        DisablePortal(spr);
+                    }
+                }
             }
-        } else {
-            if (portal_sprites[i] != NULL) {
-                SpriteManagerRemoveSprite(portal_sprites[i]);
-                portal_sprites[i] = NULL;
-            }
+           
         }
     }
 
@@ -226,12 +119,5 @@ void UPDATE() {
 }
 
 void DESTROY() {
-	if (portal_start_positions) {
-    	free(portal_start_positions);
-    	portal_start_positions = NULL;
-	}
-    if (portal_sprites) {
-        free(portal_sprites);
-        portal_sprites = NULL;
-    }
+
 }

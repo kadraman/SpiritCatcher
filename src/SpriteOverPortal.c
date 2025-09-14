@@ -49,10 +49,28 @@ Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_til
     return spr;
 }
 
+Sprite* EnablePortal(Sprite* spr) BANKED {
+    if (spr && spr->type == SpriteOverPortal) {
+        CUSTOM_DATA* data = (CUSTOM_DATA*)spr->custom_data;
+        data->is_open = true;
+        SetSpriteAnim(spr, anim_open, DEFAULT_ANIM_SPEED);
+    }
+    return spr;
+}
+
+Sprite* DisablePortal(Sprite* spr) BANKED {
+    if (spr && spr->type == SpriteOverPortal) {
+        CUSTOM_DATA* data = (CUSTOM_DATA*)spr->custom_data;
+        data->is_open = false;
+        SetSpriteAnim(spr, anim_closed, DEFAULT_ANIM_SPEED);
+    }
+    return spr;
+}
+
 void START() {
     CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
     memset(data, 0, sizeof(CUSTOM_DATA));
-    data->is_open = true;
+    data->is_open = false;
     SetSpriteAnim(THIS, anim_open, DEFAULT_ANIM_SPEED);
 }
 
@@ -69,6 +87,7 @@ void UPDATE() {
             SetState(StateGame); // Example action, change to your level change logic
         }
     } else {
+        SetSpriteAnim(THIS, anim_closed, DEFAULT_ANIM_SPEED);
         // If the portal is not open, do nothing or show a message
         //EMU_printf("SpriteOverPortal::UPDATE: Portal is closed\n");
     }
