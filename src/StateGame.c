@@ -3,7 +3,6 @@
 
 #include "Banks/SetAutoBank.h"
 
-#include "ZGBMain.h"
 #include "Scroll.h"
 #include "SpriteManager.h"
 #include "Print.h"
@@ -11,15 +10,16 @@
 #include "Music.h"
 #include "Keys.h"
 #include "SGB.h"
+#include "ZGBMain.h"
 
 #include "GameTypes.h"
-#include "Hud.h"
 #include "StateGame.h"
+#include "Hud.h"
 #include "SpritePlayer.h"
 #include "Water.h"
 
-//UINT8 g_level_current = 1;
-//UINT8 g_player_lives; 
+
+
 UINT8 g_player_region;
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
@@ -126,7 +126,6 @@ void START() {
 	scroll_bottom_movement_limit = 110;
 	level_max_time = level->seconds;
 	g_level_complete = false;
-	//g_player_lives = MAX_LIVES;
 	g_player_dead = false;
 	g_player_region = 0;
 	min_x = min_y = 1;
@@ -134,7 +133,6 @@ void START() {
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	data->spirits = level->spirits;
-	//data->lives = MAX_LIVES;
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));
@@ -194,10 +192,10 @@ void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
 		case ITEM_HEALTH:
 			//EMU_printf("StateGame::%s: player has collected health\n", __func__);
 			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			if (player_data->lives < MAX_LIVES && player_data->lives < UCHAR_MAX) {
-				player_data->lives++;
+			if (g_player_lives < MAX_LIVES && g_player_lives < UCHAR_MAX) {
+				g_player_lives++;
 			}
-			//EMU_printf("StateGame::%s: player now has %u lives\n", __func__, player_data->lives);
+			//EMU_printf("StateGame::%s: player now has %u lives\n", __func__, g_player_lives);
 			Hud_Update();
 			break;
 		case ITEM_SPIRIT:

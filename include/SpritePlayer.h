@@ -70,7 +70,7 @@ typedef struct {
 	UINT8 flags;
 	UINT8 start_x;
 	UINT8 start_y;
-	UINT8 lives;	// number of lives player has
+	UINT8 lives;	// number of lives player has - no longer used
 	UINT8 weapon;	// weapon player has currently selected
 	UINT8 spirits;	// number of spirits remaining to be c
 	UINT8 magix;	// number of magix remaining

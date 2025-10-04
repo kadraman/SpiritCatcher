@@ -36,6 +36,9 @@ void Hud_Init(void) BANKED {
     IMPORT_MAP(hud);
     INIT_HUD(hud);
 #endif
+    last_lives = 254;   // forced to 254, so that it will be updated on first call
+    last_timer = 65535; // forced to 65535, so that it will be updated on first call
+    last_magix = 254;   // forced to 254, so that it will be updated on first call
     last_spirits = 254;  // forced to 254, so that it will be updated on first call
     last_weapon = pWeaponKnife; // default weapon is knife
     timer_countdown = level_max_time;
@@ -163,11 +166,11 @@ void Hud_Update(void) BANKED {
         last_magix = player_data->magix;
     }
 
-    if (last_lives != player_data->lives) {
+    if (last_lives != g_player_lives) {
         for (UINT8 i = 0; i < MAX_LIVES; ++i) {
-            UPDATE_HUD_TILE(19 - i, 0, i < player_data->lives ? 18 : 19);
+            UPDATE_HUD_TILE(19 - i, 0, i < g_player_lives ? 18 : 19);
         }
-        last_lives = player_data->lives;
+        last_lives = g_player_lives;
     }
     
 #endif

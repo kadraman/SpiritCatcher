@@ -9,6 +9,6 @@
 #include "BankManager.h"
 #include "Sound.h"
 
-void ScrollRelocateMapTo(UINT16 new_x, UINT16 new_y);
+void ScrollRelocateMapTo(UINT16 new_x, UINT16 new_y);   // No longer used - remove?
 
 #endif // ZGBUTILS_H_

@@ -11,8 +11,7 @@
 #include "SpriteManager.h"
 
 #include "GameTypes.h"
-
-#define DEFAULT_ANIM_SPEED 8
+#include "SpriteOverPlayer.h"
 
 const UINT8 anim_idle[] = {3, 0, 1, 2};
 const UINT8 anim_walk_across[] = {3, 0, 1, 2};
@@ -23,10 +22,16 @@ Sprite* overplayer_sprite = 0;
 Sprite* overplayer_eyes_sprite = NULL;
 
 void START() {
+    OverPlayerData* data = (OverPlayerData*)THIS->custom_data;
+    memset(data, 0, sizeof(OverPlayerData));
+    data->start_x = THIS->x;
+    data->start_y = THIS->y;
+
     overplayer_sprite = THIS; // Store the pointer to the player sprite
     SetSpriteAnim(THIS, anim_walk_across, DEFAULT_ANIM_SPEED);
 
-     // Add eyes sprite at the same position
+    EMU_printf("SpriteOverPlayer::START: Player lives = %d\n", g_player_lives);
+    // Add eyes sprite at the same position
     //overplayer_eyes_sprite = SpriteManagerAdd(SpriteOverPlayerEyes, THIS->x, THIS->y);
 }
 

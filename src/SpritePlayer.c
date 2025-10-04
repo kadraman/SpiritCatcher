@@ -211,7 +211,7 @@ void Hit(void) {
 	PlayerData* data = (PlayerData*)THIS->custom_data;
 	if (GetPlayerState() == PLAYER_STATE_HIT) return;
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) return;
-	if (data->lives == 1) { // last life
+	if (g_player_lives == 1) { // last life
 		SetPlayerState(PLAYER_STATE_DIE);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		//invincible_secs = 10;
@@ -225,7 +225,7 @@ void Hit(void) {
 		//SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		FLAG_SET(data->flags, pInvincibleFlag);
-		if (data->lives > 0 && data->lives < UCHAR_MAX) data->lives--;
+		if (g_player_lives > 0 && g_player_lives < UCHAR_MAX) g_player_lives--;
 		invincible_secs = 10;
 		anim_hit_counter = 10;
 	}
@@ -455,7 +455,7 @@ void START() {
 	memset(data, 0, sizeof(PlayerData));
 	g_player_dead = false;
 	player_sprite = THIS;
-	data->lives = MAX_LIVES;
+	EMU_printf("SpritePlayer::%s: player lives = %d\n", __func__, g_player_lives);
 	data->start_x = THIS->x;
 	data->start_y = THIS->y;
 	FLAG_SET(data->flags, pGroundedFlag);
@@ -664,8 +664,8 @@ void UpdateDrown(void) {
 	accel_x = 0;
 	// update global dead variable once animation has compelted
 	if (THIS->anim_frame == GetLastAnimFrame()) {
-		//FLAG_SET(data->flags, pDeadFlag);
-		g_player_dead = true;
+		FLAG_SET(data->flags, pDeadFlag);
+		//g_player_dead = true;
 	}
 }	
 void UpdateTimeUp(void) {
@@ -729,16 +729,17 @@ void UPDATE() {
 		}
 	}
 
-	// timeup
-	if (FLAG_CHECK(data->flags, pTimeUpFlag)) {
-		if (data->lives > 0 && data->lives < UCHAR_MAX) data->lives--;
+	// timeup or drowned etc
+	if (FLAG_CHECK(data->flags, pTimeUpFlag) || FLAG_CHECK(data->flags, pDeadFlag)) {
+		if (g_player_lives > 0 && g_player_lives < UCHAR_MAX) g_player_lives--;
 		Hud_Update();
-		if (data->lives <= 0) { 
+		if (g_player_lives <= 0) { 
 			//SetState(StateGameOver);
 			//HIDE_WIN;
 			g_player_dead = true;
 		}
-		SetState(StateTimeUp);
+		//SetState(StateTimeUp);
+		SetState(StateOverworld);
 		HIDE_WIN;
 	}
 

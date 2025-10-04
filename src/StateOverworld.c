@@ -1,16 +1,23 @@
-#include "Banks/SetAutoBank.h"
-#include "main.h"
-#include <stdlib.h>
+#include <stdbool.h>
+#include <gbdk/emu_debug.h>
 
-#include <gb/gb.h>
-#include "ZGBMain.h"
+#include "Banks/SetAutoBank.h"
+
 #include "Scroll.h"
-#include "Keys.h"
-#include "Music.h"
 #include "SpriteManager.h"
+#include "Print.h"
+#include "Sound.h"
+#include "Music.h"
+#include "Keys.h"
+#include "SGB.h"
+#include "ZGBMain.h"
+
 #include "GameTypes.h"
+#include "StateGame.h"
+#include "OverworldHud.h"
+#include "SpriteOverPlayer.h"
 #include "Stars.h"
-#include <BankManager.h>
+
 
 //Sprite* AddPortal(UINT16 x, UINT16 y, bool is_open, UINT8 level, UINT8 entry_tile_x, UINT8 entry_tile_y, UINT8 exit_tile_x, UINT8 exit_tile_y) BANKED;
 Sprite* EnablePortal(Sprite* spr) BANKED;
@@ -67,7 +74,16 @@ UINT8 overworld_collision_tiles[] = {
 };
 
 void START() {
+    static UINT8 overworld_initialized = 0;
     EMU_printf("StateOverworld::START: Entering overworld state for level %d\n", g_level_current);
+    if (!overworld_initialized) {
+        g_player_lives = MAX_LIVES;
+        overworld_initialized = 1;
+        EMU_printf("StateOverworld::START: Initialized player lives to %d\n", g_player_lives);
+    } else {
+        EMU_printf("StateOverworld::START: Player lives carried over as %d\n", g_player_lives);
+    }
+    
     if (g_level_current == 1) {
         // Default start position for level 1
         player_start_x = DEFAULT_OVERPLAYER_TILE_X;
@@ -82,6 +98,7 @@ void START() {
         player_start_y = DEFAULT_OVERPLAYER_TILE_Y;
     }
 	scroll_target = SpriteManagerAdd(SpriteOverPlayer, player_start_x << 3, player_start_y << 3);
+    OverPlayerData* data = (OverPlayerData*)scroll_target->custom_data;
 	InitScroll(BANK(overworld), &overworld, overworld_collision_tiles, 0);                
 
     Overworld_Hud_Init();

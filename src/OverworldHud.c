@@ -9,17 +9,19 @@
 #include "SpriteManager.h"
 
 #include "GameTypes.h"
-#include "SpritePlayer.h"
-#include "Hud.h"
+#include "SpriteOverPlayer.h"
+#include "OverworldHud.h"
 
 // saved last drawn values, to work out what to update on hud
 static UINT8 last_hud_lives;
+
 extern Sprite* overplayer_sprite;
 
 void Overworld_Hud_Init(void) BANKED {
+    //EMU_printf("OverworldHud::Overworld_Hud_Init\n");
     IMPORT_MAP(overworldhud);
     INIT_HUD(overworldhud);
-    last_hud_lives = 0xFF; // force update of lives
+    last_hud_lives = 254;  // forced to 254, so that it will be updated on first call
 }
 
 static UINT8 getHundreds(UINT8 full) {
@@ -58,15 +60,17 @@ static void PutU16(UINT16 v, UINT8 at) {
 }
 
 void Overworld_Hud_Update(void) BANKED {
-    UINT8 tens;
-    UINT8 ones;
+    //EMU_printf("OverworldHud::Overworld_Hud_Update\n");
+    OverPlayerData* player_data = (OverPlayerData*)overplayer_sprite->custom_data;
+    //UINT8 tens;
+    //UINT8 ones;
 
-    /*if (last_lives != player_data->lives) {
+    if (last_hud_lives != g_player_lives) {
         for (UINT8 i = 0; i < MAX_LIVES; ++i) {
-            UPDATE_HUD_TILE(19 - i, 0, i < player_data->lives ? 18 : 19);
+            UPDATE_HUD_TILE(18 - i, 1, i < g_player_lives ? 17 : 11);
         }
-        last_lives = player_data->lives;
-    }*/
+        last_hud_lives = g_player_lives;
+    }
     
 }
 
