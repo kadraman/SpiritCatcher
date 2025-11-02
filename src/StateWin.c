@@ -20,7 +20,11 @@ void START() {
 
 void UPDATE() {
 	if(KEY_TICKED(J_START) | KEY_TICKED(J_A) | KEY_TICKED(J_B)) {
-		g_level_current = 1;
+		// Reset the game
+        g_game_reset = true;
+        g_player_lives = MAX_LIVES;
+		g_stage_current = 1;
+        g_level_current = 1;
 		SetState(StateOverworld);
 	}
 }

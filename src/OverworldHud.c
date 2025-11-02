@@ -14,6 +14,8 @@
 
 // saved last drawn values, to work out what to update on hud
 static UINT8 last_hud_lives;
+static UINT8 last_hud_stage;
+static UINT8 last_hud_level;
 
 extern Sprite* overplayer_sprite;
 
@@ -21,7 +23,9 @@ void Overworld_Hud_Init(void) BANKED {
     //EMU_printf("OverworldHud::Overworld_Hud_Init\n");
     IMPORT_MAP(overworldhud);
     INIT_HUD(overworldhud);
-    last_hud_lives = 254;  // forced to 254, so that it will be updated on first call
+    last_hud_lives = 254;  // forced to 254, so that it they be updated on first call
+    last_hud_stage = 254;
+    last_hud_level = 254;
 }
 
 static UINT8 getHundreds(UINT8 full) {
@@ -71,6 +75,13 @@ void Overworld_Hud_Update(void) BANKED {
         }
         last_hud_lives = g_player_lives;
     }
-    
+    if (last_hud_stage != g_stage_current) {
+        UPDATE_HUD_TILE(5, 1, g_stage_current + 1); // +1 to skip the zero tile
+        last_hud_stage = g_stage_current;
+    }
+    if (last_hud_level != g_level_current) {
+        UPDATE_HUD_TILE(7, 1, g_level_current + 1); // +1 to skip the zero tile
+        last_hud_level = g_level_current;
+    }
 }
 

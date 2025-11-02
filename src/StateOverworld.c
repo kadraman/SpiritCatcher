@@ -76,6 +76,11 @@ UINT8 overworld_collision_tiles[] = {
 void START() {
     static UINT8 overworld_initialized = 0;
     EMU_printf("StateOverworld::START: Entering overworld state for level %d\n", g_level_current);
+    // Reset if game reset flag is set
+    if (g_game_reset) {
+        overworld_initialized = 0;
+        g_game_reset = false;
+    }
     if (!overworld_initialized) {
         g_player_lives = MAX_LIVES;
         overworld_initialized = 1;

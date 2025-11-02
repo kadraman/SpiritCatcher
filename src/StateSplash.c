@@ -47,6 +47,7 @@ void UPDATE() {
 	}*/
 
 	if (ANY_KEY_PRESSED) {
+		g_stage_current = 1;
 		g_level_current = 1;
 		SetState(StateOverworld);
 	}

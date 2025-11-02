@@ -20,6 +20,11 @@ void START() {
 
 void UPDATE() {
 	if (ANY_KEY_PRESSED) {
+		// Reset the game
+        g_game_reset = true;
+        g_player_lives = MAX_LIVES;
+		g_stage_current = 1;
+        g_level_current = 1;
 		SetState(StateOverworld);
 	}
 }

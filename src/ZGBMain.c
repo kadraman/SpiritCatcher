@@ -10,6 +10,8 @@ UINT8 next_state = StateSplash;
 UINT8 next_state = StateOverworld;
 #endif
 
+bool g_game_reset = false;
+
 UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
 	if (current_state == StateOverworld || StateGame) {
 		if (U_LESS_THAN(255 - (UINT16)*tile_ptr, N_SPRITE_TYPES)) {
