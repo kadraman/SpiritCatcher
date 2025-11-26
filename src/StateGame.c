@@ -29,6 +29,8 @@ bool g_player_dead;
 extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
 extern UINT16 level_max_time;
+UINT16 level_width;
+UINT16 level_height;
 
 IMPORT_MAP(gb_border);
 IMPORT_MAP(l1);
@@ -134,6 +136,8 @@ void START() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	data->spirits = level->spirits;
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
+	level_width = level->map->width * 8;
+	level_height = level->map->height * 8;
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));
 

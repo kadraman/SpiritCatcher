@@ -29,8 +29,8 @@ const UINT8 anim_climb[] = {3, 19, 20, 21};
 const UINT8 anim_climb_idle[] = {1, 20};
 const UINT8 anim_hit[] = {4, 9, 10, 9, 10};
 const UINT8 anim_die[] = {16, 9, 10, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12};
-//const UINT8 anim_appear[] = {3, 15, 14, 13};
-//const UINT8 anim_disappear[] = {5, 14, 14, 13, 14, 15};
+const UINT8 anim_appear[] = {3, 22, 23, 24};
+const UINT8 anim_disappear[] = {5, 23, 23, 22, 23, 24};
 const UINT8 anim_drown[] = {10, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15};
 //const UINT8 anim_victory[] = {2, 21, 22}; // TBD
 
@@ -133,8 +133,9 @@ void SetPlayerState(PlayerState state) BANKED {
 		case PLAYER_STATE_TIMEUP:
 			SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
 		case PLAYER_STATE_APPEAR:
-			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
+			SetSpriteAnim(THIS, anim_appear, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_DISAPPEAR:
+			SetSpriteAnim(THIS, anim_disappear, DEFAULT_ANIM_SPEED); break;
 		case PLAYER_STATE_VICTORY:
 			SetSpriteAnim(THIS, anim_walk_idle, DEFAULT_ANIM_SPEED); break;
 		default:
@@ -366,6 +367,9 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 		FLAG_SET(data->flags, pGroundedFlag);
 		CheckCollisionTile(sprite, idx);
 	}
+	// Clamp player y position to prevent off-map movement
+	if (sprite->y < 0) sprite->y = 0;
+	if (sprite->y > level_height - sprite->coll_h) sprite->y = level_height - sprite->coll_h;
 }
 
 void AddDampening(Sprite* sprite, UINT8 idx) {
@@ -405,6 +409,9 @@ void ApplyMovementX(Sprite* sprite, UINT8 idx) {
 			AddDampening(sprite, idx);
 		}
 	}
+	// Clamp player x position to prevent off-screen movement
+	if (sprite->x < 0) sprite->x = 0;
+	if (sprite->x > level_width - sprite->coll_w) sprite->x = level_width - sprite->coll_w;
 }
 
 void CheckCanClimb(void) {
