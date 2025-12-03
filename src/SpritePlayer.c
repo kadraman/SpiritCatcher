@@ -217,11 +217,28 @@ void Hit(void) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		//invincible_secs = 10;
 	} else {
-		// knockback
-		if (THIS->mirror == NO_MIRROR) {
-			THIS->x = THIS->x - 4;
-		} else { // THIS->mirror == V_MIRROR
-			THIS->x = THIS->x + 4;
+		// knockback: compute allowed dx to keep player within level bounds
+		{
+			INT16 intended = (THIS->mirror == NO_MIRROR) ? -(4 << delta_time) : (4 << delta_time);
+			INT16 prev_x = THIS->x;
+			// keep within level [0, level_width - coll_w]
+			INT16 allowed_min = (INT16)(0 - THIS->x);
+			INT16 allowed_max = (INT16)((level_width - THIS->coll_w) - THIS->x);
+			INT16 dx = intended;
+			if (dx < allowed_min) dx = allowed_min;
+			if (dx > allowed_max) dx = allowed_max;
+			if (dx != 0) {
+				UINT8 collision = TranslateSprite(THIS, dx, 0);
+				// If the translation collided with hazardous tiles, revert the move
+				if (collision == TILE_INDEX_SPIKE_UP || collision == TILE_INDEX_SPIKE_DOWN
+					|| collision == TILE_INDEX_WATER_1 || collision == TILE_INDEX_WATER_2
+					|| collision == TILE_INDEX_WATER_3) {
+					// revert position
+					THIS->x = prev_x;
+					// clear global tile_collision so other systems don't treat this as a tile hit
+					tile_collision = 0;
+				}
+			}
 		}
 		//SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
