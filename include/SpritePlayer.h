@@ -6,7 +6,7 @@
 #include "SpriteManager.h"
 #include "Sprite.h"
 #include "ZGBMain.h"
-#include "ZGBUtils.h"
+
 
 
 #define pGroundedFlag			0	/* player is on the ground, i.e. not jumping */

@@ -1,13 +1,9 @@
 #ifndef STATEGAME_H_
 #define STATEGAME_H_
 
-//#define TILE_INDEX_PLAYER       249
-//#define TILE_INDEX_GOAL         250
-//#define TILE_INDEX_COIN         251
-//#define TILE_INDEX_SPIRIT1      252
-//#define TILE_INDEX_SPIRIT2      253
-//#define TILE_INDEX_BAT          254
-//#define TILE_INDEX_TOADSTALL    255
+#include <gbdk/platform.h>
+#include "Sprite.h"
+#include "GameTypes.h"
 
 #define TILE_INDEX_LADDER_LEFT          28
 #define TILE_INDEX_LADDER_RIGHT         29
@@ -22,15 +18,14 @@
 #define TILE_INDEX_PORTAL_BOTTOMRIGHT   38
 #define TILE_INDEX_BG1                  39
 #define TILE_INDEX_BG2                  70
-#define TILE_INDEX_BG1                  39
-#define TILE_INDEX_BG2                  70
-//#define TILE_INDEX_BRIDGE_1     78
-//#define TILE_INDEX_BRIDGE_2     79
-//#define TILE_INDEX_BRIDGE_3     80
-//#define TILE_INDEX_BRIDGE_4     81
-//#define TILE_INDEX_BRIDGE_5     82
-//#define TILE_INDEX_BRIDGE_6     83
-//#define TILE_INDEX_BRIDGE_GO_1  84
-//#define TILE_INDEX_BRIDGE_GO_2  85
+
+/* unique_ids of map entities cleared this level visit (collectables + defeated enemies). */
+#define MAX_CLEARED_ENTITIES 32
+
+UINT8 IsMapEntityCleared(Sprite* spr) BANKED;
+void ClearMapEntity(Sprite* spr) BANKED;
+
+UINT8 IsCollected(Sprite* collectable) BANKED;
+void TakeCollectable(Sprite* collectable, ItemType itype) BANKED;
 
 #endif

@@ -9,6 +9,8 @@
 #endif
 UINT8 next_state = START_STATE;
 
+/* Set by Win/Game Over when restarting; Overworld START clears it and
+   resets its static init so a new run does not carry old overworld state. */
 bool g_game_reset = false;
 
 UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {

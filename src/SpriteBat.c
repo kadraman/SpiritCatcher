@@ -7,6 +7,7 @@
 #include "Scroll.h"
 #include "SpriteManager.h"
 #include "ZGBMain.h"
+#include "StateGame.h"
 
 // player sprite pointer declaration, initialized in the SpritePlayer.c
 extern Sprite *player_sprite;
@@ -38,6 +39,10 @@ ASSERT_CUSTOM_DATA_SIZE(CUSTOM_DATA, 8);
 
 void START() {
     CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
+    if (IsMapEntityCleared(THIS) != 255) {
+        SpriteManagerRemove(THIS_IDX);
+        return;
+    }
     memset(data, 0, sizeof(CUSTOM_DATA));
     SetSpriteAnim(THIS, anim_bat_move, 5u);
     THIS->lim_x = 500u;

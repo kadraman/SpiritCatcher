@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <string.h>
 #include <gbdk/emu_debug.h>
 
 #include "Banks/SetAutoBank.h"
@@ -19,14 +20,11 @@
 #include "Water.h"
 
 
-
-UINT8 g_player_region;
 UINT8 start_x, start_y;
 INT16 min_x, max_x, min_y, max_y;
 bool g_level_complete;
 bool g_player_dead;
 
-extern UINT16 collectables_taken[];
 extern Sprite* player_sprite;
 extern UINT16 level_max_time;
 UINT16 level_width;
@@ -39,8 +37,8 @@ IMPORT_MAP(l1);
 
 DECLARE_MUSIC(cognition);
 
-#define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS}
-#define LEVELS_END {0, 0, 0, 0, 0}
+#define BANKED_MAP(MAP, X, Y, SPIRITS, SECONDS, ENTITIES) {BANK(MAP), &MAP, X, Y, SPIRITS, SECONDS, ENTITIES}
+#define LEVELS_END {0, 0, 0, 0, 0, 0}
 
 struct MapInfoBanked {
 	UINT8 bank;
@@ -49,11 +47,13 @@ struct MapInfoBanked {
 	UINT16 start_y;			// player starting location
 	UINT8 spirits;			// number of spirits to collect
 	UINT8 seconds;			// max time to complete level
+	UINT8 entities;			// clearable map markers (must be <= MAX_CLEARED_ENTITIES)
 };
 
 const struct MapInfoBanked levels[] = {
-	BANKED_MAP(l1, 2, 104, 3, 240),
-	BANKED_MAP(l1, 2, 104, 3, 240),
+	/* entities = count of GetTileReplacement tiles (255-tile < N_SPRITE_TYPES) on the map */
+	BANKED_MAP(l1, 2, 104, 3, 240, 17),
+	BANKED_MAP(l1, 2, 104, 3, 240, 17),
 	// Add more levels here
 	LEVELS_END
 };
@@ -69,57 +69,84 @@ UINT8 collision_tiles_down[] = {
 };
 UINT8 fastest_times[] = { 120 };
 
-#define MAX_COLLECTABLES 10
-UINT16 collectables_taken[MAX_COLLECTABLES + 1];
+/* [0] = count; [1..] = unique_ids cleared this visit (items + defeated enemies). */
+UINT16 cleared_entities[MAX_CLEARED_ENTITIES + 1];
 
 void pause(UINT16 time) BANKED {
 	if (time) while (time--) vsync();	
 }
 
-/*void LocateStuff(UINT8 map_bank, struct MapInfo* map) __nonbanked{
-	UINT8 x, y, tile;
-	UINT8* data;
-	PUSH_BANK(map_bank);
-	data = map->data;
-	for (y = 0; y < map->height; ++ y) {
-		for (x = 0; x < map->width; ++ x) {
-			tile = *(data ++);
-			if (tile == 250) {	// spirit
-				EMU_printf("LocateStuff: found spirit at %d:%d\n", x, y);
-				num_spirits++;
-			}
-		}
-	}
-	POP_BANK;
-}*/
+static void AssertClearedEntitiesCapacity(UINT8 entity_count) {
+	if (entity_count <= MAX_CLEARED_ENTITIES)
+		return;
+	EMU_printf(
+		"StateGame: map has %u clearable entities but MAX_CLEARED_ENTITIES=%u — raise the limit\n",
+		(unsigned)entity_count,
+		(unsigned)MAX_CLEARED_ENTITIES
+	);
+#ifndef NDEBUG
+	/* Halt in Debug so the overflow is obvious in Emulicious. */
+	while (1) vsync();
+#endif
+}
 
-void UpdateEnemies(UINT16 player_x, UINT16 player_y) BANKED {
-	switch (g_level_current) {
-		case 1:
-			if (player_x > 0 && player_x <= 250 && g_player_region <= 0) {
-				SpriteManagerAdd(SpriteSlime, 18 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 24 << 3, 7 << 3);
-				g_player_region = 1; break;
+UINT8 IsMapEntityCleared(Sprite* spr) BANKED {
+	UINT8 i;
+	for (i = 1; i != cleared_entities[0] + 1; ++i) {
+		if (cleared_entities[i] == spr->unique_id)
+			return i;
+	}
+	return 255;
+}
+
+void ClearMapEntity(Sprite* spr) BANKED {
+	if (IsMapEntityCleared(spr) != 255)
+		return;
+	if (cleared_entities[0] >= MAX_CLEARED_ENTITIES) {
+		EMU_printf(
+			"StateGame: cleared_entities full (%u) — unique_id 0x%04X not recorded\n",
+			(unsigned)MAX_CLEARED_ENTITIES,
+			(unsigned)spr->unique_id
+		);
+		return;
+	}
+	cleared_entities[++cleared_entities[0]] = spr->unique_id;
+}
+
+UINT8 IsCollected(Sprite* collectable) BANKED {
+	return IsMapEntityCleared(collectable);
+}
+
+void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
+	ClearMapEntity(collectable);
+	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
+	switch (itype) {
+		case ITEM_MANA:
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			player_data->magix++;
+			Hud_Update();
+			break;
+		case ITEM_HEALTH:
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			if (g_player_lives < MAX_LIVES && g_player_lives < UCHAR_MAX) {
+				g_player_lives++;
 			}
-			if (player_x > 250 && player_x < 500 && g_player_region <= 1) {
-				SpriteManagerAdd(SpriteSlime, 41 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 54 << 3, 7 << 3);
-				SpriteManagerAdd(SpriteBat, 69 << 3, 6 << 3);
-				g_player_region = 2; break;
-			} 
-			if (player_x > 500 && player_x < 750 && g_player_region <= 2) {
-				SpriteManagerAdd(SpriteRockard, 79 << 3, 13 << 3);
-				SpriteManagerAdd(SpriteBat, 95 << 3, 2 << 3);
-				g_player_region = 3; break;
+			Hud_Update();
+			break;
+		case ITEM_SPIRIT:
+			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
+			player_data->spirits = player_data->spirits > 0 ? player_data->spirits - 1 : 0;
+			if (player_data->spirits == 0) {
+				FLAG_SET(player_data->flags, pCaughtSpiritFlag);
 			}
-			if (player_x > 750 && player_x < 1000 && g_player_region <= 3) {
-				SpriteManagerAdd(SpriteSlime, 113 << 3, 4 << 3);
-				g_player_region = 4; break;
-			} 
+			Hud_Update();
+			break;
+		case ITEM_PORTAL:
 			break;
 		default:
 			break;
 	}
+	Hud_Update();
 }
 
 void START() {
@@ -129,9 +156,7 @@ void START() {
 	level_max_time = level->seconds;
 	g_level_complete = false;
 	g_player_dead = false;
-	g_player_region = 0;
 	min_x = min_y = 1;
-	//LocateStuff(level->bank, level->map);
 	scroll_target = SpriteManagerAdd(SpritePlayer, level->start_x, level->start_y);
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	data->spirits = level->spirits;
@@ -140,7 +165,9 @@ void START() {
 	level_width = scroll_w;
 	level_height = scroll_h;
 
-	memset(collectables_taken, 0, sizeof(collectables_taken));
+	memset(cleared_entities, 0, sizeof(cleared_entities));
+	/* Capacity comes from levels[].entities — avoid SWITCH_ROM map scans in START. */
+	AssertClearedEntitiesCapacity(level->entities);
 
 	Hud_Init();
 
@@ -151,7 +178,6 @@ void START() {
 
 void UPDATE() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
-	UpdateEnemies(player_sprite->x, player_sprite->y);
 	if (g_player_dead) {
 		//EMU_printf("StateGame::UPDATE: player is dead\n");
 		HIDE_HUD;
@@ -173,51 +199,3 @@ void UPDATE() {
 		Water_Animate();
 	}
 }
-
-UINT8 IsCollected(Sprite* collectable) BANKED {
-	UINT8 i;
-	for (i = 1; i != collectables_taken[0] + 1; ++i) {
-		if (collectables_taken[i] == collectable->unique_id)
-			return i;
-	}
-	return 255;
-}
-
-void TakeCollectable(Sprite* collectable, ItemType itype) BANKED {
-	collectables_taken[++ collectables_taken[0]] = collectable->unique_id;
-	PlayerData* player_data = (PlayerData*)player_sprite->custom_data;
-	switch (itype) {
-		case ITEM_MANA:
-			//EMU_printf("StateGame::%s: player has collected mana\n", __func__);
-			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			player_data->magix++;
-			//EMU_printf("StateGame::%s: player now has %u magix\n", __func__, player_data->magix);
-			Hud_Update();
-			break;
-		case ITEM_HEALTH:
-			//EMU_printf("StateGame::%s: player has collected health\n", __func__);
-			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			if (g_player_lives < MAX_LIVES && g_player_lives < UCHAR_MAX) {
-				g_player_lives++;
-			}
-			//EMU_printf("StateGame::%s: player now has %u lives\n", __func__, g_player_lives);
-			Hud_Update();
-			break;
-		case ITEM_SPIRIT:
-			//EMU_printf("StateGame::%s: player caught spirit\n", __func__);
-			PlayFx(CHANNEL_1, 10, 0x00, 0x81, 0x83, 0xA3, 0x87);
-			player_data->spirits = player_data->spirits > 0 ? player_data->spirits - 1 : 0;
-			if (player_data->spirits == 0) {
-				//EMU_printf("StateGame::%s: player has caught all spirits\n", __func__);
-				FLAG_SET(player_data->flags, pCaughtSpiritFlag);
-			}
-			Hud_Update();
-			break;
-		case ITEM_PORTAL:
-			break;
-		default:
-			break;
-	}
-	Hud_Update();
-}
-

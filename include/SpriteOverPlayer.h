@@ -6,7 +6,7 @@
 #include "SpriteManager.h"
 #include "Sprite.h"
 #include "ZGBMain.h"
-#include "ZGBUtils.h"
+
 
 #define DEFAULT_ANIM_SPEED      8
 

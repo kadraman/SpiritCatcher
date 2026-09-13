@@ -5,6 +5,7 @@
 
 #include "Scroll.h"
 #include "SpriteManager.h"
+#include "StateGame.h"
 
 #include "SpriteSlime.h"
 typedef struct {
@@ -32,6 +33,10 @@ static UINT8 TranslateSpriteI16(Sprite* spr, INT16 dx, INT16 dy) {
 
 void START() {
 	CUSTOM_DATA* data = (CUSTOM_DATA*)THIS->custom_data;
+	if (IsMapEntityCleared(THIS) != 255) {
+		SpriteManagerRemove(THIS_IDX);
+		return;
+	}
 	data->wait = 1;
 	data->ticks = 0;
 	data->last_cum_dx = 0;

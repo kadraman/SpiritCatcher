@@ -5,6 +5,7 @@
 
 #include "ZGBMain.h"
 #include "Scroll.h"
+#include "StateGame.h"
 
 #include "Sound.h"
 
@@ -36,14 +37,9 @@ void UPDATE() {
 		spr = sprite_manager_sprites[sprite_manager_updatables[i + 1u]];
 		if (spr->type == SpriteSlime || spr->type == SpriteBat || spr->type == SpriteRockard) {
 			if (CheckCollision(THIS, spr)) {
-				//if(spr->type != XXXX || spr->anim_data[1 + spr->anim_frame] == 1u) { //XXX can only die on frame 1
-				//	SpriteManagerRemove(i);
-				//	PlayFx(CHANNEL_4, 20, 0x0d, 0xff, 0x7d, 0xc0);
-				//}
 				spr2 = SpriteManagerAdd(SpriteParticle, spr->x, spr->y);
-				// remove enemy
+				ClearMapEntity(spr);
 				SpriteManagerRemove(i);
-				// remove magix
 				SpriteManagerRemove(THIS_IDX);
 				break;
 			}

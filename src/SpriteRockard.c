@@ -7,6 +7,7 @@
 
 #include "Scroll.h"
 #include "SpriteManager.h"
+#include "StateGame.h"
 
 // player sprite pointer declaration, initialized in the SpritePlayer.c
 extern Sprite *player_sprite;
@@ -27,12 +28,15 @@ CHECK_CUSTOM_DATA_SIZE(CUSTOM_DATA); // check that CUSTOM_DATA struct fits the C
 
 void START() {
     CUSTOM_DATA * data = (CUSTOM_DATA*)THIS->custom_data;
+	if (IsMapEntityCleared(THIS) != 255) {
+		SpriteManagerRemove(THIS_IDX);
+		return;
+	}
 	memset(data, 0, sizeof(CUSTOM_DATA));
 	THIS->lim_x = 500u;
 	THIS->lim_y = 144u;
 	data->start_x = THIS->x;
 	SetSpriteAnim(THIS, anim_rockard_move, 2u);
-
 }
 
 void UPDATE() {

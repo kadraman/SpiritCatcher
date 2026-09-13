@@ -5,6 +5,7 @@
 
 #include "SpriteManager.h"
 #include "ZGBMain.h"
+#include "StateGame.h"
 
 #define DEFAULT_ANIM_SPEED		10u
 
@@ -27,6 +28,7 @@ void UPDATE() {
 			if (spr->type == SpriteSlime || spr->type == SpriteBat) {
 				if (CheckCollision(THIS, spr)) {
 					spr2 = SpriteManagerAdd(SpriteParticle, spr->x, spr->y-5);
+					ClearMapEntity(spr);
 					SpriteManagerRemove(i);
 				}
 			}
