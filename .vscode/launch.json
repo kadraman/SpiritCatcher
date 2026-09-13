@@ -5,27 +5,25 @@
             "type": "emulicious-debugger",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}/bin/gbc/rom_Debug.gbc",
+            "program": "${workspaceFolder}/bin/gbc/SpiritDX_Debug.gbc",
             "port": 58870,
             "stopOnEntry": false,
             "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common;${workspaceFolder}/include;${workspaceFolder}/src",
             "emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar",
-            "preLaunchTask": "Debug",
-            "internalConsoleOptions": "openOnSessionStart",
-            "maxAttempts": 40
+            "preLaunchTask": "Prepare Debug",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "emulicious-debugger",
             "request": "launch",
             "name": "Release",
-            "program": "${workspaceFolder}/bin/gbc/rom.gbc",
+            "program": "${workspaceFolder}/bin/gbc/SpiritDX.gbc",
             "port": 58870,
             "stopOnEntry": false,
             "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common;${workspaceFolder}/include;${workspaceFolder}/src",
             "emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar",
-            "preLaunchTask": "Release",
-            "internalConsoleOptions": "openOnSessionStart",
-            "maxAttempts": 40
+            "preLaunchTask": "Prepare Release",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "emulicious-debugger",

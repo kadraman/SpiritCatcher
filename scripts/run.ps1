@@ -12,10 +12,10 @@ if (-not $env:BUILD_TYPE) {
 }
 
 if ($env:BUILD_TYPE -match "Debug") {
-    $Rom = Join-Path $Root "bin\gbc\rom_Debug.gbc"
+    $Rom = Join-Path $Root "bin\gbc\SpiritDX_Debug.gbc"
 }
 else {
-    $Rom = Join-Path $Root "bin\gbc\rom.gbc"
+    $Rom = Join-Path $Root "bin\gbc\SpiritDX.gbc"
 }
 
 if (-not (Test-Path $Rom)) {

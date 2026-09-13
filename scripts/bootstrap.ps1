@@ -70,9 +70,23 @@ if (-not $SkipTools) {
         throw "make is required to build CrossZGB tools (install via MSYS2, Chocolatey, or Git Bash toolchain)"
     }
     Write-Host "==> Building CrossZGB host tools..."
-    Push-Location (Join-Path $Root "deps\CrossZGB\tools")
+    $toolsDir = Join-Path $Root "deps\CrossZGB\tools"
+    $makeArgs = @()
+    if (-not (Test-SpiritHasZlib)) {
+        Write-Host "==> zlib.h not found; skipping vgm2psg (Spirit Catcher does not use VGM/PSG)"
+        $dirs = @(
+            Get-ChildItem -Directory $toolsDir |
+                Where-Object { $_.Name -ne "vgm2psg" } |
+                ForEach-Object { "$($_.Name)/." }
+        )
+        $makeArgs += "SUBDIRS=$($dirs -join ' ')"
+    }
+    Push-Location $toolsDir
     try {
-        make
+        & make @makeArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "CrossZGB tools build failed with exit code $LASTEXITCODE"
+        }
     }
     finally {
         Pop-Location
@@ -80,14 +94,8 @@ if (-not $SkipTools) {
 }
 
 if ($WithEmulicious) {
-    $found = Find-Emulicious -Root $Root
-    if ($found) {
-        Write-Host "==> Emulicious already available: $found"
-    }
-    else {
-        $null = Install-Emulicious -Root $Root -Url $EMULICIOUS_URL
-        Write-Host "==> Emulicious installed to tools/emulicious"
-    }
+    $jar = Ensure-LocalEmulicious -Root $Root -Url $EMULICIOUS_URL
+    Write-Host "==> Emulicious.jar ready: $jar"
 }
 
 Write-Host "==> Bootstrap complete."

@@ -4,16 +4,15 @@
 #include "GameTypes.h"
 #include <gbdk/emu_debug.h>
 
-#ifdef NDEBUG
-UINT8 next_state = StateSplash;
-#else
-UINT8 next_state = StateOverworld;
+#ifndef START_STATE
+#define START_STATE StateSplash
 #endif
+UINT8 next_state = START_STATE;
 
 bool g_game_reset = false;
 
 UINT8 GetTileReplacement(UINT8* tile_ptr, UINT8* tile) {
-	if (current_state == StateOverworld || StateGame) {
+	if (current_state == StateOverworld || current_state == StateGame) {
 		if (U_LESS_THAN(255 - (UINT16)*tile_ptr, N_SPRITE_TYPES)) {
 			// NOTE: for some reason tile to the right of current tile (tile_ptr+1) will be the replaced tile!
 			*tile = *(tile_ptr+1);

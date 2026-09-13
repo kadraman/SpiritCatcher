@@ -50,6 +50,24 @@
             }
         },
         {
+            "label": "Prepare Debug",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Ensure Emulicious",
+                "Debug"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Prepare Release",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Ensure Emulicious",
+                "Release"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Clean",
             "type": "shell",
             "command": "make",
@@ -90,15 +108,14 @@
         {
             "label": "Ensure Emulicious",
             "type": "shell",
-            "command": "${workspaceFolder}/scripts/bootstrap.sh --with-emulicious",
+            "command": "${workspaceFolder}/scripts/ensure-emulicious.sh",
             "windows": {
                 "command": "powershell",
                 "args": [
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/scripts/bootstrap.ps1",
-                    "-WithEmulicious"
+                    "${workspaceFolder}/scripts/ensure-emulicious.ps1"
                 ]
             },
             "options": {

@@ -39,6 +39,18 @@ spirit_load_versions() {
   done < "$root/deps/VERSIONS"
 }
 
+spirit_has_zlib() {
+  local cc
+  if command -v gcc >/dev/null 2>&1; then
+    cc=gcc
+  elif command -v clang >/dev/null 2>&1; then
+    cc=clang
+  else
+    return 1
+  fi
+  echo '#include <zlib.h>' | "$cc" -E - -o /dev/null >/dev/null 2>&1
+}
+
 spirit_require_deps() {
   local root="$1"
   if [[ ! -f "$root/deps/CrossZGB/common/src/MakefileCommon" ]]; then
@@ -169,6 +181,49 @@ spirit_download_emulicious() {
     return 1
   fi
   echo "$dest/Emulicious.jar"
+}
+
+spirit_emulicious_jar() {
+  echo "$1/tools/emulicious/Emulicious.jar"
+}
+
+# Ensure tools/emulicious/Emulicious.jar exists (required by .vscode launch.json).
+# Copies a discovered system jar when possible; otherwise downloads the portable package.
+spirit_ensure_local_emulicious() {
+  local root="$1"
+  local url="${2:-}"
+  local dest_jar dest_dir found src_jar
+
+  dest_jar="$(spirit_emulicious_jar "$root")"
+  dest_dir="$(dirname "$dest_jar")"
+  if [[ -f "$dest_jar" ]]; then
+    echo "$dest_jar"
+    return 0
+  fi
+
+  src_jar=""
+  if found="$(spirit_find_emulicious "$root")"; then
+    if [[ "$found" == *.jar ]]; then
+      src_jar="$found"
+    elif [[ -f "$(dirname "$found")/Emulicious.jar" ]]; then
+      src_jar="$(dirname "$found")/Emulicious.jar"
+    fi
+  fi
+
+  if [[ -n "$src_jar" ]]; then
+    mkdir -p "$dest_dir"
+    cp "$src_jar" "$dest_jar"
+    echo "==> Copied Emulicious.jar for the debugger to $dest_jar" >&2
+    echo "$dest_jar"
+    return 0
+  fi
+
+  spirit_download_emulicious "$root" "$url" >/dev/null
+  if [[ ! -f "$dest_jar" ]]; then
+    echo "error: Emulicious.jar missing after install at $dest_jar" >&2
+    return 1
+  fi
+  echo "$dest_jar"
 }
 
 # Find Emulicious or download into tools/emulicious. Prints path.

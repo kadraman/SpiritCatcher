@@ -38,6 +38,26 @@ function Get-SpiritVersions {
     return $map
 }
 
+function Test-SpiritHasZlib {
+    $cc = Get-Command gcc -ErrorAction SilentlyContinue
+    if ($null -eq $cc) {
+        $cc = Get-Command clang -ErrorAction SilentlyContinue
+    }
+    if ($null -eq $cc) {
+        return $false
+    }
+
+    $src = Join-Path ([System.IO.Path]::GetTempPath()) ("spirit-zlib-probe-" + [guid]::NewGuid().ToString() + ".c")
+    try {
+        Set-Content -Path $src -Value '#include <zlib.h>'
+        $null = & $cc.Source -E $src -o NUL 2>&1
+        return ($LASTEXITCODE -eq 0)
+    }
+    finally {
+        Remove-Item -LiteralPath $src -ErrorAction SilentlyContinue
+    }
+}
+
 function Assert-SpiritDeps {
     param([Parameter(Mandatory = $true)][string]$Root)
 
@@ -103,6 +123,51 @@ function Find-Emulicious {
     }
 
     return $null
+}
+
+function Get-SpiritEmuliciousJar {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    return (Join-Path $Root "tools\emulicious\Emulicious.jar")
+}
+
+function Ensure-LocalEmulicious {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [string]$Url
+    )
+
+    $destJar = Get-SpiritEmuliciousJar -Root $Root
+    if (Test-Path $destJar) {
+        return $destJar
+    }
+
+    $found = Find-Emulicious -Root $Root
+    $srcJar = $null
+    if ($found) {
+        if ($found -like "*.jar") {
+            $srcJar = $found
+        }
+        else {
+            $sibling = Join-Path (Split-Path $found -Parent) "Emulicious.jar"
+            if (Test-Path $sibling) {
+                $srcJar = $sibling
+            }
+        }
+    }
+
+    $destDir = Split-Path $destJar -Parent
+    if ($srcJar) {
+        New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+        Copy-Item -LiteralPath $srcJar -Destination $destJar -Force
+        Write-Host "==> Copied Emulicious.jar for the debugger to $destJar"
+        return $destJar
+    }
+
+    $null = Install-Emulicious -Root $Root -Url $Url
+    if (-not (Test-Path $destJar)) {
+        throw "Emulicious.jar missing after install at $destJar"
+    }
+    return $destJar
 }
 
 function Install-Emulicious {

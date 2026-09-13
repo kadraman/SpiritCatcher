@@ -6,6 +6,7 @@ An action platformer for the Nintendo Game Boy Color written using [CrossZGB](ht
 
 - Git (with submodule support)
 - `make` and a C/C++ toolchain (Xcode CLT, build-essential, or MSYS2/MinGW on Windows)
+- zlib development headers (`zlib.h`) only if you want CrossZGB's `vgm2psg` tool; Spirit Catcher does not use VGM files, and bootstrap skips that tool when zlib is missing
 - Python 3 with `pillow` and `wave` (used by some CrossZGB asset tools)
 - Java 21+ (only needed to run Emulicious)
 
@@ -114,7 +115,7 @@ git submodule update --init --recursive
 
 (`./scripts/build.sh` / `.\scripts\build.ps1` work the same.)
 
-The ROM is written to `bin/gbc/` (`rom_Debug.gbc` for Debug, `rom.gbc` for Release).
+The ROM is written to `bin/gbc/` (`SpiritDX_Debug.gbc` for Debug, `SpiritDX.gbc` for Release).
 
 ```bash
 ./scripts/clean.sh   # or .\scripts\clean.ps1
@@ -141,16 +142,17 @@ Install the recommended extension when prompted, or from the Extensions view:
 - **Emulicious Debugger** — `emulicious.emulicious-debugger`
 - **C/C++** — `ms-vscode.cpptools` (for breakpoints in `.c` sources)
 
-Ensure Emulicious is available (once):
+F5 launches `${workspaceFolder}/tools/emulicious/Emulicious.jar`. A system-wide Emulicious.exe is not enough. Ensure the local jar once (or let F5 copy/download it):
 
 ```bash
 ./scripts/bootstrap.sh --with-emulicious
+# or: ./scripts/ensure-emulicious.sh
 ```
 
 ### Launch with F5 (preferred)
 
 1. Open the **Run and Debug** view (`Cmd+Shift+D` / `Ctrl+Shift+D`).
-2. Select **Debug** (builds `rom_Debug.gbc` then launches Emulicious).
+2. Select **Debug** (builds `SpiritDX_Debug.gbc` then launches Emulicious).
 3. Press **F5**.
 
 Cursor/VS Code starts Emulicious via `tools/emulicious/Emulicious.jar`, loads the ROM, and connects the debugger. The **Debug Console** shows `EMU_printf` output (lines prefixed with `DBG363183` while debugging the hit bug).

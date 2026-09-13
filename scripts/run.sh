@@ -12,8 +12,8 @@ cd "$ROOT"
 BUILD_TYPE="${BUILD_TYPE:-Debug}"
 ROM=""
 case "$BUILD_TYPE" in
-  *Debug*) ROM="bin/gbc/rom_Debug.gbc" ;;
-  *)       ROM="bin/gbc/rom.gbc" ;;
+  *Debug*) ROM="bin/gbc/SpiritDX_Debug.gbc" ;;
+  *)       ROM="bin/gbc/SpiritDX.gbc" ;;
 esac
 
 if [[ ! -f "$ROM" ]]; then

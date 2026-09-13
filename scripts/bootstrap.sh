@@ -120,17 +120,25 @@ if [[ $BUILD_TOOLS -eq 1 ]]; then
     exit 1
   fi
   echo "==> Building CrossZGB host tools..."
-  make -C "$ROOT/deps/CrossZGB/tools"
+  tools_dir="$ROOT/deps/CrossZGB/tools"
+  make_args=()
+  if ! spirit_has_zlib; then
+    echo "==> zlib.h not found; skipping vgm2psg (Spirit Catcher does not use VGM/PSG)"
+    subdirs=""
+    for d in "$tools_dir"/*/; do
+      name="$(basename "$d")"
+      [[ "$name" == "vgm2psg" ]] && continue
+      subdirs+="$name/. "
+    done
+    make_args+=( "SUBDIRS=${subdirs% }" )
+  fi
+  make -C "$tools_dir" "${make_args[@]}"
 fi
 
 # --- Optional Emulicious ---
 if [[ $WITH_EMULICIOUS -eq 1 ]]; then
-  if emu_path="$(spirit_find_emulicious "$ROOT")"; then
-    echo "==> Emulicious already available: $emu_path"
-  else
-    emu_path="$(spirit_download_emulicious "$ROOT" "$EMULICIOUS_URL")"
-    echo "==> Emulicious installed: $emu_path"
-  fi
+  emu_path="$(spirit_ensure_local_emulicious "$ROOT" "$EMULICIOUS_URL")"
+  echo "==> Emulicious.jar ready: $emu_path"
 fi
 
 echo "==> Bootstrap complete."
