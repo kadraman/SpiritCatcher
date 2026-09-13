@@ -1,5 +1,5 @@
 # Shared path / dependency helpers for Spirit Catcher (PowerShell).
-# Dot-sourced by setenv.ps1, bootstrap.ps1, and run.ps1.
+# Dot-sourced by scripts/{bootstrap,build,clean,run,setenv}.ps1
 
 function Get-SpiritRepoRoot {
     param([string]$StartPath = $PSScriptRoot)

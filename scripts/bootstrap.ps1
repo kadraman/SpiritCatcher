@@ -93,4 +93,4 @@ if ($WithEmulicious) {
 Write-Host "==> Bootstrap complete."
 Write-Host "    ZGB_PATH  -> $(Join-Path $Root 'deps\CrossZGB\common')"
 Write-Host "    GBDK_HOME -> $(Join-Path $Root 'deps\gbdk')"
-Write-Host "    Next: . .\setenv.ps1 ; .\build.ps1"
+Write-Host "    Next: .\build.ps1"

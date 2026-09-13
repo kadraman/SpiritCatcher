@@ -1,10 +1,9 @@
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $RepoRoot) { $RepoRoot = $PSScriptRoot }
-. (Join-Path $RepoRoot "scripts\lib\env.ps1")
+$ScriptDir = $PSScriptRoot
+. (Join-Path $ScriptDir "lib\env.ps1")
 
-$Root = Get-SpiritRepoRoot -StartPath $RepoRoot
+$Root = Get-SpiritRepoRoot -StartPath (Join-Path $ScriptDir "..")
 Set-SpiritEnvironment -Root $Root
 Assert-SpiritDeps -Root $Root
 

@@ -1,15 +1,12 @@
 # Export project-local CrossZGB / GBDK / Emulicious environment.
-# Usage: . .\setenv.ps1
+# Usage: . .\scripts\setenv.ps1
 
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $RepoRoot) {
-    $RepoRoot = $PSScriptRoot
-}
-. (Join-Path $RepoRoot "scripts\lib\env.ps1")
+$ScriptDir = $PSScriptRoot
+. (Join-Path $ScriptDir "lib\env.ps1")
 
-$Root = Get-SpiritRepoRoot -StartPath $RepoRoot
+$Root = Get-SpiritRepoRoot -StartPath (Join-Path $ScriptDir "..")
 Set-SpiritEnvironment -Root $Root
 
 if (-not (Test-Path (Join-Path $env:ZGB_PATH "src\MakefileCommon"))) {
@@ -18,7 +15,7 @@ if (-not (Test-Path (Join-Path $env:ZGB_PATH "src\MakefileCommon"))) {
 $lcc = Join-Path $env:GBDK_HOME "bin\lcc.exe"
 $lccUnix = Join-Path $env:GBDK_HOME "bin\lcc"
 if (-not (Test-Path $lcc) -and -not (Test-Path $lccUnix)) {
-    Write-Warning "GBDK missing; run: scripts/bootstrap.ps1"
+    Write-Warning "GBDK missing; run: .\scripts\bootstrap.ps1"
 }
 
 Write-Host "ZGB_PATH=$env:ZGB_PATH"

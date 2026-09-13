@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shared path / dependency helpers for Spirit Catcher (bash).
-# Sourced by setenv.sh, bootstrap.sh, and run.sh.
+# Sourced by scripts/{bootstrap,build,clean,run,setenv}.sh
 
 spirit_repo_root() {
   local here

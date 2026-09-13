@@ -112,10 +112,12 @@ git submodule update --init --recursive
 .\build.ps1
 ```
 
+(`./scripts/build.sh` / `.\scripts\build.ps1` work the same.)
+
 The ROM is written to `bin/gbc/` (`rom_Debug.gbc` for Debug, `rom.gbc` for Release).
 
 ```bash
-./clean.sh   # or .\clean.ps1
+./scripts/clean.sh   # or .\scripts\clean.ps1
 ```
 
 ## Running in Emulicious
@@ -144,13 +146,15 @@ Enable remote debugging once in Emulicious: **Tools → Remote Debugging → Ena
 
 ## Environment variables
 
-`./setenv.sh` / `.\setenv.ps1` export project-local paths (also applied automatically by build/clean/run):
+`source ./scripts/setenv.sh` / `. .\scripts\setenv.ps1` export project-local paths (also applied automatically by build/clean/run):
 
 | Variable | Value |
 | --- | --- |
 | `ZGB_PATH` | `<repo>/deps/CrossZGB/common` |
 | `GBDK_HOME` | `<repo>/deps/gbdk` |
 | `EMULICIOUS_PATH` | resolved Emulicious jar/exe when found |
+
+Tooling lives under `scripts/` (`bootstrap`, `build`, `clean`, `run`, `setenv`, `lib`). Root `build` / `run` are thin wrappers.
 
 ----
 

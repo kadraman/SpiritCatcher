@@ -136,4 +136,4 @@ fi
 echo "==> Bootstrap complete."
 echo "    ZGB_PATH  -> $ROOT/deps/CrossZGB/common"
 echo "    GBDK_HOME -> $ROOT/deps/gbdk"
-echo "    Next: source ./setenv.sh && ./build.sh"
+echo "    Next: ./build.sh"
