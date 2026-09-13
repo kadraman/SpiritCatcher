@@ -1,10 +1,12 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "SpiritCatcher",
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include",
+                "${workspaceFolder}/deps/CrossZGB/common/include",
+                "${workspaceFolder}/deps/gbdk/include/**",
                 "${env:ZGB_PATH}/include",
                 "${env:GBDK_HOME}/include/**"
             ],
@@ -12,10 +14,9 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "__PORT_gbz80"
+                "__PORT_gbz80",
+                "CGB"
             ],
-            "windowsSdkVersion": "8.1",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.24.28314/bin/Hostx64/x64/cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "${default}"

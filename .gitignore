@@ -251,3 +251,7 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Local toolchain / emulator (populated by scripts/bootstrap*)
+deps/gbdk/
+tools/emulicious/

@@ -1,0 +1,3 @@
+[submodule "deps/CrossZGB"]
+	path = deps/CrossZGB
+	url = https://github.com/gbdk-2020/CrossZGB.git

@@ -6,32 +6,18 @@
         {
             "label": "Release",
             "type": "shell",
-            //"command": "${env:ZGB_PATH}/../env/make-3.81-bin/bin/make",#
             "command": "make",
             "options": {
-                "cwd": "${workspaceFolder}/src"
+                "cwd": "${workspaceFolder}/src",
+                "env": {
+                    "ZGB_PATH": "${workspaceFolder}/deps/CrossZGB/common",
+                    "GBDK_HOME": "${workspaceFolder}/deps/gbdk"
+                }
             },
             "isBackground": false,
             "args": [
-                "BUILD_TYPE=Release"
-            ],
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "ReleaseColor",
-            "type": "shell",
-            //"command": "${env:ZGB_PATH}/../env/make-3.81-bin/bin/make",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}/src"
-            },
-            "isBackground": false,
-            "args": [
-                "BUILD_TYPE=ReleaseColor"
+                "BUILD_TYPE=Release",
+                "gbc"
             ],
             "problemMatcher": [],
             "group": {
@@ -42,34 +28,18 @@
         {
             "label": "Debug",
             "type": "shell",
-            //"command": "${env:ZGB_PATH}/../env/make-3.81-bin/bin/make",
             "command": "make",
             "options": {
-                "cwd": "${workspaceFolder}/src"
+                "cwd": "${workspaceFolder}/src",
+                "env": {
+                    "ZGB_PATH": "${workspaceFolder}/deps/CrossZGB/common",
+                    "GBDK_HOME": "${workspaceFolder}/deps/gbdk"
+                }
             },
             "isBackground": false,
             "args": [
-                "BUILD_TYPE=Debug"
-            ],
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "DebugColor",
-            "type": "shell",
-            //"command": "${env:ZGB_PATH}/../env/make-3.81-bin/bin/make",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}/src"
-            },
-            "isBackground": false,
-            "args": [
-                "BUILD_TYPE=DebugColor"
+                "BUILD_TYPE=Debug",
+                "gbc"
             ],
             "problemMatcher": [
                 "$gcc"
@@ -82,19 +52,40 @@
         {
             "label": "Clean",
             "type": "shell",
-            //"command": "${env:ZGB_PATH}/../env/make-3.81-bin/bin/make",
             "command": "make",
             "options": {
-                "cwd": "${workspaceFolder}/src"
+                "cwd": "${workspaceFolder}/src",
+                "env": {
+                    "ZGB_PATH": "${workspaceFolder}/deps/CrossZGB/common",
+                    "GBDK_HOME": "${workspaceFolder}/deps/gbdk"
+                }
             },
             "isBackground": false,
             "args": [
-                "BUILD_TYPE=${defaultBuildTask}",
-                "clean"
+                "BUILD_TYPE=Debug",
+                "gbc-clean"
             ],
             "problemMatcher": [
                 "$gcc"
             ]
+        },
+        {
+            "label": "Bootstrap",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/bootstrap.sh",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/scripts/bootstrap.ps1"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
         }
     ]
 }

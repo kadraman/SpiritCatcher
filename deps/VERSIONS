@@ -1,0 +1,18 @@
+# Pinned dependency versions for Spirit Catcher bootstrap.
+# CrossZGB engine source is tracked as a git submodule at tag CROSSZGB_TAG.
+
+CROSSZGB_TAG=v2026.1
+
+# GBDK-2020 binary release (https://github.com/gbdk-2020/gbdk-2020/releases)
+# Contemporary with CrossZGB v2026.1 (March 2026).
+GBDK_RELEASE=4.5.0
+
+# Per-platform asset filenames under the GBDK release.
+GBDK_ASSET_LINUX_X64=gbdk-linux64.tar.gz
+GBDK_ASSET_MACOS_ARM64=gbdk-macos-arm64.tar.gz
+GBDK_ASSET_MACOS_X64=gbdk-macos.tar.gz
+GBDK_ASSET_WINDOWS_X64=gbdk-win64.zip
+
+# Emulicious portable download (Java jar package).
+# https://emulicious.net/downloads/
+EMULICIOUS_URL=https://emulicious.net/download/emulicious/?wpdmdl=205

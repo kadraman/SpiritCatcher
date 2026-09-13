@@ -1,6 +1,9 @@
 {
     "files.exclude": {
         "obj": true,
+        "bin": true,
+        "deps/gbdk": true,
+        "tools/emulicious": true,
         "Debug": true,
         "DebugColor": true,
         "Release": true,
@@ -10,7 +13,6 @@
         "*.sln": true,
         "*.vcxproj*": true,
         "*.db": true,
-        ".gitignore": true,
         ".vs": true
     },
     "files.associations": {
@@ -29,5 +31,6 @@
         "setautobank.h": "c",
         "statetitlesc": "cpp",
         "spriteplayer.h": "c"
-    }
+    },
+    "emulicious-debugger.emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar"
 }
