@@ -134,15 +134,46 @@ Emulicious is resolved in this order:
 4. `tools/emulicious/` in this repo
 5. Automatic download into `tools/emulicious/` if still missing
 
-## VS Code / Cursor
+## VS Code / Cursor (Emulicious Debugger)
 
-Recommended extension: Emulicious Debugger (`emulicious.emulicious-debugger`).
+Install the recommended extension when prompted, or from the Extensions view:
 
-- **Debug** / **Release** launch configs build then open the ROM
-- `emuliciousPath` defaults to `${workspaceFolder}/tools/emulicious/Emulicious.jar` (populated by bootstrap/run)
-- Engine sources are available via `additionalSrcFolders` → `deps/CrossZGB/common`
+- **Emulicious Debugger** — `emulicious.emulicious-debugger`
+- **C/C++** — `ms-vscode.cpptools` (for breakpoints in `.c` sources)
 
-Enable remote debugging once in Emulicious: **Tools → Remote Debugging → Enabled**.
+Ensure Emulicious is available (once):
+
+```bash
+./scripts/bootstrap.sh --with-emulicious
+```
+
+### Launch with F5 (preferred)
+
+1. Open the **Run and Debug** view (`Cmd+Shift+D` / `Ctrl+Shift+D`).
+2. Select **Debug** (builds `rom_Debug.gbc` then launches Emulicious).
+3. Press **F5**.
+
+Cursor/VS Code starts Emulicious via `tools/emulicious/Emulicious.jar`, loads the ROM, and connects the debugger. The **Debug Console** shows `EMU_printf` output (lines prefixed with `DBG363183` while debugging the hit bug).
+
+Other launch configs:
+
+| Config | Purpose |
+| --- | --- |
+| **Debug** | Build Debug ROM + launch Emulicious + attach debugger |
+| **Release** | Build Release ROM + launch Emulicious + attach debugger |
+| **Attach to Emulicious** | Attach to an already-running Emulicious (enable **Tools → Remote Debugging** in Emulicious first) |
+
+Debug symbols come from the CrossZGB Debug build (`.cdb` / `.sym` next to the ROM in `bin/gbc/`).
+
+### macOS note
+
+If launch fails with “Operation Not Permitted”, grant permissions to `/System/Library/CoreServices/Jar Launcher.app` (see the [Emulicious Debugger README](https://github.com/Calindro/emulicious-debugger)).
+
+### Running without the debugger
+
+```bash
+./run.sh     # or .\run.ps1
+```
 
 ## Environment variables
 

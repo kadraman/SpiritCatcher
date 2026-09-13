@@ -32,10 +32,12 @@ void START() {
 
 void UPDATE() {
 	CUSTOM_DATA* data = (CUSTOM_DATA*)THIS->custom_data;
-	
-	//THIS->x += (INT16)data->vx << delta_time;
-	//THIS->y += (INT16)data->vy << delta_time;
-	if (TranslateSprite(THIS, (INT16)data->vx << delta_time, (INT16)data->vy << delta_time)) {
+	INT16 dx = (INT16)data->vx << delta_time;
+	INT16 dy = (INT16)data->vy << delta_time;
+	INT8 sx = (dx > 127) ? 127 : (dx < -128) ? (INT8)-128 : (INT8)dx;
+	INT8 sy = (dy > 127) ? 127 : (dy < -128) ? (INT8)-128 : (INT8)dy;
+
+	if (TranslateSprite(THIS, sx, sy)) {
 		SetFrame(THIS, 1); // set to frame 1 for the rocklette sprite
 		// if the sprite is out of bounds, remove it
 		SpriteManagerRemove(THIS_IDX);

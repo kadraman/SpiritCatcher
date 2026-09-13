@@ -16,6 +16,20 @@ typedef struct {
 } CUSTOM_DATA;
 CHECK_CUSTOM_DATA_SIZE(CUSTOM_DATA);
 
+/* TranslateSprite only accepts INT8; chunk larger deltas to avoid truncate/wrap. */
+static UINT8 TranslateSpriteI16(Sprite* spr, INT16 dx, INT16 dy) {
+	UINT8 col = 0;
+	while (dx != 0 || dy != 0) {
+		INT8 sx = (dx > 127) ? 127 : (dx < -128) ? (INT8)-128 : (INT8)dx;
+		INT8 sy = (dy > 127) ? 127 : (dy < -128) ? (INT8)-128 : (INT8)dy;
+		col = TranslateSprite(spr, sx, sy);
+		dx -= sx;
+		dy -= sy;
+		if (col) break;
+	}
+	return col;
+}
+
 void START() {
 	CUSTOM_DATA* data = (CUSTOM_DATA*)THIS->custom_data;
 	data->wait = 1;
@@ -52,7 +66,7 @@ void START() {
  *   horizontal direction `dir` (+1 or -1) and invert Y as the engine uses
  *   screen coordinates where negative dy moves up.
  * - We compute the per-frame delta as (cur_cum - last_cum) and call
- *   `TranslateSprite(THIS, delta_x << delta_time, delta_y << delta_time)`.
+ *   `TranslateSpriteI16` (chunks into INT8 steps for TranslateSprite).
  *   Using `TranslateSprite` preserves collision and scrolling semantics.
  * - If a tile collision occurs we enter reversing mode (wait == 2) so the
  *   slime will retrace the remaining curve frames back to the ground.
@@ -113,7 +127,7 @@ void UPDATE() {
 		INT16 delta_x = next_cum_dx - cur_cum_dx;
 		INT16 delta_y = next_cum_dy - cur_cum_dy;
 
-		TranslateSprite(THIS, delta_x << delta_time, delta_y << delta_time);
+		TranslateSpriteI16(THIS, (INT16)(delta_x << delta_time), (INT16)(delta_y << delta_time));
 
 		data->last_cum_dx = next_cum_dx;
 		data->last_cum_dy = next_cum_dy;
@@ -152,9 +166,7 @@ void UPDATE() {
 			INT16 delta_y = cur_cum_dy - data->last_cum_dy;
 
 			// translate using TranslateSprite so collisions/scroll are handled
-			INT16 tx = (INT16)delta_x << delta_time;
-			INT16 ty = (INT16)delta_y << delta_time;
-			INT16 col = TranslateSprite(THIS, tx, ty);
+			UINT8 col = TranslateSpriteI16(THIS, (INT16)(delta_x << delta_time), (INT16)(delta_y << delta_time));
 
 			if (col) {
 				// collision occurred: enter reversing mode to run remaining curve frames back to ground
@@ -197,7 +209,7 @@ void UPDATE() {
 					// last_cum_dy is cumulative vertical offset (negative = up). Move it toward 0.
 					if (data->last_cum_dy != 0) {
 						INT16 step = (data->last_cum_dy < 0) ? 1 : -1; // move down if above ground
-						TranslateSprite(THIS, 0, (INT16)step << delta_time);
+						TranslateSpriteI16(THIS, 0, (INT16)(step << delta_time));
 						data->last_cum_dy += step;
 					} else {
 						// finished descent
@@ -214,7 +226,7 @@ void UPDATE() {
 			INT16 final_dx = (INT16)(data->dir * MOVE_WIDTH) - data->last_cum_dx;
 			INT16 final_dy = (INT16)(0) - data->last_cum_dy;
 			if (final_dx || final_dy) {
-				INT16 col = TranslateSprite(THIS, (INT16)final_dx << delta_time, (INT16)final_dy << delta_time);
+				UINT8 col = TranslateSpriteI16(THIS, (INT16)(final_dx << delta_time), (INT16)(final_dy << delta_time));
 				if (col) {
 					// collided with tile while applying final delta: reverse and go to waiting
 					data->dir = (INT8)(-data->dir);
@@ -223,7 +235,7 @@ void UPDATE() {
 					INT16 back_x = (INT16)(-data->last_cum_dx);
 					INT16 back_y = (INT16)(-data->last_cum_dy);
 					if (back_x || back_y) {
-						TranslateSprite(THIS, back_x << delta_time, back_y << delta_time);
+						TranslateSpriteI16(THIS, (INT16)(back_x << delta_time), (INT16)(back_y << delta_time));
 					}
 					data->last_cum_dx = 0;
 					data->last_cum_dy = 0;
@@ -237,7 +249,7 @@ void UPDATE() {
 					INT16 back_x = (INT16)(-data->last_cum_dx);
 					INT16 back_y = (INT16)(-data->last_cum_dy);
 					if (back_x || back_y) {
-						TranslateSprite(THIS, back_x << delta_time, back_y << delta_time);
+						TranslateSpriteI16(THIS, (INT16)(back_x << delta_time), (INT16)(back_y << delta_time));
 					}
 					data->last_cum_dx = 0;
 					data->last_cum_dy = 0;

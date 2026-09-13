@@ -136,8 +136,9 @@ void START() {
 	PlayerData* data = (PlayerData*)player_sprite->custom_data;
 	data->spirits = level->spirits;
 	InitScroll(level->bank, level->map, collision_tiles, collision_tiles_down);
-	level_width = level->map->width * 8;
-	level_height = level->map->height * 8;
+	/* Use scroll_* set by InitScroll — map->width/height live in another bank. */
+	level_width = scroll_w;
+	level_height = scroll_h;
 
 	memset(collectables_taken, 0, sizeof(collectables_taken));
 

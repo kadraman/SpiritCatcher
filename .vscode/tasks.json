@@ -86,6 +86,25 @@
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Ensure Emulicious",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/bootstrap.sh --with-emulicious",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/scripts/bootstrap.ps1",
+                    "-WithEmulicious"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
         }
     ]
 }

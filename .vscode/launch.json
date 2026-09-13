@@ -8,10 +8,11 @@
             "program": "${workspaceFolder}/bin/gbc/rom_Debug.gbc",
             "port": 58870,
             "stopOnEntry": false,
-            "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common",
+            "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common;${workspaceFolder}/include;${workspaceFolder}/src",
             "emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar",
             "preLaunchTask": "Debug",
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "maxAttempts": 40
         },
         {
             "type": "emulicious-debugger",
@@ -20,9 +21,19 @@
             "program": "${workspaceFolder}/bin/gbc/rom.gbc",
             "port": 58870,
             "stopOnEntry": false,
-            "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common",
+            "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common;${workspaceFolder}/include;${workspaceFolder}/src",
             "emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar",
-            "preLaunchTask": "Release"
+            "preLaunchTask": "Release",
+            "internalConsoleOptions": "openOnSessionStart",
+            "maxAttempts": 40
+        },
+        {
+            "type": "emulicious-debugger",
+            "request": "attach",
+            "name": "Attach to Emulicious",
+            "port": 58870,
+            "additionalSrcFolders": "${workspaceFolder}/deps/CrossZGB/common;${workspaceFolder}/include;${workspaceFolder}/src",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

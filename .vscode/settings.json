@@ -1,9 +1,6 @@
 {
     "files.exclude": {
         "obj": true,
-        "bin": true,
-        "deps/gbdk": true,
-        "tools/emulicious": true,
         "Debug": true,
         "DebugColor": true,
         "Release": true,
@@ -32,5 +29,6 @@
         "statetitlesc": "cpp",
         "spriteplayer.h": "c"
     },
-    "emulicious-debugger.emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar"
+    "emulicious-debugger.emuliciousPath": "${workspaceFolder}/tools/emulicious/Emulicious.jar",
+    "emulicious-debugger.maxAttempts": 40
 }

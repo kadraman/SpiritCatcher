@@ -99,6 +99,97 @@ void UpdateVictory(void);
 
 void RemoveLantern(Sprite *sprite) BANKED;
 
+/* TranslateSprite only accepts INT8 — clamp before call to avoid truncate/wrap. */
+static INT8 ClampToInt8(INT16 v) {
+	if (v > 127) return 127;
+	if (v < -128) return (INT8)-128;
+	return (INT8)v;
+}
+
+static UINT16 PlayerMinX(void) {
+	return (min_x > 0) ? (UINT16)min_x : 0u;
+}
+
+/* Prefer engine scroll size; level_width may be stale if map bank was wrong. */
+static UINT16 PlayerBoundsW(void) {
+	if (scroll_w > 0u) return scroll_w;
+	return level_width;
+}
+
+static UINT16 PlayerBoundsH(void) {
+	if (scroll_h > 0u) return scroll_h;
+	return level_height;
+}
+
+static UINT16 PlayerMaxX(Sprite* sprite) {
+	UINT16 w = PlayerBoundsW();
+	/* Invalid/unknown width: do not invent a tiny max (that blocks all right move). */
+	if (w <= sprite->coll_w) return 0xFFFFu;
+	return w - sprite->coll_w;
+}
+
+static void ClampPlayerX(Sprite* sprite) {
+	UINT16 min_px = PlayerMinX();
+	UINT16 max_px = PlayerMaxX(sprite);
+	if (sprite->x < min_px) sprite->x = min_px;
+	/* Only apply upper clamp when we have a real map width */
+	if (max_px != 0xFFFFu && sprite->x > max_px) sprite->x = max_px;
+}
+
+static void ClampPlayerY(Sprite* sprite) {
+	UINT16 min_py = (min_y > 0) ? (UINT16)min_y : 0u;
+	UINT16 h = PlayerBoundsH();
+	if (sprite->y < min_py) sprite->y = min_py;
+	if (h > sprite->coll_h) {
+		UINT16 max_py = h - sprite->coll_h;
+		if (sprite->y > max_py) sprite->y = max_py;
+	}
+}
+
+/* Apply horizontal TranslateSprite step without UINT16 wrap past map edges. */
+static UINT8 TranslatePlayerX(Sprite* sprite, INT16 step) {
+	UINT16 prev_x = sprite->x;
+	UINT16 min_px = PlayerMinX();
+	UINT16 max_px = PlayerMaxX(sprite);
+	INT8 sx;
+
+	if (step < 0) {
+		UINT16 want = (UINT16)(-step);
+		if (sprite->x <= min_px) {
+			accel_x = 0;
+			return 0;
+		}
+		if (want > sprite->x - min_px) {
+			want = sprite->x - min_px;
+			accel_x = 0;
+		}
+		sx = ClampToInt8(-(INT16)want);
+	} else if (step > 0) {
+		UINT16 want = (UINT16)step;
+		if (max_px != 0xFFFFu) {
+			if (sprite->x >= max_px) {
+				accel_x = 0;
+				return 0;
+			}
+			if (want > max_px - sprite->x) {
+				want = max_px - sprite->x;
+				accel_x = 0;
+			}
+		}
+		sx = ClampToInt8((INT16)want);
+	} else {
+		return 0;
+	}
+
+	tile_collision = TranslateSprite(sprite, sx, 0);
+	/* Underflow wrap: x jumped upward while moving left */
+	if (sx < 0 && sprite->x > prev_x) sprite->x = min_px;
+	/* Overflow wrap: x jumped downward while moving right */
+	if (sx > 0 && max_px != 0xFFFFu && sprite->x < prev_x) sprite->x = max_px;
+	ClampPlayerX(sprite);
+	return tile_collision;
+}
+
 // attack function
 typedef void (*attack_func_t)(void);
 attack_func_t attack_function;
@@ -127,6 +218,7 @@ void SetPlayerState(PlayerState state) BANKED {
 		case PLAYER_STATE_HIT:
 			SetSpriteAnim(THIS, anim_hit, HIT_ANIM_SPEED); break;
 		case PLAYER_STATE_DIE:
+			SetAnimationLoop(THIS, FALSE);
 			SetSpriteAnim(THIS, anim_die, DIE_ANIM_SPEED); break;
 		case PLAYER_STATE_DROWN:
 			SetSpriteAnim(THIS, anim_drown, DROWN_ANIM_SPEED); break;
@@ -217,28 +309,23 @@ void Hit(void) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		//invincible_secs = 10;
 	} else {
-		// knockback: compute allowed dx to keep player within level bounds
+		// Knockback: TranslateSprite takes INT8 — keep displacement in that range.
 		{
-			INT16 intended = (THIS->mirror == NO_MIRROR) ? -(4 << delta_time) : (4 << delta_time);
-			INT16 prev_x = THIS->x;
-			// keep within level [0, level_width - coll_w]
-			INT16 allowed_min = (INT16)(0 - THIS->x);
-			INT16 allowed_max = (INT16)((level_width - THIS->coll_w) - THIS->x);
-			INT16 dx = intended;
-			if (dx < allowed_min) dx = allowed_min;
-			if (dx > allowed_max) dx = allowed_max;
-			if (dx != 0) {
-				UINT8 collision = TranslateSprite(THIS, dx, 0);
-				// If the translation collided with hazardous tiles, revert the move
+			INT8 knock_x;
+			UINT8 kn = (UINT8)(4u << delta_time);
+			if (kn > 8u) kn = 8u;
+			knock_x = (THIS->mirror == NO_MIRROR) ? -(INT8)kn : (INT8)kn;
+			UINT16 prev_x = THIS->x;
+			if (knock_x != 0) {
+				UINT8 collision = TranslatePlayerX(THIS, knock_x);
 				if (collision == TILE_INDEX_SPIKE_UP || collision == TILE_INDEX_SPIKE_DOWN
 					|| collision == TILE_INDEX_WATER_1 || collision == TILE_INDEX_WATER_2
 					|| collision == TILE_INDEX_WATER_3) {
-					// revert position
 					THIS->x = prev_x;
-					// clear global tile_collision so other systems don't treat this as a tile hit
 					tile_collision = 0;
 				}
 			}
+			ClampPlayerX(THIS);
 		}
 		//SetPlayerState(PLAYER_STATE_HIT);
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
@@ -372,11 +459,11 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 	if (accel_y < Y_SPEED_MAX && !FLAG_CHECK(data->flags, pOnPlatformFlag)) {
 		accel_y += Y_GRAVITY;
 	}
-	tile_collision = TranslateSprite(sprite, 0, accel_y >> 6 << delta_time);
+	tile_collision = TranslateSprite(sprite, 0, ClampToInt8((INT16)(accel_y >> 6) << delta_time));
 	if (!tile_collision && delta_time != 0 && accel_y < Y_SPEED_MAX) { 
 		//do another iteration if there is no collision
 		accel_y += Y_GRAVITY;
-		tile_collision = TranslateSprite(sprite, 0, accel_y >> 6 << delta_time);
+		tile_collision = TranslateSprite(sprite, 0, ClampToInt8((INT16)(accel_y >> 6) << delta_time));
 	}
 	if (tile_collision) {
 		//EMU_printf("SpritePlayer::%s tile collision: ud\n", __func__, tile_collision);
@@ -384,20 +471,18 @@ void ApplyGravity(Sprite* sprite, UINT8 idx) {
 		FLAG_SET(data->flags, pGroundedFlag);
 		CheckCollisionTile(sprite, idx);
 	}
-	// Clamp player y position to prevent off-map movement
-	if (sprite->y < 0) sprite->y = 0;
-	if (sprite->y > level_height - sprite->coll_h) sprite->y = level_height - sprite->coll_h;
+	ClampPlayerY(sprite);
 }
 
 void AddDampening(Sprite* sprite, UINT8 idx) {
 	if (accel_x > 0) {
 		accel_x -= X_DAMPENING;
 		x_inc = accel_x >> 6;
-		tile_collision = TranslateSprite(sprite, x_inc << delta_time, 0);
+		TranslatePlayerX(sprite, (INT16)x_inc << delta_time);
 	} else if (accel_x < 0) {
 		accel_x += X_DAMPENING;
 		x_inc = abs(accel_x) >> 6;
-		tile_collision = TranslateSprite(sprite, -x_inc << delta_time, 0);
+		TranslatePlayerX(sprite, -((INT16)x_inc << delta_time));
 	}
 	CheckCollisionTile(sprite, idx);
 }
@@ -407,17 +492,14 @@ void ApplyMovementX(Sprite* sprite, UINT8 idx) {
 	if (KEY_PRESSED(J_RIGHT)) {
 		if (accel_x < (X_SPEED_MAX-X_SPEED_INC)) accel_x += X_SPEED_INC;	
 		x_inc = accel_x >> 6;	
-		tile_collision = TranslateSprite(sprite, x_inc << delta_time, 0);
+		TranslatePlayerX(sprite, (INT16)x_inc << delta_time);
 		CheckCollisionTile(sprite, idx);
 		sprite->mirror = NO_MIRROR;
 		//CheckOnPlatform();
 	} else if (KEY_PRESSED(J_LEFT)) {
 		if (accel_x > -(X_SPEED_MAX-X_SPEED_INC)) accel_x -= X_SPEED_INC;
 		x_inc = abs(accel_x) >> 6;
-		if (sprite->x - x_inc < min_x) {
-			x_inc = accel_x = 0;
-		}
-		tile_collision = TranslateSprite(sprite, -x_inc << delta_time, 0);
+		TranslatePlayerX(sprite, -((INT16)x_inc << delta_time));
 		CheckCollisionTile(sprite, idx);
 		sprite->mirror = V_MIRROR;
 		//CheckOnPlatform();
@@ -426,9 +508,7 @@ void ApplyMovementX(Sprite* sprite, UINT8 idx) {
 			AddDampening(sprite, idx);
 		}
 	}
-	// Clamp player x position to prevent off-screen movement
-	if (sprite->x < 0) sprite->x = 0;
-	if (sprite->x > level_width - sprite->coll_w) sprite->x = level_width - sprite->coll_w;
+	ClampPlayerX(sprite);
 }
 
 void CheckCanClimb(void) {
@@ -499,6 +579,9 @@ void START() {
 	tile_collision = 0;
 	invincible_secs = 0;
 	prev_keys = 0;
+	/* Keep player alive while invincibility blinks with SetVisible(FALSE).
+	   CrossZGB DrawSprite removes non-persistent sprites on the !visible path. */
+	SetPersistent(THIS, TRUE);
 	SetPlayerState(PLAYER_STATE_SPAWN);
 }
 
@@ -602,7 +685,7 @@ void UpdateClimbing(void) {
 	UINT8 i = TILE_INDEX_LADDER_LEFT;
 	if (KEY_PRESSED(J_UP)) {
 		SetSpriteAnim(THIS, anim_climb, DEFAULT_ANIM_SPEED);
-		tile_collision = TranslateSprite(THIS, 0, -1 << delta_time);
+		tile_collision = TranslateSprite(THIS, 0, ClampToInt8(-(INT16)(1u << delta_time)));
 		CheckCollisionTile(THIS, THIS_IDX);
 		if (tile_collision == TILE_INDEX_LADDER_LEFT || tile_collision == TILE_INDEX_LADDER_RIGHT) {
 			THIS->y = THIS->y - 1;
@@ -610,7 +693,7 @@ void UpdateClimbing(void) {
 		i = GetScrollTile((THIS->x + 8u) >> 3, (THIS->y + 16u) >> 3);
 	} else if (KEY_PRESSED(J_DOWN)) {
 		SetSpriteAnim(THIS, anim_climb, DEFAULT_ANIM_SPEED);
-		tile_collision = TranslateSprite(THIS, 0, 1 << delta_time);
+		tile_collision = TranslateSprite(THIS, 0, ClampToInt8((INT16)(1u << delta_time)));
 		CheckCollisionTile(THIS, THIS_IDX);
 		if (tile_collision == TILE_INDEX_LADDER_LEFT || tile_collision == TILE_INDEX_LADDER_RIGHT) {
 			THIS->y = THIS->y + 1;
@@ -730,8 +813,9 @@ void UPDATE() {
 
 	// invincible
 	if (FLAG_CHECK(data->flags, pInvincibleFlag)) {
-		SetVisible(THIS, visible_skip++);
-		if (visible_skip > 3) visible_skip = 0;
+		/* visible is a 1-bit field — only pass 0/1 */
+		visible_skip ^= 1u;
+		SetVisible(THIS, visible_skip);
 		if (invincible_secs > 0) {
 			invincible_ticks++;
 			if (invincible_ticks == 25) {
@@ -740,7 +824,7 @@ void UPDATE() {
 			}
 		} else {
 			FLAG_CLEAR(data->flags, pInvincibleFlag);
-			SetVisible(THIS, true);
+			SetVisible(THIS, TRUE);
 		}
 	}
 
@@ -819,7 +903,6 @@ void UPDATE() {
 }
 
 void DESTROY() {
-
 }
 
 
