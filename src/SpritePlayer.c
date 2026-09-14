@@ -283,9 +283,9 @@ bool PlayerIsOnTopOfPlatform(Sprite* player, Sprite* platform) BANKED {
 void UpdateAttackPos(void) {
 	attack1_sprite->mirror = THIS->mirror;
 	if (THIS->mirror == V_MIRROR) 
-		attack1_sprite->x = THIS->x - 14u;
+		attack1_sprite->x = THIS->x - 12u;
 	else
-		attack1_sprite->x = THIS->x + 14u; 
+		attack1_sprite->x = THIS->x + 12u; 
 	attack1_sprite->y = THIS->y + 2u;
 }
 
@@ -309,11 +309,11 @@ void Hit(void) {
 		PlayFx(CHANNEL_1, 10, 0x5b, 0x7f, 0xf7, 0x15, 0x86);
 		//invincible_secs = 10;
 	} else {
-		// Knockback: TranslateSprite takes INT8 — keep displacement in that range.
+		// Knockback: small nudge opposite facing (TranslateSprite is INT8).
 		{
 			INT8 knock_x;
-			UINT8 kn = (UINT8)(4u << delta_time);
-			if (kn > 8u) kn = 8u;
+			UINT8 kn = (UINT8)(2u << delta_time);
+			if (kn > 4u) kn = 4u;
 			knock_x = (THIS->mirror == NO_MIRROR) ? -(INT8)kn : (INT8)kn;
 			UINT16 prev_x = THIS->x;
 			if (knock_x != 0) {
@@ -378,6 +378,10 @@ void Magix(void) {
 void CatchSpirit(void) {
 	//EMU_printf("SpritePlayer::%s catching spirit\n", __func__);
 	SetPlayerState(PLAYER_STATE_CATCH);
+	if (lantern_sprite != NULL) {
+		SpriteManagerRemoveSprite(lantern_sprite);
+		lantern_sprite = NULL;
+	}
 	if (THIS->mirror == V_MIRROR) {
         // Facing left
         lantern_sprite = SpriteManagerAdd(SpriteLantern, THIS->x - 6, THIS->y - 7);
@@ -676,7 +680,10 @@ void UpdateCatching(void) {
 		( (prev_keys & J_B)  && !(keys & J_B) ) ) {
 		// Either J_UP or J_B was just released
 		//EMU_printf("SpritePlayer::%s stopped catching\n", __func__);
-		SpriteManagerRemoveSprite(lantern_sprite);
+		if (lantern_sprite != NULL) {
+			SpriteManagerRemoveSprite(lantern_sprite);
+			lantern_sprite = NULL;
+		}
 		SetPlayerState(PLAYER_STATE_IDLE);
 	}
 }

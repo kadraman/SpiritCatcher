@@ -5,7 +5,8 @@
 
 // Spirit animations and movement lookup table
 const UINT8 anim_spirit[] = {3, 0, 1, 2};
-const UINT8 anim_spirit_caught[] = {5, 3, 3, 3, 3, 3};
+/* Struggle frames (existing art). For a real absorb, add smaller frames — see comment in SpriteSpirit.c */
+const UINT8 anim_spirit_caught[] = {4, 3, 2, 3, 2};
 // sine-like movement table used to move the spirit in a circular pattern
 // (size inferred from initializer to avoid mismatches)
 const INT8 sin_table[] = {

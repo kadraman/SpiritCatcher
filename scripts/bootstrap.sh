@@ -132,7 +132,8 @@ if [[ $BUILD_TOOLS -eq 1 ]]; then
     done
     make_args+=( "SUBDIRS=${subdirs% }" )
   fi
-  make -C "$tools_dir" "${make_args[@]}"
+  # Bash <4.4 (macOS /bin/bash) errors on "${empty[@]}" with set -u
+  make -C "$tools_dir" ${make_args[@]+"${make_args[@]}"}
 fi
 
 # --- Optional Emulicious ---

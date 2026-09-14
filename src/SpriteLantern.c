@@ -10,7 +10,10 @@
 
 const UINT8 anim_lantern[] = {2, 0, 1};
 
+extern Sprite* lantern_sprite;
+
 void RemoveLantern(Sprite *sprite) BANKED {
+	(void)sprite;
 	SpriteManagerRemove(THIS_IDX);
 }
 
@@ -23,4 +26,7 @@ void UPDATE() {
 }
 
 void DESTROY() {
+	if (lantern_sprite == THIS) {
+		lantern_sprite = NULL;
+	}
 }
