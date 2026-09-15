@@ -11,20 +11,18 @@
 #include "ZGBMain.h"
 #include "SpriteSlime.h"
 
-#define WAIT_HOP   0u
-#define WAIT_IDLE  1u
-#define WAIT_REV   2u
-#define WAIT_FALL  3u
+#define WAIT_HOP    0u
+#define WAIT_IDLE   1u
+#define WAIT_FALL   2u
+#define WAIT_ESCAPE 3u
 
-#define FALL_VY_MAX 4u
-/* How far below the feet we still treat as "supported" during a hop */
-#define GROUND_LOOKAHEAD (MOVE_HEIGHT + 8)
+#define FALL_PERIOD 2u
 
 typedef struct {
 	INT16 last_cum_dx;
 	INT16 last_cum_dy;
 	UINT8 ticks;
-	INT8 dir;  /* +1 right, -1 left */
+	INT8 dir;
 	UINT8 wait;
 } CUSTOM_DATA;
 CHECK_CUSTOM_DATA_SIZE(CUSTOM_DATA);
@@ -45,71 +43,83 @@ static UINT8 TranslateSpriteI16(Sprite* spr, INT16 dx, INT16 dy) {
 static UINT8 slime_is_water(UINT8 tile) {
 	return (tile == TILE_INDEX_WATER_1
 		|| tile == TILE_INDEX_WATER_2
-		|| tile == TILE_INDEX_WATER_3) ? 1u : 0u;
+		|| tile == TILE_INDEX_WATER_3);
 }
 
-static UINT8 slime_is_solid(UINT8 tile) {
-	return scroll_collisions[tile] ? 1u : 0u;
+/* Mushroom-style foot row for a 16px sprite. */
+static UINT8 slime_tile_at(UINT16 px, UINT8 row_add) {
+	return GetScrollTile(px >> 3, (THIS->y >> 3) + row_add);
 }
 
-static UINT8 slime_is_floor(UINT8 tile) {
-	return (slime_is_solid(tile) && !slime_is_water(tile)) ? 1u : 0u;
+/* Solid ground you can stand on — not empty, not water. */
+static UINT8 slime_safe_floor_at(UINT16 px) {
+	UINT8 t = slime_tile_at(px, 2u);
+	/* Water often sits one row lower than the shore — check both */
+	if (slime_is_water(t) || slime_is_water(slime_tile_at(px, 3u))) return 0u;
+	return scroll_collisions[t] ? 1u : 0u;
 }
 
-static UINT8 slime_tile_xy(UINT16 px, UINT16 py) {
-	return GetScrollTile(px >> 3, py >> 3);
+static UINT8 slime_on_floor(void) {
+	return slime_safe_floor_at(THIS->x + (THIS->coll_w >> 1));
 }
 
-/* Probe one step ahead: 0 = ok, 1 = turn (wall / water), 2 = ledge (fall). */
-static UINT8 slime_probe_ahead(INT8 dir) {
-	UINT16 ax = (dir > 0) ? (THIS->x + THIS->coll_w + 2u) : (THIS->x - 2u);
-	UINT16 mid_y = THIS->y + (THIS->coll_h >> 1);
-	UINT16 below_y = THIS->y + THIS->coll_h + 1u;
-	UINT8 wall = slime_tile_xy(ax, mid_y);
-	UINT8 below = slime_tile_xy(ax, below_y);
+static UINT8 slime_on_water(void) {
+	UINT16 cx = THIS->x + (THIS->coll_w >> 1);
+	return (slime_is_water(slime_tile_at(cx, 2u))
+		|| slime_is_water(slime_tile_at(cx, 3u))) ? 1u : 0u;
+}
 
-	if (slime_is_water(below) || slime_is_water(wall)) return 1u;
-	if (slime_is_floor(wall)) return 1u; /* raised ground / wall */
-	if (!slime_is_solid(below)) return 2u; /* ledge — fall, don't turn */
-	return 0u;
+static UINT8 slime_water_under(UINT16 px) {
+	return (slime_is_water(slime_tile_at(px, 2u))
+		|| slime_is_water(slime_tile_at(px, 3u))) ? 1u : 0u;
 }
 
 /*
- * Under-feet support:
- *   0 = standing on / above real floor
- *   1 = water is the surface under us (hazard)
- *   2 = void — fall
- *
- * Important: if a floor tile is at the feet, that wins even when water exists
- * further down (avoids flip-loop on shore platforms).
+ * Turn away from water / walls before hopping.
+ * Need safe floor just ahead; reject if hop mid/landing crosses water.
  */
-static UINT8 slime_support_below(void) {
-	UINT16 fx = THIS->x + (THIS->coll_w >> 1);
-	UINT16 fy = THIS->y + THIS->coll_h;
-	UINT8 t_feet = slime_tile_xy(fx, fy);
-	UINT8 t_up = slime_tile_xy(fx, (fy > 0u) ? (UINT16)(fy - 1u) : 0u);
-	UINT8 i;
+static UINT8 slime_dir_blocked(INT8 dir) {
+	UINT16 near_x, mid_x, end_x;
+	UINT8 body;
 
-	if (slime_is_floor(t_feet) || slime_is_floor(t_up)) return 0u;
-
-	/* First non-empty surface below */
-	for (i = 0u; i <= (UINT8)GROUND_LOOKAHEAD; i = (UINT8)(i + 8u)) {
-		UINT8 t = slime_tile_xy(fx, (UINT16)(fy + i));
-		if (slime_is_water(t)) return 1u;
-		if (slime_is_floor(t)) return 0u;
+	if (dir > 0) {
+		near_x = THIS->x + THIS->coll_w + 4u;
+		mid_x = THIS->x + THIS->coll_w + 24u;
+		end_x = THIS->x + THIS->coll_w + (UINT8)MOVE_WIDTH;
+	} else {
+		if (THIS->x < (UINT8)MOVE_WIDTH) return 1u;
+		near_x = THIS->x - 4u;
+		mid_x = THIS->x - 24u;
+		end_x = THIS->x - (UINT8)MOVE_WIDTH;
 	}
-	return 2u;
+
+	if (!slime_safe_floor_at(near_x)) return 1u;
+	if (slime_water_under(mid_x) || slime_water_under(end_x)) return 1u;
+
+	body = slime_tile_at(near_x, 1u);
+	if (scroll_collisions[body] && !slime_is_water(body)) return 1u;
+
+	return 0u;
 }
 
-static void slime_flip(CUSTOM_DATA* data) {
-	data->dir = (INT8)(-data->dir);
-	THIS->mirror = (data->dir == -1) ? V_MIRROR : NO_MIRROR;
+/* Pick a horizontal dir that still has safe floor nearby (for escape). */
+static INT8 slime_escape_dir(INT8 preferred) {
+	UINT8 d;
+	for (d = 8u; d <= 40u; d = (UINT8)(d + 8u)) {
+		if (preferred > 0) {
+			if (slime_safe_floor_at(THIS->x + THIS->coll_w + d)) return 1;
+			if (THIS->x >= d && slime_safe_floor_at(THIS->x - d)) return -1;
+		} else {
+			if (THIS->x >= d && slime_safe_floor_at(THIS->x - d)) return -1;
+			if (slime_safe_floor_at(THIS->x + THIS->coll_w + d)) return 1;
+		}
+	}
+	return preferred;
 }
 
-static void slime_nudge_forward(CUSTOM_DATA* data) {
-	/* Step away from a hazard so the next probe isn't still in water */
-	if (data->dir > 0) TranslateSprite(THIS, 2, 0);
-	else TranslateSprite(THIS, -2, 0);
+static void slime_set_dir(CUSTOM_DATA* data, INT8 dir) {
+	data->dir = dir;
+	THIS->mirror = (dir < 0) ? V_MIRROR : NO_MIRROR;
 }
 
 static void slime_enter_idle(CUSTOM_DATA* data) {
@@ -125,41 +135,20 @@ static void slime_enter_hop(CUSTOM_DATA* data) {
 	data->last_cum_dx = 0;
 	data->last_cum_dy = 0;
 	data->wait = WAIT_HOP;
-	data->dir = (THIS->mirror == V_MIRROR) ? (INT8)-1 : (INT8)1;
 	SetSpriteAnim(THIS, anim_slime_move, 5u);
 }
 
 static void slime_enter_fall(CUSTOM_DATA* data) {
-	data->last_cum_dx = 0;
-	data->last_cum_dy = 1;
 	data->ticks = 0u;
 	data->wait = WAIT_FALL;
 	SetSpriteAnim(THIS, anim_slime_move, 5u);
 }
 
-static void slime_enter_rev(CUSTOM_DATA* data) {
-	data->wait = WAIT_REV;
-}
-
-/* Turn away from a blocked direction and hop the other way if clear. */
-static void slime_turn_and_go(CUSTOM_DATA* data) {
-	slime_flip(data);
-	slime_nudge_forward(data);
-	if (slime_probe_ahead(data->dir) == 1u) {
-		/* Both sides blocked — wait, try again later */
-		slime_enter_idle(data);
-	} else {
-		slime_enter_hop(data);
-	}
-}
-
-/* Void only — do not flip on water here (that caused shore idle loops). */
-static UINT8 slime_check_void_fall(CUSTOM_DATA* data) {
-	if (slime_support_below() == 2u) {
-		slime_enter_fall(data);
-		return 1u;
-	}
-	return 0u;
+static void slime_enter_escape(CUSTOM_DATA* data, INT8 dir) {
+	slime_set_dir(data, slime_escape_dir(dir));
+	data->ticks = 0u;
+	data->wait = WAIT_ESCAPE;
+	SetSpriteAnim(THIS, anim_slime_move, 5u);
 }
 
 void START() {
@@ -170,141 +159,139 @@ void START() {
 	}
 	memset(data, 0, sizeof(CUSTOM_DATA));
 	data->wait = WAIT_IDLE;
-	data->dir = 1;
+	slime_set_dir(data, 1);
 	SetSpriteAnim(THIS, anim_slime_wait, 5u);
 	THIS->lim_x = 500u;
 	THIS->lim_y = 144u;
-	if (player_sprite != NULL) {
-		if (player_sprite->x < THIS->x) {
-			THIS->mirror = V_MIRROR;
-			data->dir = -1;
-		} else {
-			THIS->mirror = NO_MIRROR;
-			data->dir = 1;
-		}
+	if (player_sprite != NULL && player_sprite->x < THIS->x) {
+		slime_set_dir(data, -1);
 	}
 }
 
 void UPDATE() {
 	CUSTOM_DATA* data = (CUSTOM_DATA*)THIS->custom_data;
 	UINT8 col;
-	UINT8 probe;
+
+	if (data->wait == WAIT_ESCAPE) {
+		TranslateSprite(THIS, data->dir, 0);
+		data->ticks++;
+		if (slime_on_floor()) {
+			slime_enter_idle(data);
+			return;
+		}
+		/* Re-aim toward floor occasionally — don't ping-pong every frame */
+		if (data->ticks == 12u) {
+			slime_set_dir(data, slime_escape_dir(data->dir));
+		}
+		if (data->ticks >= 48u) {
+			slime_enter_fall(data);
+		}
+		return;
+	}
 
 	if (data->wait == WAIT_FALL) {
-		if (data->last_cum_dy < (INT16)FALL_VY_MAX) data->last_cum_dy++;
-		col = TranslateSpriteI16(THIS, 0, (INT16)(data->last_cum_dy << delta_time));
-		if (col) {
-			if (slime_is_water(col)) {
-				/* Landed against water collision — face inland and leave */
-				slime_turn_and_go(data);
-			} else {
-				slime_enter_idle(data);
+		data->ticks++;
+		if ((data->ticks % FALL_PERIOD) == 0u) {
+			col = TranslateSprite(THIS, 0, 1);
+			if (col) {
+				if (slime_is_water(col) || slime_on_water()) {
+					slime_enter_escape(data, (INT8)(-data->dir));
+				} else {
+					slime_enter_idle(data);
+				}
+				return;
 			}
+		}
+		if (slime_on_water()) {
+			slime_enter_escape(data, (INT8)(-data->dir));
 			return;
 		}
 		if (THIS->y > scroll_h) SpriteManagerRemove(THIS_IDX);
 		return;
 	}
 
-	if (data->wait == WAIT_REV) {
-		UINT16 t = data->ticks;
-		if (t == 0u) {
-			slime_turn_and_go(data);
-			return;
-		}
-		{
-			UINT16 t0 = t - 1u;
-			INT16 cur_cum_dx = (INT16)(data->dir * slime_dx_table[t]);
-			INT16 cur_cum_dy = (INT16)(-slime_dy_table[t]);
-			INT16 next_cum_dx = (INT16)(data->dir * slime_dx_table[t0]);
-			INT16 next_cum_dy = (INT16)(-slime_dy_table[t0]);
-			TranslateSpriteI16(THIS,
-				(INT16)((next_cum_dx - cur_cum_dx) << delta_time),
-				(INT16)((next_cum_dy - cur_cum_dy) << delta_time));
-			data->last_cum_dx = next_cum_dx;
-			data->last_cum_dy = next_cum_dy;
-			data->ticks = (UINT8)t0;
-		}
-		if (slime_check_void_fall(data)) return;
+	if (slime_on_water()) {
+		slime_enter_escape(data, (INT8)(-data->dir));
 		return;
 	}
 
 	if (data->wait == WAIT_IDLE) {
-		data->ticks++;
-		if (data->ticks >= (UINT8)SLIME_DURATION) {
-			probe = slime_probe_ahead(data->dir);
-			if (probe == 1u) {
-				/* Water / wall ahead — turn and hop the other way now */
-				slime_turn_and_go(data);
-				return;
-			}
-			slime_enter_hop(data);
+		if (!slime_on_floor()) {
+			slime_enter_fall(data);
 			return;
 		}
-		if (slime_check_void_fall(data)) return;
+
+		data->ticks++;
+		if (data->ticks < (UINT8)SLIME_DURATION) return;
+
+		/* Edge of water / gap / wall → face inland and wait (do NOT hop) */
+		if (slime_dir_blocked(data->dir)) {
+			slime_set_dir(data, (INT8)(-data->dir));
+			data->ticks = 0u;
+			return;
+		}
+		slime_enter_hop(data);
 		return;
 	}
 
-	/* ----- Hopping ----- */
-	if (data->ticks < (UINT8)SLIME_DURATION) {
+	/* Hop — abort immediately if we lose safe floor under the lead foot */
+	{
 		UINT16 t = data->ticks;
 		INT16 dx = slime_dx_table[t];
 		INT16 dy = slime_dy_table[t];
-		INT16 cur_cum_dx = (INT16)(data->dir * dx);
-		INT16 cur_cum_dy = (INT16)(-dy);
-		INT16 delta_x = cur_cum_dx - data->last_cum_dx;
-		INT16 delta_y = cur_cum_dy - data->last_cum_dy;
+		INT16 cur_dx = (INT16)(data->dir * dx);
+		INT16 cur_dy = (INT16)(-dy);
+		UINT16 lead_x;
 
-		if (dy <= 2) {
-			probe = slime_probe_ahead(data->dir);
-			if (probe == 1u) {
-				if (t == 0u) {
-					slime_turn_and_go(data);
-				} else {
-					slime_enter_rev(data);
-				}
-				return;
-			}
-		}
+		lead_x = (data->dir > 0)
+			? (THIS->x + THIS->coll_w + 4u)
+			: (THIS->x - 4u);
 
-		col = TranslateSpriteI16(THIS,
-			(INT16)(delta_x << delta_time),
-			(INT16)(delta_y << delta_time));
-
-		if (col) {
-			if (slime_is_water(col) || slime_is_floor(col)) {
-				if (t == 0u) slime_turn_and_go(data);
-				else slime_enter_rev(data);
-				return;
-			}
-		}
-
-		if (player_sprite != NULL && CheckCollision(THIS, player_sprite)) {
-			if (t == 0u) slime_enter_idle(data);
-			else slime_enter_rev(data);
+		/* Still on the ground portion of the hop — refuse to continue into hazard */
+		if (dy <= 2 && !slime_safe_floor_at(lead_x)) {
+			slime_set_dir(data, (INT8)(-data->dir));
+			slime_enter_idle(data);
 			return;
 		}
 
-		data->last_cum_dx = cur_cum_dx;
-		data->last_cum_dy = cur_cum_dy;
+		col = TranslateSpriteI16(THIS,
+			cur_dx - data->last_cum_dx,
+			cur_dy - data->last_cum_dy);
+
+		if (col) {
+			if (slime_is_water(col)) {
+				slime_enter_escape(data, (INT8)(-data->dir));
+			} else {
+				slime_set_dir(data, (INT8)(-data->dir));
+				slime_enter_idle(data);
+			}
+			return;
+		}
+
+		if (player_sprite != NULL && CheckCollision(THIS, player_sprite)) {
+			slime_enter_idle(data);
+			return;
+		}
+
+		data->last_cum_dx = cur_dx;
+		data->last_cum_dy = cur_dy;
 		data->ticks++;
 
-		if (slime_check_void_fall(data)) return;
-		return;
-	}
+		if (slime_on_water()) {
+			slime_enter_escape(data, (INT8)(-data->dir));
+			return;
+		}
 
-	/* Finished hop arc */
-	{
-		INT16 final_dx = (INT16)(data->dir * MOVE_WIDTH) - data->last_cum_dx;
-		INT16 final_dy = (INT16)(0) - data->last_cum_dy;
-		if (final_dx || final_dy) {
-			TranslateSpriteI16(THIS,
-				(INT16)(final_dx << delta_time),
-				(INT16)(final_dy << delta_time));
+		if (data->ticks > (UINT8)(SLIME_DURATION >> 1) && !slime_on_floor()) {
+			slime_enter_fall(data);
+			return;
+		}
+
+		if (data->ticks >= (UINT8)SLIME_DURATION) {
+			if (slime_on_floor()) slime_enter_idle(data);
+			else slime_enter_fall(data);
 		}
 	}
-	if (slime_check_void_fall(data)) return;
-	slime_enter_idle(data);
 }
 
 void DESTROY() {
